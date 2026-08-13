@@ -1,0 +1,496 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* ActivityModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* ActivityModels.swift */; };
+		A10000000000000000000002 /* WidtgetConfigurationIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* WidtgetConfigurationIntent.swift */; };
+		A10000000000000000000003 /* ActivityProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* ActivityProvider.swift */; };
+		A10000000000000000000004 /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* Palette.swift */; };
+		A10000000000000000000005 /* MetricViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* MetricViews.swift */; };
+		A10000000000000000000006 /* ActivityVisualization.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* ActivityVisualization.swift */; };
+		A10000000000000000000007 /* RepositoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* RepositoryViews.swift */; };
+		A10000000000000000000008 /* WidtgetWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* WidtgetWidgetView.swift */; };
+		A10000000000000000000009 /* WidtgetWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* WidtgetWidget.swift */; };
+		A1000000000000000000000A /* WidtgetPreviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* WidtgetPreviews.swift */; };
+		A1000000000000000000000B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* SwiftUI.framework */; };
+		A1000000000000000000000C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* WidgetKit.framework */; };
+		A1000000000000000000000D /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* AppIntents.framework */; };
+		A1000000000000000000000E /* WidgetPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* WidgetPreferences.swift */; };
+		A1000000000000000000000F /* WidtgetHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* WidtgetHostApp.swift */; };
+		A10000000000000000000010 /* WidgetSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* WidgetSettingsView.swift */; };
+		A10000000000000000000011 /* WidgetPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* WidgetPreferences.swift */; };
+		A10000000000000000000012 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* SwiftUI.framework */; };
+		A10000000000000000000013 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* WidgetKit.framework */; };
+		A10000000000000000000014 /* widtget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* widtget.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		G10000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000000000000000000002 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E10000000000000000000001;
+			remoteInfo = widtget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C10000000000000000000007 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A10000000000000000000014 /* widtget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		B10000000000000000000001 /* ActivityModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityModels.swift; sourceTree = "<group>"; };
+		B10000000000000000000002 /* WidtgetConfigurationIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidtgetConfigurationIntent.swift; sourceTree = "<group>"; };
+		B10000000000000000000003 /* ActivityProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityProvider.swift; sourceTree = "<group>"; };
+		B10000000000000000000004 /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
+		B10000000000000000000005 /* MetricViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricViews.swift; sourceTree = "<group>"; };
+		B10000000000000000000006 /* ActivityVisualization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityVisualization.swift; sourceTree = "<group>"; };
+		B10000000000000000000007 /* RepositoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViews.swift; sourceTree = "<group>"; };
+		B10000000000000000000008 /* WidtgetWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidtgetWidgetView.swift; sourceTree = "<group>"; };
+		B10000000000000000000009 /* WidtgetWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidtgetWidget.swift; sourceTree = "<group>"; };
+		B1000000000000000000000A /* WidtgetPreviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidtgetPreviews.swift; sourceTree = "<group>"; };
+		B1000000000000000000000B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B1000000000000000000000C /* widtget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = widtget.entitlements; sourceTree = "<group>"; };
+		B1000000000000000000000D /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		B1000000000000000000000E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		B1000000000000000000000F /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
+		B10000000000000000000010 /* widtget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = widtget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000011 /* WidgetPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetPreferences.swift; sourceTree = "<group>"; };
+		B10000000000000000000012 /* WidtgetHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidtgetHostApp.swift; sourceTree = "<group>"; };
+		B10000000000000000000013 /* WidgetSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSettingsView.swift; sourceTree = "<group>"; };
+		B10000000000000000000014 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B10000000000000000000015 /* widtgetApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = widtgetApp.entitlements; sourceTree = "<group>"; };
+		B10000000000000000000016 /* widtget.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = widtget.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C10000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000000000000000000000D /* AppIntents.framework in Frameworks */,
+				A1000000000000000000000B /* SwiftUI.framework in Frameworks */,
+				A1000000000000000000000C /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000012 /* SwiftUI.framework in Frameworks */,
+				A10000000000000000000013 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D10000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				D1000000000000000000000A /* widtgetApp */,
+				D10000000000000000000002 /* widtget */,
+				D10000000000000000000009 /* Shared */,
+				D10000000000000000000006 /* Frameworks */,
+				D10000000000000000000007 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D10000000000000000000002 /* widtget */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000009 /* WidtgetWidget.swift */,
+				B1000000000000000000000A /* WidtgetPreviews.swift */,
+				D10000000000000000000003 /* Configuration */,
+				D10000000000000000000004 /* Models */,
+				D10000000000000000000005 /* Provider */,
+				D10000000000000000000008 /* Views */,
+				B1000000000000000000000B /* Info.plist */,
+				B1000000000000000000000C /* widtget.entitlements */,
+			);
+			path = widtget;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000003 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000002 /* WidtgetConfigurationIntent.swift */,
+			);
+			path = Configuration;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000004 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000001 /* ActivityModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000005 /* Provider */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000003 /* ActivityProvider.swift */,
+			);
+			path = Provider;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000006 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B1000000000000000000000F /* AppIntents.framework */,
+				B1000000000000000000000D /* SwiftUI.framework */,
+				B1000000000000000000000E /* WidgetKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000007 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000016 /* widtget.app */,
+				B10000000000000000000010 /* widtget.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000008 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000004 /* Palette.swift */,
+				B10000000000000000000005 /* MetricViews.swift */,
+				B10000000000000000000006 /* ActivityVisualization.swift */,
+				B10000000000000000000007 /* RepositoryViews.swift */,
+				B10000000000000000000008 /* WidtgetWidgetView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000009 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000011 /* WidgetPreferences.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		D1000000000000000000000A /* widtgetApp */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000012 /* WidtgetHostApp.swift */,
+				B10000000000000000000013 /* WidgetSettingsView.swift */,
+				B10000000000000000000014 /* Info.plist */,
+				B10000000000000000000015 /* widtgetApp.entitlements */,
+			);
+			path = widtgetApp;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E10000000000000000000001 /* widtget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F10000000000000000000002 /* Build configuration list for PBXNativeTarget "widtget" */;
+			buildPhases = (
+				C10000000000000000000003 /* Sources */,
+				C10000000000000000000001 /* Frameworks */,
+				C10000000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = widtget;
+			productName = widtget;
+			productReference = B10000000000000000000010 /* widtget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		E10000000000000000000003 /* widtget app */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F10000000000000000000009 /* Build configuration list for PBXNativeTarget "widtget app" */;
+			buildPhases = (
+				C10000000000000000000004 /* Sources */,
+				C10000000000000000000005 /* Frameworks */,
+				C10000000000000000000006 /* Resources */,
+				C10000000000000000000007 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				G10000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = "widtget app";
+			productName = widtget;
+			productReference = B10000000000000000000016 /* widtget.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E10000000000000000000002 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					E10000000000000000000001 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					E10000000000000000000003 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+				};
+			};
+			buildConfigurationList = F10000000000000000000001 /* Build configuration list for PBXProject "widtget" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D10000000000000000000001;
+			productRefGroup = D10000000000000000000007 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E10000000000000000000003 /* widtget app */,
+				E10000000000000000000001 /* widtget */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C10000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C10000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* ActivityModels.swift in Sources */,
+				A10000000000000000000002 /* WidtgetConfigurationIntent.swift in Sources */,
+				A10000000000000000000003 /* ActivityProvider.swift in Sources */,
+				A10000000000000000000004 /* Palette.swift in Sources */,
+				A10000000000000000000005 /* MetricViews.swift in Sources */,
+				A10000000000000000000006 /* ActivityVisualization.swift in Sources */,
+				A10000000000000000000007 /* RepositoryViews.swift in Sources */,
+				A10000000000000000000008 /* WidtgetWidgetView.swift in Sources */,
+				A10000000000000000000009 /* WidtgetWidget.swift in Sources */,
+				A1000000000000000000000A /* WidtgetPreviews.swift in Sources */,
+				A1000000000000000000000E /* WidgetPreferences.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000000000000000000000F /* WidtgetHostApp.swift in Sources */,
+				A10000000000000000000010 /* WidgetSettingsView.swift in Sources */,
+				A10000000000000000000011 /* WidgetPreferences.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		G10000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E10000000000000000000001 /* widtget */;
+			targetProxy = G10000000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		F10000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F10000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		F10000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = widtget/widtget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = widtget/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/PlugIns";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yjay18.widtget.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F10000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = widtget/widtget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = widtget/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/PlugIns";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yjay18.widtget.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		F10000000000000000000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = widtgetApp/widtgetApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = widtgetApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yjay18.widtget;
+				PRODUCT_NAME = widtget;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F10000000000000000000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = widtgetApp/widtgetApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = widtgetApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yjay18.widtget;
+				PRODUCT_NAME = widtget;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F10000000000000000000001 /* Build configuration list for PBXProject "widtget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F10000000000000000000003 /* Debug */,
+				F10000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F10000000000000000000002 /* Build configuration list for PBXNativeTarget "widtget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F10000000000000000000005 /* Debug */,
+				F10000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F10000000000000000000009 /* Build configuration list for PBXNativeTarget "widtget app" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F10000000000000000000007 /* Debug */,
+				F10000000000000000000008 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E10000000000000000000002 /* Project object */;
+}
