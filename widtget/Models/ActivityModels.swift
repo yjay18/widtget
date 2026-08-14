@@ -1,13 +1,14 @@
 import Foundation
 
 enum ActivityLoadState: String, Codable, Sendable {
+    case setupRequired
     case loading
     case loaded
     case noActivity
     case error
 }
 
-struct RepositoryActivity: Identifiable, Hashable, Sendable {
+struct RepositoryActivity: Identifiable, Hashable, Codable, Sendable {
     let name: String
     let commits: Int
     let additions: Int
@@ -17,7 +18,7 @@ struct RepositoryActivity: Identifiable, Hashable, Sendable {
     var totalChanged: Int { additions + deletions }
 }
 
-struct ActivityCell: Identifiable, Hashable, Sendable {
+struct ActivityCell: Identifiable, Hashable, Codable, Sendable {
     let id: Int
     let additions: Int
     let deletions: Int
@@ -25,7 +26,7 @@ struct ActivityCell: Identifiable, Hashable, Sendable {
     var totalChanged: Int { additions + deletions }
 }
 
-struct ActivitySnapshot: Hashable, Sendable {
+struct ActivitySnapshot: Hashable, Codable, Sendable {
     let additions: Int
     let deletions: Int
     let commits: Int
@@ -73,6 +74,19 @@ struct ActivitySnapshot: Hashable, Sendable {
 
     var isStale: Bool {
         Date().timeIntervalSince(updatedAt) > 60 * 60
+    }
+
+    func markingRefreshError(_ message: String) -> ActivitySnapshot {
+        ActivitySnapshot(
+            additions: additions,
+            deletions: deletions,
+            commits: commits,
+            repositories: repositories,
+            activity: activity,
+            updatedAt: updatedAt,
+            state: .error,
+            errorMessage: message
+        )
     }
 }
 

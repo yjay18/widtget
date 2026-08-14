@@ -7,7 +7,7 @@ struct WidtgetHostApp: App {
             WidgetSettingsView()
                 .frame(width: 420)
         }
-        .defaultSize(width: 420, height: 390)
+        .defaultSize(width: 420, height: 620)
         .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .newItem) { }

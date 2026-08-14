@@ -27,6 +27,12 @@
 		A10000000000000000000012 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* SwiftUI.framework */; };
 		A10000000000000000000013 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* WidgetKit.framework */; };
 		A10000000000000000000014 /* widtget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* widtget.appex */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A10000000000000000000015 /* ActivityModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* ActivityModels.swift */; };
+		A10000000000000000000016 /* ActivitySnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000017 /* ActivitySnapshotStore.swift */; };
+		A10000000000000000000017 /* ActivitySnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000017 /* ActivitySnapshotStore.swift */; };
+		A10000000000000000000018 /* GitHubActivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000018 /* GitHubActivityService.swift */; };
+		A10000000000000000000019 /* GitHubAccountModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000019 /* GitHubAccountModel.swift */; };
+		A1000000000000000000001A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001A /* Security.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +82,10 @@
 		B10000000000000000000014 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B10000000000000000000015 /* widtgetApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = widtgetApp.entitlements; sourceTree = "<group>"; };
 		B10000000000000000000016 /* widtget.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = widtget.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000017 /* ActivitySnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitySnapshotStore.swift; sourceTree = "<group>"; };
+		B10000000000000000000018 /* GitHubActivityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubActivityService.swift; sourceTree = "<group>"; };
+		B10000000000000000000019 /* GitHubAccountModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubAccountModel.swift; sourceTree = "<group>"; };
+		B1000000000000000000001A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +103,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1000000000000000000001A /* Security.framework in Frameworks */,
 				A10000000000000000000012 /* SwiftUI.framework in Frameworks */,
 				A10000000000000000000013 /* WidgetKit.framework in Frameworks */,
 			);
@@ -155,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				B1000000000000000000000F /* AppIntents.framework */,
+				B1000000000000000000001A /* Security.framework */,
 				B1000000000000000000000D /* SwiftUI.framework */,
 				B1000000000000000000000E /* WidgetKit.framework */,
 			);
@@ -185,6 +197,7 @@
 		D10000000000000000000009 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				B10000000000000000000017 /* ActivitySnapshotStore.swift */,
 				B10000000000000000000011 /* WidgetPreferences.swift */,
 			);
 			path = Shared;
@@ -195,6 +208,8 @@
 			children = (
 				B10000000000000000000012 /* WidtgetHostApp.swift */,
 				B10000000000000000000013 /* WidgetSettingsView.swift */,
+				B10000000000000000000019 /* GitHubAccountModel.swift */,
+				B10000000000000000000018 /* GitHubActivityService.swift */,
 				B10000000000000000000014 /* Info.plist */,
 				B10000000000000000000015 /* widtgetApp.entitlements */,
 			);
@@ -252,9 +267,21 @@
 				TargetAttributes = {
 					E10000000000000000000001 = {
 						CreatedOnToolsVersion = 15.4;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 					E10000000000000000000003 = {
 						CreatedOnToolsVersion = 15.4;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -300,6 +327,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000001 /* ActivityModels.swift in Sources */,
+				A10000000000000000000016 /* ActivitySnapshotStore.swift in Sources */,
 				A10000000000000000000002 /* WidtgetConfigurationIntent.swift in Sources */,
 				A10000000000000000000003 /* ActivityProvider.swift in Sources */,
 				A10000000000000000000004 /* Palette.swift in Sources */,
@@ -317,6 +345,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000000000000000000015 /* ActivityModels.swift in Sources */,
+				A10000000000000000000017 /* ActivitySnapshotStore.swift in Sources */,
+				A10000000000000000000019 /* GitHubAccountModel.swift in Sources */,
+				A10000000000000000000018 /* GitHubActivityService.swift in Sources */,
 				A1000000000000000000000F /* WidtgetHostApp.swift in Sources */,
 				A10000000000000000000010 /* WidgetSettingsView.swift in Sources */,
 				A10000000000000000000011 /* WidgetPreferences.swift in Sources */,
@@ -377,6 +409,7 @@
 				CODE_SIGN_ENTITLEMENTS = widtget/widtget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 68U2S246ZX;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = widtget/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/PlugIns";
@@ -389,6 +422,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yjay18.widtget.widget;
 				PRODUCT_MODULE_NAME = widtgetWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -402,6 +436,7 @@
 				CODE_SIGN_ENTITLEMENTS = widtget/widtget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 68U2S246ZX;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = widtget/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/PlugIns";
@@ -414,6 +449,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yjay18.widtget.widget;
 				PRODUCT_MODULE_NAME = widtgetWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -424,8 +460,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = widtgetApp/widtgetApp.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 68U2S246ZX;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = widtgetApp/Info.plist;
@@ -437,6 +475,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yjay18.widtget;
 				PRODUCT_MODULE_NAME = widtgetApp;
 				PRODUCT_NAME = widtget;
+				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -446,8 +485,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = widtgetApp/widtgetApp.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 68U2S246ZX;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = widtgetApp/Info.plist;
@@ -459,6 +500,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yjay18.widtget;
 				PRODUCT_MODULE_NAME = widtgetApp;
 				PRODUCT_NAME = widtget;
+				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};

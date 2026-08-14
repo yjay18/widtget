@@ -1,0 +1,14 @@
+schemaVersion: 1
+
+enabledWorkflows:
+  - macos
+  - project-discovery
+  - xcode-ide
+  - utilities
+
+sessionDefaults:
+  projectPath: "./widtget.xcodeproj"
+  scheme: "widtget app"
+
+# Keep third-party error telemetry out of this local development workflow.
+sentryDisabled: true

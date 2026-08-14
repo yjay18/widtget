@@ -1,9 +1,12 @@
 import Foundation
+import OSLog
 import WidgetKit
 
 struct ActivityEntry: TimelineEntry {
     let date: Date
+    let configuredPeriod: ActivityPeriod
     let period: ActivityPeriod
+    let username: String
     let snapshot: ActivitySnapshot
 }
 
@@ -12,43 +15,122 @@ struct ActivityProvider: AppIntentTimelineProvider {
     typealias Entry = ActivityEntry
 
     func placeholder(in context: Context) -> ActivityEntry {
-        ActivityEntry(date: .now, period: .daily, snapshot: .loading)
+        ActivityEntry(
+            date: .now,
+            configuredPeriod: .daily,
+            period: .daily,
+            username: "github",
+            snapshot: .loading
+        )
     }
 
     func snapshot(for configuration: WidtgetConfigurationIntent, in context: Context) async -> ActivityEntry {
-        ActivityEntry(
-            date: .now,
-            period: configuration.period,
-            snapshot: ActivityDataSource.snapshot(for: configuration.period)
-        )
+        entry(for: configuration, context: context, date: .now)
     }
 
     func timeline(for configuration: WidtgetConfigurationIntent, in context: Context) async -> Timeline<ActivityEntry> {
         let now = Date()
-        let entry = ActivityEntry(
-            date: now,
-            period: configuration.period,
-            snapshot: ActivityDataSource.snapshot(for: configuration.period)
-        )
+        let entry = entry(for: configuration, context: context, date: now)
         let nextRefresh = Calendar.current.date(byAdding: .minute, value: 30, to: now) ?? now.addingTimeInterval(1_800)
         return Timeline(entries: [entry], policy: .after(nextRefresh))
     }
+
+    private func entry(
+        for configuration: WidtgetConfigurationIntent,
+        context: Context,
+        date: Date
+    ) -> ActivityEntry {
+        let configuredPeriod = configuration.period
+        let family = ActivityWidgetFamily(widgetFamily: context.family)
+        let key = SharedPreferences.displayedPeriodKey(
+            family: family.rawValue,
+            configuredPeriod: configuredPeriod.rawValue
+        )
+        let period = SharedPreferences.defaults.string(forKey: key)
+            .flatMap(ActivityPeriod.init(rawValue:)) ?? configuredPeriod
+        let windowMode = SharedPreferences.defaults.string(
+            forKey: SharedPreferences.Key.periodWindowMode
+        )
+        .flatMap(PeriodWindowMode.init(rawValue:)) ?? .fixed
+        let content = ActivityDataSource.content(for: period, windowMode: windowMode)
+
+        return ActivityEntry(
+            date: date,
+            configuredPeriod: configuredPeriod,
+            period: period,
+            username: content.username,
+            snapshot: content.snapshot
+        )
+    }
 }
 
-/// A single seam for connecting a production GitHub data pipeline later. The widget ships with
-/// deterministic data so every size and state remains useful without a companion app or embedded token.
+struct ActivityContent {
+    let username: String
+    let snapshot: ActivitySnapshot
+}
+
+/// The widget reads display-ready snapshots written by the host app. Credentials and GitHub network
+/// access intentionally stay out of the extension process.
 enum ActivityDataSource {
-    static func snapshot(for period: ActivityPeriod) -> ActivitySnapshot {
-        switch period {
-        case .daily:
-            return .daily
-        case .weekly:
-            return .weekly
+    private static let logger = Logger(
+        subsystem: "com.yjay18.widtget.widget",
+        category: "ActivitySnapshotStore"
+    )
+
+    static func content(for period: ActivityPeriod, windowMode: PeriodWindowMode) -> ActivityContent {
+        do {
+            guard let archive = try ActivitySnapshotStore.read() else {
+                return ActivityContent(username: "", snapshot: .setupRequired)
+            }
+            return ActivityContent(
+                username: archive.username,
+                snapshot: archive.snapshot(for: period.storedPeriod, windowMode: windowMode)
+            )
+        } catch {
+            let nsError = error as NSError
+            logger.error(
+                "Snapshot read failed: \(nsError.domain, privacy: .public) \(nsError.code) — \(nsError.localizedDescription, privacy: .public)"
+            )
+            return ActivityContent(
+                username: SharedPreferences.defaults.string(
+                    forKey: SharedPreferences.Key.githubUsername
+                ) ?? "",
+                snapshot: ActivitySnapshot(
+                    additions: 0,
+                    deletions: 0,
+                    commits: 0,
+                    repositories: [],
+                    activity: (0..<7).map { ActivityCell(id: $0, additions: 0, deletions: 0) },
+                    updatedAt: .now,
+                    state: .error,
+                    errorMessage: "Open widtget · \(nsError.code)"
+                )
+            )
+        }
+    }
+}
+
+private extension ActivityPeriod {
+    var storedPeriod: StoredActivityPeriod {
+        switch self {
+        case .daily: .daily
+        case .weekly: .weekly
         }
     }
 }
 
 extension ActivitySnapshot {
+    static let setupRequired = ActivitySnapshot(
+        additions: 0,
+        deletions: 0,
+        commits: 0,
+        repositories: [],
+        activity: (0..<7).map { ActivityCell(id: $0, additions: 0, deletions: 0) },
+        updatedAt: .now,
+        state: .setupRequired,
+        errorMessage: "Connect GitHub"
+    )
+
     static let loading = ActivitySnapshot(
         additions: 0,
         deletions: 0,

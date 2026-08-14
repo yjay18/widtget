@@ -12,6 +12,38 @@ enum ActivityPeriod: String, AppEnum, CaseIterable, Sendable {
     ]
 
     var displayName: String { rawValue.uppercased() }
+
+    var toggled: ActivityPeriod {
+        self == .daily ? .weekly : .daily
+    }
+}
+
+enum ActivityWidgetFamily: String, AppEnum, CaseIterable, Sendable {
+    case small
+    case medium
+    case large
+    case extraLarge
+
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Widget size")
+    static let caseDisplayRepresentations: [ActivityWidgetFamily: DisplayRepresentation] = [
+        .small: "Small",
+        .medium: "Medium",
+        .large: "Large",
+        .extraLarge: "Extra Large"
+    ]
+
+    init(widgetFamily: WidgetFamily) {
+        switch widgetFamily {
+        case .systemSmall:
+            self = .small
+        case .systemMedium:
+            self = .medium
+        case .systemExtraLarge:
+            self = .extraLarge
+        default:
+            self = .large
+        }
+    }
 }
 
 struct WidtgetConfigurationIntent: WidgetConfigurationIntent {
@@ -30,12 +62,39 @@ struct WidtgetConfigurationIntent: WidgetConfigurationIntent {
     }
 }
 
-struct RefreshActivityIntent: AppIntent {
-    static let title: LocalizedStringResource = "Refresh activity"
+struct SetActivityPeriodIntent: AppIntent {
+    static let title: LocalizedStringResource = "Change activity period"
+    static let description = IntentDescription("Switch a widtget between daily and weekly GitHub activity.")
     static let openAppWhenRun = false
 
+    @Parameter(title: "Period")
+    var period: ActivityPeriod
+
+    @Parameter(title: "Widget size")
+    var family: ActivityWidgetFamily
+
+    @Parameter(title: "Configured period")
+    var configuredPeriod: ActivityPeriod
+
+    init() {
+        period = .daily
+        family = .medium
+        configuredPeriod = .daily
+    }
+
+    init(period: ActivityPeriod, family: ActivityWidgetFamily, configuredPeriod: ActivityPeriod) {
+        self.period = period
+        self.family = family
+        self.configuredPeriod = configuredPeriod
+    }
+
     func perform() async throws -> some IntentResult {
-        WidgetCenter.shared.reloadTimelines(ofKind: WidtgetWidget.kind)
+        let key = SharedPreferences.displayedPeriodKey(
+            family: family.rawValue,
+            configuredPeriod: configuredPeriod.rawValue
+        )
+        SharedPreferences.defaults.set(period.rawValue, forKey: key)
+        WidgetCenter.shared.reloadTimelines(ofKind: WidtgetWidgetKind.value)
         return .result()
     }
 }

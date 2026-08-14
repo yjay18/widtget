@@ -30,11 +30,102 @@ struct WidtgetWidgetView: View {
                 SmallWidgetView(entry: entry, preferences: preferences)
             case .systemMedium:
                 MediumWidgetView(entry: entry, preferences: preferences)
+            case .systemExtraLarge:
+                ExtraLargeWidgetView(entry: entry, preferences: preferences)
             default:
                 LargeWidgetView(entry: entry, preferences: preferences)
             }
         }
-        .widgetURL(URL(string: "https://github.com/yjay18"))
+        .widgetURL(githubURL)
+    }
+
+    private var githubURL: URL? {
+        let path = entry.username.isEmpty ? "" : "/\(entry.username)"
+        return URL(string: "https://github.com\(path)")
+    }
+}
+
+private struct ExtraLargeWidgetView: View {
+    let entry: ActivityEntry
+    let preferences: WidgetViewPreferences
+
+    var body: some View {
+        VStack(spacing: 13) {
+            PeriodHeader(entry: entry)
+
+            HStack(alignment: .top, spacing: 14) {
+                VStack(spacing: 10) {
+                    metricCard(
+                        value: entry.snapshot.additions,
+                        label: "lines added",
+                        sign: "+",
+                        color: WidtgetPalette.green
+                    )
+                    metricCard(
+                        value: entry.snapshot.deletions,
+                        label: "lines deleted",
+                        sign: "−",
+                        color: WidtgetPalette.coral
+                    )
+                    SecondaryMetrics(snapshot: entry.snapshot)
+                }
+                .frame(maxWidth: .infinity, alignment: .top)
+
+                if preferences.showActivity || preferences.showUpdateTime {
+                    VStack(alignment: .leading, spacing: 12) {
+                        sectionLabel("ACTIVITY")
+                        if preferences.showActivity {
+                            ActivityStrip(cells: entry.snapshot.activity, height: 82)
+                            ActivityGrid(cells: entry.snapshot.activity)
+                        }
+                        Spacer(minLength: 0)
+                        if preferences.showUpdateTime {
+                            UpdateStatus(snapshot: entry.snapshot)
+                        }
+                    }
+                    .padding(13)
+                    .widtgetSurface(cornerRadius: 13)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                }
+
+                if preferences.showRepositories {
+                    VStack(alignment: .leading, spacing: 11) {
+                        sectionLabel("REPOSITORIES")
+                        RepositoryList(
+                            snapshot: entry.snapshot,
+                            limit: preferences.repositoryDetail.extraLargeLimit
+                        )
+                    }
+                    .padding(13)
+                    .widtgetSurface(cornerRadius: 13)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                }
+            }
+            .frame(maxHeight: .infinity)
+        }
+        .padding(17)
+    }
+
+    private func metricCard(value: Int, label: String, sign: Character, color: Color) -> some View {
+        PrimaryMetric(
+            value: value,
+            label: label,
+            sign: sign,
+            color: color,
+            fontSize: 50,
+            loading: entry.snapshot.state == .loading
+        )
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .widtgetSurface(cornerRadius: 13)
+    }
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 9, weight: .bold, design: .rounded))
+            .tracking(1)
+            .foregroundStyle(WidtgetPalette.secondaryText)
     }
 }
 
@@ -44,7 +135,7 @@ private struct SmallWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            PeriodHeader(entry: entry)
+            PeriodHeader(entry: entry, compact: true)
 
             PrimaryMetric(
                 value: entry.snapshot.additions,
@@ -151,20 +242,28 @@ private struct LargeWidgetView: View {
         VStack(spacing: 11) {
             PeriodHeader(entry: entry)
 
-            HStack(spacing: 10) {
-                metricCard(
-                    value: entry.snapshot.additions,
-                    label: "lines added",
-                    sign: "+",
-                    color: WidtgetPalette.green
-                )
-                metricCard(
-                    value: entry.snapshot.deletions,
-                    label: "lines deleted",
-                    sign: "−",
-                    color: WidtgetPalette.coral
-                )
+            GeometryReader { proxy in
+                let cardWidth = max(0, (proxy.size.width - 10) / 2)
+
+                HStack(spacing: 10) {
+                    metricCard(
+                        value: entry.snapshot.additions,
+                        label: "lines added",
+                        sign: "+",
+                        color: WidtgetPalette.green
+                    )
+                    .frame(width: cardWidth)
+
+                    metricCard(
+                        value: entry.snapshot.deletions,
+                        label: "lines deleted",
+                        sign: "−",
+                        color: WidtgetPalette.coral
+                    )
+                    .frame(width: cardWidth)
+                }
             }
+            .frame(height: 70)
 
             SecondaryMetrics(snapshot: entry.snapshot)
 
@@ -212,7 +311,7 @@ private struct LargeWidgetView: View {
             label: label,
             sign: sign,
             color: color,
-            fontSize: 39,
+            fontSize: 35,
             loading: entry.snapshot.state == .loading
         )
         .padding(.horizontal, 12)

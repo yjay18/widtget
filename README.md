@@ -1,14 +1,16 @@
 # widtget
 
-`widtget` is a widget-first native macOS product for focused code-activity snapshots. Its small host app exists only to install the WidgetKit extension and manage shared appearance preferences—there is no dashboard, detailed statistics page, or app-style navigation.
+`widtget` is a widget-first native macOS product for focused code-activity snapshots. Its small host app exists only to install the WidgetKit extension, manage the GitHub connection and data refresh, and control shared appearance preferences—there is no dashboard, detailed statistics page, or app-style navigation.
 
 ## What is included
 
 - Native `AppIntentConfiguration` with **Daily** and **Weekly** modes.
-- Purpose-built small, medium, and large layouts.
+- Purpose-built small, medium, large, and extra-large layouts.
 - Large tabular addition/deletion totals, compact commit and repository metrics, proportional repository bars, and two-color activity visualizations.
 - Loading, no-activity, API-error/retry, stale-data, and “+N more” visual states.
-- A minimal macOS appearance window for showing or hiding repository breakdowns, activity visualization, and update status, plus repository density.
+- A minimal macOS settings window for connecting GitHub and controlling repository breakdowns, activity visualization, update status, and repository density.
+- Exact commit, addition, and deletion totals fetched by the host app for the authenticated user's accessible repositories.
+- A Keychain-protected GitHub token and display-ready App Group snapshots, with no credential or network access in the widget extension.
 - Shared App Group preferences with immediate WidgetKit timeline reloads.
 - Deterministic preview data for every layout, including the requested `+29,696` and `−43,332` daily headline values.
 - Repository ranking by total lines changed, then commit count.
@@ -19,19 +21,49 @@
 2. Select both the `widtget app` and `widtget` extension targets, then assign the same development team under Signing & Capabilities.
 3. Confirm that `group.com.yjay18.widtget` is available to both targets as an App Group.
 4. Run the `widtget app` target once so macOS registers the embedded widget.
-5. Open `WidtgetPreviews.swift` to inspect all widget families and states in the canvas.
-6. Add `widtget` from the macOS widget gallery. Edit an individual widget to select Daily or Weekly.
+5. Connect GitHub in the host app using the setup below.
+6. Open `WidtgetPreviews.swift` to inspect all widget families and states in the canvas.
+7. Add `widtget` from the macOS widget gallery. Edit an individual widget to select Daily or Weekly.
 
 The app controls global appearance preferences. Daily/Weekly remains a native, per-widget setting so multiple instances can show different periods.
 
 The project targets macOS 14 because it uses native App Intent widget configuration and interactive retry.
 
+## Connect GitHub
+
+1. Use **Create a fine-grained token** in the host app. Choose your GitHub account as the resource owner, select the repositories to include, and keep the prefilled **Contents: read-only** permission.
+2. Paste the token into the host app and select **Connect GitHub**.
+3. To include repositories owned by an organization, enter its GitHub name under **Add organization**. The generated GitHub link preselects that organization and the minimum read-only permission; choose the repositories, generate the token, paste it back into `widtget`, and select **Add organization**.
+4. If the organization requires approval, ask an organization owner to approve the fine-grained token before adding it. A pending token cannot expose private repositories.
+
+GitHub limits each fine-grained personal access token to one resource owner, so every additional organization needs its own token. `widtget` validates that the organization is actually visible to the token and that all connected tokens authenticate the same GitHub user. The connection manager shows each owner and accessible repository count, supports independent organization removal, stores all tokens only in Keychain, merges repositories across owners, and deduplicates repositories and commits.
+
+Activity is calculated from commits authored by the authenticated user across every accessible branch. The **Fixed** window uses the current local calendar day or week; **Rolling** uses the last 24 hours or seven days. Both are cached on every refresh so the setting can switch immediately. Commits reachable from multiple branches are deduplicated by repository and SHA, and addition/deletion totals come from GitHub's individual commit statistics.
+
+Select **Refresh** in the host app to perform a full branch discovery and remember branches containing recent activity. Refreshing from the widget is intentionally lighter: it checks each active repository's default branch plus the previously discovered activity branches. Opening the app also uses this lightweight refresh when the cache is older than 15 minutes. If refresh fails, the widget keeps the last successful snapshot and marks it stale.
+
+## Command-line development
+
+The repository includes a repeatable Xcode build loop for Codex and local terminal work:
+
+```sh
+./script/build_and_run.sh build
+```
+
+That command performs an unsigned compile check. To use the Personal Team signing configured in Xcode, register the widget extension, and launch the host app, run:
+
+```sh
+./script/build_and_run.sh run
+```
+
+XcodeBuildMCP settings live in `.xcodebuildmcp/config.yaml`; they enable macOS builds, project discovery, and Xcode 26's IDE bridge while keeping the project and host-app scheme selected by default.
+
 ## Data boundary
 
-`ActivityDataSource` in `Provider/ActivityProvider.swift` is the single integration seam for production data. It currently returns deterministic snapshots so the extension stays self-contained and never embeds a GitHub personal access token. Replace that implementation with an approved server-backed or shared-container data source when one is available.
+`GitHubActivityService` in `widtgetApp/GitHubActivityService.swift` is the only GitHub API client. The host app keeps personal access tokens in the app-scoped macOS data-protection Keychain, turns API responses into display-ready daily and weekly snapshots, and writes those snapshots atomically to the shared App Group container. `ActivityDataSource` in `widtget/Provider/ActivityProvider.swift` only reads that cache, so the widget extension never receives tokens or makes authenticated requests.
 
-GitHub does not provide unauthenticated aggregate line-addition/deletion totals, and embedding a token in a widget binary is unsafe. The widget therefore links to the public `yjay18` GitHub profile on tap but does not claim to be an official GitHub product.
+Deterministic snapshots remain limited to Xcode previews. A widget without cached data displays a setup prompt, and tapping a connected widget opens the authenticated user's GitHub profile. `widtget` does not claim to be an official GitHub product.
 
 ## Packaging
 
-The `widtget app` target embeds and signs `widtget.appex`. The host has no product dashboard: after the first launch, normal use happens entirely from the widget, and the app only needs to be reopened when changing appearance preferences.
+The `widtget app` target embeds and signs `widtget.appex`. The host has no product dashboard: normal use happens from the widget, while the app is reopened only to refresh GitHub activity, manage the connection, or change appearance preferences.

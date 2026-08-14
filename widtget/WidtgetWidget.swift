@@ -24,7 +24,7 @@ struct WidtgetWidget: Widget {
         }
         .configurationDisplayName("widtget")
         .description("A focused view of additions, deletions, commits, and repository activity.")
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge])
         .contentMarginsDisabled()
     }
 }
