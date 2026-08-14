@@ -11,6 +11,8 @@ struct WidtgetWidgetView: View {
     private var showUpdateTime = WidgetViewPreferences.defaults.showUpdateTime
     @AppStorage(SharedPreferences.Key.repositoryDetail, store: SharedPreferences.defaults)
     private var repositoryDetail = WidgetViewPreferences.defaults.repositoryDetail
+    @AppStorage(SharedPreferences.Key.periodWindowMode, store: SharedPreferences.defaults)
+    private var periodWindowMode = WidgetViewPreferences.defaults.periodWindowMode
 
     let entry: ActivityEntry
 
@@ -19,7 +21,8 @@ struct WidtgetWidgetView: View {
             showRepositories: showRepositories,
             showActivity: showActivity,
             showUpdateTime: showUpdateTime,
-            repositoryDetail: repositoryDetail
+            repositoryDetail: repositoryDetail,
+            periodWindowMode: periodWindowMode
         )
     }
 
@@ -68,6 +71,10 @@ private struct ExtraLargeWidgetView: View {
                         color: WidtgetPalette.coral
                     )
                     SecondaryMetrics(snapshot: entry.snapshot)
+                    ActivityInsights(snapshot: entry.snapshot, labels: activityLabels)
+                        .padding(.horizontal, 13)
+                        .padding(.vertical, 11)
+                        .widtgetSurface(cornerRadius: 12)
                 }
                 .frame(maxWidth: .infinity, alignment: .top)
 
@@ -75,17 +82,22 @@ private struct ExtraLargeWidgetView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         sectionLabel("ACTIVITY")
                         if preferences.showActivity {
-                            ActivityStrip(cells: entry.snapshot.activity, height: 82)
+                            VStack(spacing: 5) {
+                                ActivityStrip(cells: entry.snapshot.activity, height: 82)
+                                ActivityAxisLabels(
+                                    labels: activityLabels,
+                                    fontSize: 7
+                                )
+                            }
                             ActivityGrid(cells: entry.snapshot.activity)
                         }
-                        Spacer(minLength: 0)
                         if preferences.showUpdateTime {
                             UpdateStatus(snapshot: entry.snapshot)
                         }
                     }
                     .padding(13)
                     .widtgetSurface(cornerRadius: 13)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
                 }
 
                 if preferences.showRepositories {
@@ -104,6 +116,16 @@ private struct ExtraLargeWidgetView: View {
             .frame(maxHeight: .infinity)
         }
         .padding(17)
+    }
+
+    private var activityLabels: [String] {
+        ActivityIntervalLabels.labels(
+            period: entry.period,
+            windowMode: preferences.periodWindowMode,
+            referenceDate: entry.snapshot.updatedAt,
+            cellCount: entry.snapshot.activity.count,
+            style: .expanded
+        )
     }
 
     private func metricCard(value: Int, label: String, sign: Character, color: Color) -> some View {
@@ -273,15 +295,29 @@ private struct LargeWidgetView: View {
                         VStack(alignment: .leading, spacing: 7) {
                             sectionLabel("ACTIVITY")
                             if preferences.showActivity {
-                                ActivityGrid(cells: entry.snapshot.activity)
+                                ActivityStrip(cells: entry.snapshot.activity, height: 64)
+                                ActivityGrid(
+                                    cells: entry.snapshot.activity,
+                                    labels: compactActivityLabels,
+                                    labelFontSize: 6.5
+                                )
+                                Rectangle()
+                                    .fill(WidtgetPalette.border)
+                                    .frame(height: 1)
+                                ActivityInsights(
+                                    snapshot: entry.snapshot,
+                                    labels: expandedActivityLabels,
+                                    compact: true
+                                )
                             }
+                            Spacer(minLength: 4)
                             if preferences.showUpdateTime {
                                 UpdateStatus(snapshot: entry.snapshot)
                             }
                         }
                         .padding(10)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                         .widtgetSurface()
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
                     }
 
                     if preferences.showRepositories {
@@ -303,6 +339,24 @@ private struct LargeWidgetView: View {
             }
         }
         .padding(16)
+    }
+
+    private var compactActivityLabels: [String] {
+        activityLabels(style: .compact)
+    }
+
+    private var expandedActivityLabels: [String] {
+        activityLabels(style: .expanded)
+    }
+
+    private func activityLabels(style: ActivityIntervalLabelStyle) -> [String] {
+        ActivityIntervalLabels.labels(
+            period: entry.period,
+            windowMode: preferences.periodWindowMode,
+            referenceDate: entry.snapshot.updatedAt,
+            cellCount: entry.snapshot.activity.count,
+            style: style
+        )
     }
 
     private func metricCard(value: Int, label: String, sign: Character, color: Color) -> some View {

@@ -68,11 +68,13 @@ struct WidgetViewPreferences: Sendable {
     var showActivity: Bool
     var showUpdateTime: Bool
     var repositoryDetail: RepositoryDetail
+    var periodWindowMode: PeriodWindowMode
 
     static let defaults = WidgetViewPreferences(
         showRepositories: true,
         showActivity: true,
         showUpdateTime: true,
-        repositoryDetail: .expanded
+        repositoryDetail: .expanded,
+        periodWindowMode: .fixed
     )
 }
