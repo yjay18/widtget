@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 enum WidtgetPalette {
     static let background = Color(red: 0.035, green: 0.047, blue: 0.063)
@@ -13,15 +14,25 @@ enum WidtgetPalette {
 }
 
 struct SurfaceModifier: ViewModifier {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
     let cornerRadius: CGFloat
 
     func body(content: Content) -> some View {
         content
-            .background(WidtgetPalette.surface)
+            .background {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(renderingMode == .fullColor ? WidtgetPalette.surface : Color.clear)
+            }
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(WidtgetPalette.border, lineWidth: 1)
+                    .stroke(
+                        renderingMode == .fullColor
+                            ? WidtgetPalette.border
+                            : Color.primary.opacity(0.14),
+                        lineWidth: 1
+                    )
             }
     }
 }

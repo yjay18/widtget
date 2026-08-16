@@ -23,6 +23,12 @@ struct WidgetSettingsView: View {
     @AppStorage(SharedPreferences.Key.periodWindowMode, store: SharedPreferences.defaults)
     private var periodWindowMode = PeriodWindowMode.fixed
 
+    @AppStorage(SharedPreferences.Key.snakeMinimumSegments, store: SharedPreferences.defaults)
+    private var snakeMinimumSegments = CommitSnakeLimits.defaultMinimum
+
+    @AppStorage(SharedPreferences.Key.snakeMaximumSegments, store: SharedPreferences.defaults)
+    private var snakeMaximumSegments = CommitSnakeLimits.defaultMaximum
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
@@ -47,6 +53,8 @@ struct WidgetSettingsView: View {
                         showUpdateTime = WidgetViewPreferences.defaults.showUpdateTime
                         repositoryDetail = WidgetViewPreferences.defaults.repositoryDetail
                         periodWindowMode = .fixed
+                        snakeMinimumSegments = WidgetViewPreferences.defaults.snakeMinimumSegments
+                        snakeMaximumSegments = WidgetViewPreferences.defaults.snakeMaximumSegments
                         reloadWidgets()
                     }
                     .buttonStyle(.plain)
@@ -65,6 +73,18 @@ struct WidgetSettingsView: View {
         .onChange(of: showActivity) { _, _ in reloadWidgets() }
         .onChange(of: showUpdateTime) { _, _ in reloadWidgets() }
         .onChange(of: repositoryDetail) { _, _ in reloadWidgets() }
+        .onChange(of: snakeMinimumSegments) { _, newValue in
+            if newValue > snakeMaximumSegments {
+                snakeMaximumSegments = newValue
+            }
+            reloadWidgets()
+        }
+        .onChange(of: snakeMaximumSegments) { _, newValue in
+            if newValue < snakeMinimumSegments {
+                snakeMinimumSegments = newValue
+            }
+            reloadWidgets()
+        }
         .onChange(of: periodWindowMode) { _, _ in
             reloadWidgets()
             guard github.hasStoredToken, !github.isBusy else { return }
@@ -378,6 +398,42 @@ struct WidgetSettingsView: View {
                 .frame(width: 180)
             }
             .disabled(!showRepositories)
+
+            GroupBox("Commit snake") {
+                VStack(spacing: 10) {
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Body length")
+                                .font(.system(size: 13, weight: .medium))
+                            Text("One block per commit, held within these visual limits.")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+
+                        Text("\(snakeMinimumSegments)–\(snakeMaximumSegments) blocks")
+                            .font(.system(size: 11, weight: .semibold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack(spacing: 22) {
+                        Stepper(
+                            "Minimum: \(snakeMinimumSegments)",
+                            value: $snakeMinimumSegments,
+                            in: CommitSnakeLimits.minimumRange
+                        )
+                        Stepper(
+                            "Maximum: \(snakeMaximumSegments)",
+                            value: $snakeMaximumSegments,
+                            in: CommitSnakeLimits.maximumRange
+                        )
+                    }
+                    .font(.system(size: 11, weight: .medium))
+                }
+                .padding(.vertical, 4)
+            }
         }
     }
 

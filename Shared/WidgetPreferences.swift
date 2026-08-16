@@ -43,6 +43,13 @@ enum PeriodWindowMode: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+enum CommitSnakeLimits {
+    static let minimumRange = 2...10
+    static let maximumRange = 8...28
+    static let defaultMinimum = 4
+    static let defaultMaximum = 24
+}
+
 enum SharedPreferences {
     static let suiteName = "group.com.yjay18.widtget"
     static let defaults = UserDefaults(suiteName: suiteName) ?? .standard
@@ -53,6 +60,8 @@ enum SharedPreferences {
         static let showUpdateTime = "appearance.showUpdateTime"
         static let repositoryDetail = "appearance.repositoryDetail"
         static let periodWindowMode = "appearance.periodWindowMode"
+        static let snakeMinimumSegments = "appearance.snakeMinimumSegments"
+        static let snakeMaximumSegments = "appearance.snakeMaximumSegments"
         static let githubUsername = "github.username"
         static let lastSuccessfulRefresh = "github.lastSuccessfulRefresh"
         static let githubRefreshRequested = "github.refreshRequested"
@@ -69,12 +78,16 @@ struct WidgetViewPreferences: Sendable {
     var showUpdateTime: Bool
     var repositoryDetail: RepositoryDetail
     var periodWindowMode: PeriodWindowMode
+    var snakeMinimumSegments: Int
+    var snakeMaximumSegments: Int
 
     static let defaults = WidgetViewPreferences(
         showRepositories: true,
         showActivity: true,
         showUpdateTime: true,
         repositoryDetail: .expanded,
-        periodWindowMode: .fixed
+        periodWindowMode: .fixed,
+        snakeMinimumSegments: CommitSnakeLimits.defaultMinimum,
+        snakeMaximumSegments: CommitSnakeLimits.defaultMaximum
     )
 }

@@ -228,11 +228,11 @@ struct ActivityInsights: View {
     }
 }
 
-private enum CodingPetMood {
+private enum CommitSnakeMood {
     case sleeping
-    case curious
-    case focused
-    case celebrating
+    case hatched
+    case growing
+    case thriving
     case setupRequired
     case loading
     case worried
@@ -246,41 +246,28 @@ private enum CodingPetMood {
         case .loading:
             self = .loading
         case .loaded, .noActivity:
-            let averageInterval = (snapshot.additions + snapshot.deletions)
-                / max(snapshot.activity.count, 1)
-            switch averageInterval {
+            switch snapshot.commits {
             case 0:
                 self = .sleeping
-            case 1..<500:
-                self = .curious
-            case 500..<2_500:
-                self = .focused
+            case 1..<5:
+                self = .hatched
+            case 5..<15:
+                self = .growing
             default:
-                self = .celebrating
+                self = .thriving
             }
         }
     }
 
     var title: String {
         switch self {
-        case .sleeping: "BYTE IS NAPPING"
-        case .curious: "BYTE WOKE UP"
-        case .focused: "BYTE IS LOCKED IN"
-        case .celebrating: "BYTE IS THRIVING"
-        case .setupRequired: "BYTE NEEDS A LOGIN"
-        case .loading: "BYTE IS SNIFFING AROUND"
-        case .worried: "BYTE LOST THE SIGNAL"
-        }
-    }
-
-    var energy: Int {
-        switch self {
-        case .sleeping, .worried: 1
-        case .setupRequired: 1
-        case .loading: 2
-        case .curious: 3
-        case .focused: 4
-        case .celebrating: 5
+        case .sleeping: "SNAKE IS SNOOZING"
+        case .hatched: "A SNAKE HATCHED"
+        case .growing: "SNAKE IS GROWING"
+        case .thriving: "SNAKE IS HUGE"
+        case .setupRequired: "SNAKE NEEDS GITHUB"
+        case .loading: "SNAKE IS HUNTING"
+        case .worried: "SNAKE LOST THE TRAIL"
         }
     }
 
@@ -288,32 +275,54 @@ private enum CodingPetMood {
         switch self {
         case .worried: WidtgetPalette.coral
         case .sleeping, .setupRequired, .loading: WidtgetPalette.secondaryText
-        case .curious, .focused, .celebrating: WidtgetPalette.green
+        case .hatched, .growing, .thriving: WidtgetPalette.green
         }
     }
 }
 
-struct CodingPetView: View {
+struct CommitSnakeView: View {
     let snapshot: ActivitySnapshot
+    let minimumSegments: Int
+    let maximumSegments: Int
 
-    private var mood: CodingPetMood {
-        CodingPetMood(snapshot: snapshot)
+    private var mood: CommitSnakeMood {
+        CommitSnakeMood(snapshot: snapshot)
     }
 
-    private var linesMoved: Int {
-        snapshot.additions + snapshot.deletions
+    private var lowerLimit: Int {
+        min(max(minimumSegments, CommitSnakeLimits.minimumRange.lowerBound), CommitSnakeLimits.minimumRange.upperBound)
+    }
+
+    private var upperLimit: Int {
+        max(
+            lowerLimit,
+            min(maximumSegments, CommitSnakeLimits.maximumRange.upperBound)
+        )
+    }
+
+    private var bodySegments: Int {
+        min(max(snapshot.commits, lowerLimit), upperLimit)
+    }
+
+    private var growthProgress: Double {
+        guard upperLimit > lowerLimit else { return 1 }
+        return Double(bodySegments - lowerLimit) / Double(upperLimit - lowerLimit)
     }
 
     var body: some View {
         ZStack {
-            PixelPetBackdrop(mood: mood)
+            CommitSnakeBackdrop(accent: mood.accent)
 
-            HStack(spacing: 10) {
-                PixelCodingPet(mood: mood)
-                    .frame(width: 82, height: 66)
+            HStack(spacing: 11) {
+                BlockyCommitSnake(
+                    mood: mood,
+                    bodySegments: bodySegments,
+                    maximumSegments: upperLimit
+                )
+                .frame(width: 118, height: 67)
 
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("CODE COMPANION")
+                    Text("COMMIT SNAKE")
                         .font(.system(size: 7, weight: .bold, design: .monospaced))
                         .tracking(0.7)
                         .foregroundStyle(WidtgetPalette.secondaryText)
@@ -324,24 +333,22 @@ struct CodingPetView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.72)
 
-                    HStack(spacing: 6) {
-                        Text(activityDescription)
-                            .font(.system(size: 7, weight: .semibold, design: .monospaced))
-                            .monospacedDigit()
-                            .foregroundStyle(mood.accent)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.72)
+                    Text(activityDescription)
+                        .font(.system(size: 7, weight: .semibold, design: .monospaced))
+                        .monospacedDigit()
+                        .foregroundStyle(mood.accent)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.68)
 
-                        Spacer(minLength: 1)
-
-                        HStack(spacing: 2) {
-                            ForEach(0..<5, id: \.self) { index in
-                                Rectangle()
-                                    .fill(index < mood.energy ? mood.accent : WidtgetPalette.neutral)
-                                    .frame(width: 6, height: 3)
-                            }
+                    GeometryReader { proxy in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(WidtgetPalette.neutral)
+                            Capsule()
+                                .fill(mood.accent)
+                                .frame(width: max(3, proxy.size.width * growthProgress))
                         }
                     }
+                    .frame(height: 3)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -349,7 +356,7 @@ struct CodingPetView: View {
             .padding(.vertical, 8)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Code companion. \(mood.title). \(activityDescription).")
+        .accessibilityLabel("Commit snake. \(mood.title). \(activityDescription).")
     }
 
     private var activityDescription: String {
@@ -360,173 +367,197 @@ struct CodingPetView: View {
             "FETCHING ACTIVITY"
         case .worried:
             "REFRESH NEEDED"
-        case .sleeping:
-            "NO LINES MOVED"
-        case .curious, .focused, .celebrating:
-            "\(unsignedCompact(linesMoved)) LINES MOVED"
+        case .sleeping, .hatched, .growing, .thriving:
+            if snapshot.commits < lowerLimit {
+                "\(snapshot.commits) COMMITS · RESTING \(bodySegments)/\(upperLimit)"
+            } else if snapshot.commits >= upperLimit {
+                "\(snapshot.commits) COMMITS · \(bodySegments)/\(upperLimit) BLOCKS"
+            } else {
+                "\(snapshot.commits) COMMITS · \(bodySegments)/\(upperLimit) BLOCKS"
+            }
         }
-    }
-
-    private func unsignedCompact(_ value: Int) -> String {
-        String(ActivityNumberFormat.compact(value, sign: "+").dropFirst())
     }
 }
 
-private struct PixelPetBackdrop: View {
-    let mood: CodingPetMood
+private struct CommitSnakeBackdrop: View {
+    let accent: Color
 
     var body: some View {
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
-            let cloudColor = WidtgetPalette.secondaryText.opacity(0.18)
-            let dotSpacing: CGFloat = 2.1
-            let dotSize: CGFloat = 0.85
-            let cloudOrigin = CGPoint(x: max(8, size.width - 75), y: 7)
-
-            for row in 0..<8 {
-                let range: Range<Int>
-                switch row {
-                case 0...1: range = 12..<24
-                case 2...3: range = 6..<29
-                default: range = 0..<34
-                }
-                for column in range {
-                    let rect = CGRect(
-                        x: cloudOrigin.x + CGFloat(column) * dotSpacing,
-                        y: cloudOrigin.y + CGFloat(row) * dotSpacing,
-                        width: dotSize,
-                        height: dotSize
-                    )
-                    context.fill(Path(rect), with: .color(cloudColor))
-                }
-            }
-
             let stars: [(CGFloat, CGFloat)] = [
-                (0.08, 0.25), (0.43, 0.13), (0.88, 0.46), (0.68, 0.72)
+                (0.05, 0.20), (0.42, 0.12), (0.93, 0.28), (0.72, 0.83)
             ]
             for (index, star) in stars.enumerated() {
                 let center = CGPoint(x: size.width * star.0, y: size.height * star.1)
                 let color = index.isMultiple(of: 2)
-                    ? WidtgetPalette.green.opacity(0.52)
+                    ? accent.opacity(0.45)
                     : WidtgetPalette.coral.opacity(0.48)
-                let vertical = CGRect(x: center.x - 0.6, y: center.y - 3, width: 1.2, height: 6)
-                let horizontal = CGRect(x: center.x - 3, y: center.y - 0.6, width: 6, height: 1.2)
+                let vertical = CGRect(x: center.x - 0.5, y: center.y - 2, width: 1, height: 4)
+                let horizontal = CGRect(x: center.x - 2, y: center.y - 0.5, width: 4, height: 1)
                 context.fill(Path(vertical), with: .color(color))
                 context.fill(Path(horizontal), with: .color(color))
-            }
-
-            let groundY = size.height - 9
-            for x in stride(from: CGFloat(0), through: size.width, by: 4) {
-                let isLive = Int(x / 4).isMultiple(of: 7)
-                let color = isLive ? mood.accent.opacity(0.62) : WidtgetPalette.border.opacity(0.85)
-                let rect = CGRect(x: x, y: groundY, width: 1.6, height: 1.6)
-                context.fill(Path(rect), with: .color(color))
             }
         }
         .accessibilityHidden(true)
     }
 }
 
-private struct PixelCodingPet: View {
-    let mood: CodingPetMood
-
-    private let sprite = [
-        "......##......",
-        "......##......",
-        "....######....",
-        "..##########..",
-        ".############.",
-        ".############.",
-        "..##########..",
-        "...########...",
-        "...##.##.##...",
-        "..###.##.###..",
-        "..##......##.."
-    ]
+private struct BlockyCommitSnake: View {
+    let mood: CommitSnakeMood
+    let bodySegments: Int
+    let maximumSegments: Int
 
     var body: some View {
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
-            let columns: CGFloat = 16
-            let rows: CGFloat = 12
-            let pixel = max(2, floor(min(size.width / columns, size.height / rows)))
+            let maximumSlots = max(maximumSegments + 1, 2)
+            let columns = min(10, max(5, Int(ceil(Double(maximumSlots) / 3))))
+            let rows = Int(ceil(Double(maximumSlots) / Double(columns)))
+            let horizontalGap: CGFloat = 1.4
+            let verticalGap: CGFloat = 5
+            let inset: CGFloat = 5
+            let availableWidth = max(1, size.width - inset * 2)
+            let availableHeight = max(1, size.height - inset * 2)
+            let block = max(
+                3,
+                floor(min(
+                    (availableWidth - CGFloat(columns - 1) * horizontalGap) / CGFloat(columns),
+                    (availableHeight - CGFloat(rows - 1) * verticalGap) / CGFloat(rows)
+                ))
+            )
+            let gridWidth = CGFloat(columns) * block + CGFloat(columns - 1) * horizontalGap
+            let gridHeight = CGFloat(rows) * block + CGFloat(rows - 1) * verticalGap
             let origin = CGPoint(
-                x: (size.width - 14 * pixel) / 2,
-                y: (size.height - 11 * pixel) / 2
+                x: (size.width - gridWidth) / 2,
+                y: (size.height - gridHeight) / 2
             )
 
-            for (row, line) in sprite.enumerated() {
-                for (column, value) in line.enumerated() where value == "#" {
-                    let rect = CGRect(
-                        x: origin.x + CGFloat(column) * pixel,
-                        y: origin.y + CGFloat(row) * pixel,
-                        width: pixel - 0.55,
-                        height: pixel - 0.55
-                    )
-                    context.fill(Path(rect), with: .color(bodyColor))
+            func frame(for index: Int) -> CGRect {
+                let row = index / columns
+                let offset = index % columns
+                let column = row.isMultiple(of: 2) ? offset : columns - 1 - offset
+                return CGRect(
+                    x: origin.x + CGFloat(column) * (block + horizontalGap),
+                    y: origin.y + CGFloat(rows - 1 - row) * (block + verticalGap),
+                    width: block,
+                    height: block
+                )
+            }
+
+            for index in 0..<maximumSlots {
+                let slot = frame(for: index)
+                context.fill(
+                    Path(roundedRect: slot, cornerRadius: 2),
+                    with: .color(WidtgetPalette.neutral.opacity(0.58))
+                )
+            }
+
+            if bodySegments > 0 {
+                for index in 1...bodySegments {
+                    let previous = frame(for: index - 1)
+                    let current = frame(for: index)
+                    let connector: CGRect
+                    if abs(previous.midY - current.midY) < 1 {
+                        connector = CGRect(
+                            x: min(previous.maxX, current.maxX) - horizontalGap,
+                            y: previous.midY - max(1, block * 0.22),
+                            width: horizontalGap * 2,
+                            height: max(2, block * 0.44)
+                        )
+                    } else {
+                        connector = CGRect(
+                            x: previous.midX - max(1, block * 0.22),
+                            y: min(previous.midY, current.midY),
+                            width: max(2, block * 0.44),
+                            height: abs(previous.midY - current.midY)
+                        )
+                    }
+                    context.fill(Path(connector), with: .color(bodyColor(index: index - 1)))
                 }
             }
 
-            let armPixels: [(Int, Int)]
-            switch mood {
-            case .celebrating:
-                armPixels = [(-1, 2), (0, 3), (13, 3), (14, 2)]
-            case .curious:
-                armPixels = [(-1, 5), (13, 3), (14, 2)]
-            case .worried:
-                armPixels = [(-1, 6), (14, 6)]
-            default:
-                armPixels = [(-1, 5), (14, 5)]
-            }
-            for (column, row) in armPixels {
-                let rect = CGRect(
-                    x: origin.x + CGFloat(column) * pixel,
-                    y: origin.y + CGFloat(row) * pixel,
-                    width: pixel - 0.55,
-                    height: pixel - 0.55
-                )
-                context.fill(Path(rect), with: .color(bodyColor))
+            for index in 0..<bodySegments {
+                let segment = frame(for: index)
+                let isMilestone = (index + 1).isMultiple(of: 5)
+                let color = isMilestone ? WidtgetPalette.coral.opacity(0.88) : bodyColor(index: index)
+                context.fill(Path(roundedRect: segment, cornerRadius: 2), with: .color(color))
             }
 
-            let eyeWidth = mood == .sleeping ? pixel * 1.8 : pixel * 1.45
-            let eyeHeight = mood == .sleeping ? max(1, pixel * 0.28) : pixel * 1.18
-            let eyeY = origin.y + pixel * (mood == .sleeping ? 5.0 : 4.45)
-            for column in [3.0, 9.55] {
-                let rect = CGRect(
-                    x: origin.x + pixel * column,
-                    y: eyeY,
-                    width: eyeWidth,
-                    height: eyeHeight
-                )
-                context.fill(Path(rect), with: .color(eyeColor))
+            let headIndex = min(bodySegments, maximumSlots - 1)
+            let head = frame(for: headIndex)
+            context.fill(Path(roundedRect: head, cornerRadius: 3), with: .color(mood.accent))
+
+            let row = headIndex / columns
+            let offset = headIndex % columns
+            let facingUp = row > 0 && offset == 0
+            let eyeSize = max(1.2, block * 0.13)
+            let sleeping = mood == .sleeping
+            let eyeColor = Color.black.opacity(0.72)
+
+            let eyeRects: [CGRect]
+            if facingUp {
+                eyeRects = [0.27, 0.68].map { fraction in
+                    CGRect(
+                        x: head.minX + block * fraction - eyeSize / 2,
+                        y: head.minY + block * 0.22,
+                        width: eyeSize,
+                        height: sleeping ? 1 : eyeSize
+                    )
+                }
+            } else {
+                let facingRight = row.isMultiple(of: 2)
+                let x = facingRight ? head.maxX - block * 0.28 : head.minX + block * 0.18
+                eyeRects = [0.28, 0.69].map { fraction in
+                    CGRect(
+                        x: x,
+                        y: head.minY + block * fraction - eyeSize / 2,
+                        width: eyeSize,
+                        height: sleeping ? 1 : eyeSize
+                    )
+                }
+            }
+            for eye in eyeRects {
+                context.fill(Path(roundedRect: eye, cornerRadius: 0.7), with: .color(eyeColor))
             }
 
-            if mood == .celebrating {
-                let mouth = CGRect(
-                    x: origin.x + pixel * 6,
-                    y: origin.y + pixel * 6.1,
-                    width: pixel * 2,
-                    height: pixel * 0.65
-                )
-                context.fill(Path(mouth), with: .color(eyeColor))
+            if mood != .sleeping && mood != .loading && mood != .setupRequired {
+                let tongue: CGRect
+                if facingUp {
+                    tongue = CGRect(
+                        x: head.midX - 0.7,
+                        y: head.minY - 3,
+                        width: 1.4,
+                        height: 4
+                    )
+                } else if row.isMultiple(of: 2) {
+                    tongue = CGRect(
+                        x: head.maxX - 1,
+                        y: head.midY - 0.7,
+                        width: 4,
+                        height: 1.4
+                    )
+                } else {
+                    tongue = CGRect(
+                        x: head.minX - 3,
+                        y: head.midY - 0.7,
+                        width: 4,
+                        height: 1.4
+                    )
+                }
+                context.fill(Path(tongue), with: .color(WidtgetPalette.coral))
             }
         }
         .accessibilityHidden(true)
     }
 
-    private var bodyColor: Color {
+    private func bodyColor(index: Int) -> Color {
         switch mood {
         case .sleeping, .setupRequired, .loading:
-            WidtgetPalette.secondaryText.opacity(0.62)
-        case .curious:
-            WidtgetPalette.coral.opacity(0.72)
-        case .focused:
-            WidtgetPalette.coral.opacity(0.88)
-        case .celebrating, .worried:
-            WidtgetPalette.coral
+            WidtgetPalette.secondaryText.opacity(0.54 + min(Double(index) * 0.025, 0.2))
+        case .worried:
+            WidtgetPalette.coral.opacity(0.62 + min(Double(index) * 0.018, 0.24))
+        case .hatched, .growing, .thriving:
+            WidtgetPalette.green.opacity(0.58 + min(Double(index) * 0.018, 0.34))
         }
-    }
-
-    private var eyeColor: Color {
-        mood == .worried ? WidtgetPalette.green.opacity(0.82) : Color.black.opacity(0.72)
     }
 }
 

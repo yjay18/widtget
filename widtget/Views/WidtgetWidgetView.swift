@@ -13,6 +13,10 @@ struct WidtgetWidgetView: View {
     private var repositoryDetail = WidgetViewPreferences.defaults.repositoryDetail
     @AppStorage(SharedPreferences.Key.periodWindowMode, store: SharedPreferences.defaults)
     private var periodWindowMode = WidgetViewPreferences.defaults.periodWindowMode
+    @AppStorage(SharedPreferences.Key.snakeMinimumSegments, store: SharedPreferences.defaults)
+    private var snakeMinimumSegments = WidgetViewPreferences.defaults.snakeMinimumSegments
+    @AppStorage(SharedPreferences.Key.snakeMaximumSegments, store: SharedPreferences.defaults)
+    private var snakeMaximumSegments = WidgetViewPreferences.defaults.snakeMaximumSegments
 
     let entry: ActivityEntry
 
@@ -22,7 +26,9 @@ struct WidtgetWidgetView: View {
             showActivity: showActivity,
             showUpdateTime: showUpdateTime,
             repositoryDetail: repositoryDetail,
-            periodWindowMode: periodWindowMode
+            periodWindowMode: periodWindowMode,
+            snakeMinimumSegments: snakeMinimumSegments,
+            snakeMaximumSegments: snakeMaximumSegments
         )
     }
 
@@ -100,7 +106,11 @@ private struct ExtraLargeWidgetView: View {
                         .widtgetSurface(cornerRadius: 13)
 
                         if preferences.showActivity {
-                            CodingPetView(snapshot: entry.snapshot)
+                            CommitSnakeView(
+                                snapshot: entry.snapshot,
+                                minimumSegments: preferences.snakeMinimumSegments,
+                                maximumSegments: preferences.snakeMaximumSegments
+                            )
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .widtgetSurface(cornerRadius: 13)
                         }
