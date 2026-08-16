@@ -63,8 +63,24 @@ enum GitHubTokenStore {
     private static let account = "activity-token"
 
     static func readConnections(defaultUsername: String = "") throws -> [GitHubStoredConnection] {
-        guard let data = try readData(using: protectedLookup) else { return [] }
+        if let data = try readData(using: protectedLookup) {
+            return try decodeConnections(data, defaultUsername: defaultUsername)
+        }
 
+        // Earlier development builds could write to the classic login Keychain. Migrate that
+        // credential once into the app-scoped data-protection Keychain instead of making the user
+        // reconnect after an update.
+        guard let legacyData = try readData(using: legacyLookup) else { return [] }
+        let connections = try decodeConnections(legacyData, defaultUsername: defaultUsername)
+        try replace(with: connections)
+        try removeData(using: legacyLookup)
+        return connections
+    }
+
+    private static func decodeConnections(
+        _ data: Data,
+        defaultUsername: String
+    ) throws -> [GitHubStoredConnection] {
         if let archive = try? JSONDecoder().decode(GitHubTokenArchive.self, from: data),
            archive.schemaVersion == GitHubTokenArchive.currentSchemaVersion {
             return normalized(archive.connections)
@@ -123,7 +139,12 @@ enum GitHubTokenStore {
     }
 
     static func remove() throws {
-        let status = SecItemDelete(protectedLookup as CFDictionary)
+        try removeData(using: protectedLookup)
+        try removeData(using: legacyLookup)
+    }
+
+    private static func removeData(using lookup: [String: Any]) throws {
+        let status = SecItemDelete(lookup as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw GitHubTokenStoreError.keychainStatus(status)
         }
@@ -135,6 +156,14 @@ enum GitHubTokenStore {
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
             kSecUseDataProtectionKeychain as String: true
+        ]
+    }
+
+    private static var legacyLookup: [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
         ]
     }
 

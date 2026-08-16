@@ -27,4 +27,7 @@ import WidgetKit
 } timeline: {
     ActivityEntry(date: .now, configuredPeriod: .weekly, period: .weekly, username: "yjay18", snapshot: .weekly)
     ActivityEntry(date: .now, configuredPeriod: .daily, period: .daily, username: "yjay18", snapshot: .noActivity)
+    ActivityEntry(date: .now, configuredPeriod: .daily, period: .daily, username: "", snapshot: .setupRequired)
+    ActivityEntry(date: .now, configuredPeriod: .daily, period: .daily, username: "yjay18", snapshot: .loading)
+    ActivityEntry(date: .now, configuredPeriod: .daily, period: .daily, username: "yjay18", snapshot: .error)
 }

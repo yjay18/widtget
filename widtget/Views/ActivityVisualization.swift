@@ -228,6 +228,308 @@ struct ActivityInsights: View {
     }
 }
 
+private enum CodingPetMood {
+    case sleeping
+    case curious
+    case focused
+    case celebrating
+    case setupRequired
+    case loading
+    case worried
+
+    init(snapshot: ActivitySnapshot) {
+        switch snapshot.state {
+        case .error:
+            self = .worried
+        case .setupRequired:
+            self = .setupRequired
+        case .loading:
+            self = .loading
+        case .loaded, .noActivity:
+            let averageInterval = (snapshot.additions + snapshot.deletions)
+                / max(snapshot.activity.count, 1)
+            switch averageInterval {
+            case 0:
+                self = .sleeping
+            case 1..<500:
+                self = .curious
+            case 500..<2_500:
+                self = .focused
+            default:
+                self = .celebrating
+            }
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .sleeping: "BYTE IS NAPPING"
+        case .curious: "BYTE WOKE UP"
+        case .focused: "BYTE IS LOCKED IN"
+        case .celebrating: "BYTE IS THRIVING"
+        case .setupRequired: "BYTE NEEDS A LOGIN"
+        case .loading: "BYTE IS SNIFFING AROUND"
+        case .worried: "BYTE LOST THE SIGNAL"
+        }
+    }
+
+    var energy: Int {
+        switch self {
+        case .sleeping, .worried: 1
+        case .setupRequired: 1
+        case .loading: 2
+        case .curious: 3
+        case .focused: 4
+        case .celebrating: 5
+        }
+    }
+
+    var accent: Color {
+        switch self {
+        case .worried: WidtgetPalette.coral
+        case .sleeping, .setupRequired, .loading: WidtgetPalette.secondaryText
+        case .curious, .focused, .celebrating: WidtgetPalette.green
+        }
+    }
+}
+
+struct CodingPetView: View {
+    let snapshot: ActivitySnapshot
+
+    private var mood: CodingPetMood {
+        CodingPetMood(snapshot: snapshot)
+    }
+
+    private var linesMoved: Int {
+        snapshot.additions + snapshot.deletions
+    }
+
+    var body: some View {
+        ZStack {
+            PixelPetBackdrop(mood: mood)
+
+            HStack(spacing: 10) {
+                PixelCodingPet(mood: mood)
+                    .frame(width: 82, height: 66)
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("CODE COMPANION")
+                        .font(.system(size: 7, weight: .bold, design: .monospaced))
+                        .tracking(0.7)
+                        .foregroundStyle(WidtgetPalette.secondaryText)
+
+                    Text(mood.title)
+                        .font(.system(size: 10.5, weight: .bold, design: .monospaced))
+                        .foregroundStyle(WidtgetPalette.primaryText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+
+                    HStack(spacing: 6) {
+                        Text(activityDescription)
+                            .font(.system(size: 7, weight: .semibold, design: .monospaced))
+                            .monospacedDigit()
+                            .foregroundStyle(mood.accent)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
+
+                        Spacer(minLength: 1)
+
+                        HStack(spacing: 2) {
+                            ForEach(0..<5, id: \.self) { index in
+                                Rectangle()
+                                    .fill(index < mood.energy ? mood.accent : WidtgetPalette.neutral)
+                                    .frame(width: 6, height: 3)
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Code companion. \(mood.title). \(activityDescription).")
+    }
+
+    private var activityDescription: String {
+        switch mood {
+        case .setupRequired:
+            "CONNECT GITHUB"
+        case .loading:
+            "FETCHING ACTIVITY"
+        case .worried:
+            "REFRESH NEEDED"
+        case .sleeping:
+            "NO LINES MOVED"
+        case .curious, .focused, .celebrating:
+            "\(unsignedCompact(linesMoved)) LINES MOVED"
+        }
+    }
+
+    private func unsignedCompact(_ value: Int) -> String {
+        String(ActivityNumberFormat.compact(value, sign: "+").dropFirst())
+    }
+}
+
+private struct PixelPetBackdrop: View {
+    let mood: CodingPetMood
+
+    var body: some View {
+        Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
+            let cloudColor = WidtgetPalette.secondaryText.opacity(0.18)
+            let dotSpacing: CGFloat = 2.1
+            let dotSize: CGFloat = 0.85
+            let cloudOrigin = CGPoint(x: max(8, size.width - 75), y: 7)
+
+            for row in 0..<8 {
+                let range: Range<Int>
+                switch row {
+                case 0...1: range = 12..<24
+                case 2...3: range = 6..<29
+                default: range = 0..<34
+                }
+                for column in range {
+                    let rect = CGRect(
+                        x: cloudOrigin.x + CGFloat(column) * dotSpacing,
+                        y: cloudOrigin.y + CGFloat(row) * dotSpacing,
+                        width: dotSize,
+                        height: dotSize
+                    )
+                    context.fill(Path(rect), with: .color(cloudColor))
+                }
+            }
+
+            let stars: [(CGFloat, CGFloat)] = [
+                (0.08, 0.25), (0.43, 0.13), (0.88, 0.46), (0.68, 0.72)
+            ]
+            for (index, star) in stars.enumerated() {
+                let center = CGPoint(x: size.width * star.0, y: size.height * star.1)
+                let color = index.isMultiple(of: 2)
+                    ? WidtgetPalette.green.opacity(0.52)
+                    : WidtgetPalette.coral.opacity(0.48)
+                let vertical = CGRect(x: center.x - 0.6, y: center.y - 3, width: 1.2, height: 6)
+                let horizontal = CGRect(x: center.x - 3, y: center.y - 0.6, width: 6, height: 1.2)
+                context.fill(Path(vertical), with: .color(color))
+                context.fill(Path(horizontal), with: .color(color))
+            }
+
+            let groundY = size.height - 9
+            for x in stride(from: CGFloat(0), through: size.width, by: 4) {
+                let isLive = Int(x / 4).isMultiple(of: 7)
+                let color = isLive ? mood.accent.opacity(0.62) : WidtgetPalette.border.opacity(0.85)
+                let rect = CGRect(x: x, y: groundY, width: 1.6, height: 1.6)
+                context.fill(Path(rect), with: .color(color))
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct PixelCodingPet: View {
+    let mood: CodingPetMood
+
+    private let sprite = [
+        "......##......",
+        "......##......",
+        "....######....",
+        "..##########..",
+        ".############.",
+        ".############.",
+        "..##########..",
+        "...########...",
+        "...##.##.##...",
+        "..###.##.###..",
+        "..##......##.."
+    ]
+
+    var body: some View {
+        Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
+            let columns: CGFloat = 16
+            let rows: CGFloat = 12
+            let pixel = max(2, floor(min(size.width / columns, size.height / rows)))
+            let origin = CGPoint(
+                x: (size.width - 14 * pixel) / 2,
+                y: (size.height - 11 * pixel) / 2
+            )
+
+            for (row, line) in sprite.enumerated() {
+                for (column, value) in line.enumerated() where value == "#" {
+                    let rect = CGRect(
+                        x: origin.x + CGFloat(column) * pixel,
+                        y: origin.y + CGFloat(row) * pixel,
+                        width: pixel - 0.55,
+                        height: pixel - 0.55
+                    )
+                    context.fill(Path(rect), with: .color(bodyColor))
+                }
+            }
+
+            let armPixels: [(Int, Int)]
+            switch mood {
+            case .celebrating:
+                armPixels = [(-1, 2), (0, 3), (13, 3), (14, 2)]
+            case .curious:
+                armPixels = [(-1, 5), (13, 3), (14, 2)]
+            case .worried:
+                armPixels = [(-1, 6), (14, 6)]
+            default:
+                armPixels = [(-1, 5), (14, 5)]
+            }
+            for (column, row) in armPixels {
+                let rect = CGRect(
+                    x: origin.x + CGFloat(column) * pixel,
+                    y: origin.y + CGFloat(row) * pixel,
+                    width: pixel - 0.55,
+                    height: pixel - 0.55
+                )
+                context.fill(Path(rect), with: .color(bodyColor))
+            }
+
+            let eyeWidth = mood == .sleeping ? pixel * 1.8 : pixel * 1.45
+            let eyeHeight = mood == .sleeping ? max(1, pixel * 0.28) : pixel * 1.18
+            let eyeY = origin.y + pixel * (mood == .sleeping ? 5.0 : 4.45)
+            for column in [3.0, 9.55] {
+                let rect = CGRect(
+                    x: origin.x + pixel * column,
+                    y: eyeY,
+                    width: eyeWidth,
+                    height: eyeHeight
+                )
+                context.fill(Path(rect), with: .color(eyeColor))
+            }
+
+            if mood == .celebrating {
+                let mouth = CGRect(
+                    x: origin.x + pixel * 6,
+                    y: origin.y + pixel * 6.1,
+                    width: pixel * 2,
+                    height: pixel * 0.65
+                )
+                context.fill(Path(mouth), with: .color(eyeColor))
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    private var bodyColor: Color {
+        switch mood {
+        case .sleeping, .setupRequired, .loading:
+            WidtgetPalette.secondaryText.opacity(0.62)
+        case .curious:
+            WidtgetPalette.coral.opacity(0.72)
+        case .focused:
+            WidtgetPalette.coral.opacity(0.88)
+        case .celebrating, .worried:
+            WidtgetPalette.coral
+        }
+    }
+
+    private var eyeColor: Color {
+        mood == .worried ? WidtgetPalette.green.opacity(0.82) : Color.black.opacity(0.72)
+    }
+}
+
 struct ActivityStrip: View {
     let cells: [ActivityCell]
     var height: CGFloat = 12

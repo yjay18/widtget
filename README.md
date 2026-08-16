@@ -50,7 +50,7 @@ The repository includes a repeatable Xcode build loop for Codex and local termin
 ./script/build_and_run.sh build
 ```
 
-That command performs an unsigned compile check. To use the Personal Team signing configured in Xcode, register the widget extension, and launch the host app, run:
+That command performs an unsigned compile check. Unsigned validation artifacts and signed run artifacts use separate directories under `.build/DerivedData`; the validation copy is unregistered after compiling so it cannot replace the Keychain-enabled app in Launch Services. To use the Personal Team signing configured in Xcode, register the widget extension, and launch the host app, run:
 
 ```sh
 ./script/build_and_run.sh run

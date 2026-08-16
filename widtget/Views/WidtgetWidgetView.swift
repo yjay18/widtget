@@ -79,25 +79,33 @@ private struct ExtraLargeWidgetView: View {
                 .frame(maxWidth: .infinity, alignment: .top)
 
                 if preferences.showActivity || preferences.showUpdateTime {
-                    VStack(alignment: .leading, spacing: 12) {
-                        sectionLabel("ACTIVITY")
-                        if preferences.showActivity {
-                            VStack(spacing: 5) {
-                                ActivityStrip(cells: entry.snapshot.activity, height: 82)
-                                ActivityAxisLabels(
-                                    labels: activityLabels,
-                                    fontSize: 7
-                                )
+                    VStack(spacing: 10) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            sectionLabel("ACTIVITY")
+                            if preferences.showActivity {
+                                VStack(spacing: 5) {
+                                    ActivityStrip(cells: entry.snapshot.activity, height: 82)
+                                    ActivityAxisLabels(
+                                        labels: activityLabels,
+                                        fontSize: 7
+                                    )
+                                }
+                                ActivityGrid(cells: entry.snapshot.activity)
                             }
-                            ActivityGrid(cells: entry.snapshot.activity)
+                            if preferences.showUpdateTime {
+                                UpdateStatus(snapshot: entry.snapshot)
+                            }
                         }
-                        if preferences.showUpdateTime {
-                            UpdateStatus(snapshot: entry.snapshot)
+                        .padding(13)
+                        .widtgetSurface(cornerRadius: 13)
+
+                        if preferences.showActivity {
+                            CodingPetView(snapshot: entry.snapshot)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .widtgetSurface(cornerRadius: 13)
                         }
                     }
-                    .padding(13)
-                    .widtgetSurface(cornerRadius: 13)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 }
 
                 if preferences.showRepositories {
@@ -292,10 +300,10 @@ private struct LargeWidgetView: View {
             if preferences.showActivity || preferences.showUpdateTime || preferences.showRepositories {
                 HStack(alignment: .top, spacing: 12) {
                     if preferences.showActivity || preferences.showUpdateTime {
-                        VStack(alignment: .leading, spacing: 7) {
+                        VStack(alignment: .leading, spacing: 6) {
                             sectionLabel("ACTIVITY")
                             if preferences.showActivity {
-                                ActivityStrip(cells: entry.snapshot.activity, height: 64)
+                                ActivityStrip(cells: entry.snapshot.activity, height: 52)
                                 ActivityGrid(
                                     cells: entry.snapshot.activity,
                                     labels: compactActivityLabels,
@@ -310,9 +318,10 @@ private struct LargeWidgetView: View {
                                     compact: true
                                 )
                             }
-                            Spacer(minLength: 4)
+                            Spacer(minLength: 0)
                             if preferences.showUpdateTime {
                                 UpdateStatus(snapshot: entry.snapshot)
+                                    .padding(.bottom, 5)
                             }
                         }
                         .padding(10)
