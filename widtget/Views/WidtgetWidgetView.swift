@@ -258,7 +258,8 @@ private struct WidgetBlockView: View {
             case .snake:
                 CommitSnakeView(
                     snapshot: entry.snapshot,
-                    commitsPerBlock: preferences.snakeCommitsPerBlock
+                    commitsPerBlock: preferences.snakeCommitsPerBlock,
+                    expanded: isExpandedFamily
                 )
                 .background(fill)
             }
@@ -273,26 +274,34 @@ private struct WidgetBlockView: View {
         valueColor: Color,
         footer: String
     ) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
-            blockLabel(label)
-            Spacer(minLength: 1)
-            Text(
-                entry.snapshot.state == .loading
-                    ? "\(sign)––,–––"
-                    : ActivityNumberFormat.exact(value, sign: sign)
-            )
-            .font(.system(size: metricFontSize, weight: .black, design: .rounded))
-            .monospacedDigit()
-            .foregroundStyle(valueColor)
-            .lineLimit(1)
-            .minimumScaleFactor(0.42)
-            .contentTransition(.numericText())
+        GeometryReader { proxy in
+            VStack(alignment: .leading, spacing: isExpandedFamily ? 7 : 5) {
+                blockLabel(label)
 
-            Text(footer)
-                .font(.system(size: 7, weight: .black, design: .monospaced))
-                .tracking(0.3)
-                .foregroundStyle(foreground.opacity(0.68))
+                if isExpandedFamily {
+                    metricContext(horizontal: proxy.size.width > proxy.size.height * 1.6)
+                }
+
+                Spacer(minLength: 1)
+
+                Text(
+                    entry.snapshot.state == .loading
+                        ? "\(sign)––,–––"
+                        : ActivityNumberFormat.exact(value, sign: sign)
+                )
+                .font(.system(size: metricFontSize, weight: .black, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(valueColor)
                 .lineLimit(1)
+                .minimumScaleFactor(0.42)
+                .contentTransition(.numericText())
+
+                Text(footer)
+                    .font(.system(size: isExpandedFamily ? 7.5 : 7, weight: .black, design: .monospaced))
+                    .tracking(0.3)
+                    .foregroundStyle(foreground.opacity(0.68))
+                    .lineLimit(1)
+            }
         }
         .padding(contentPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -301,18 +310,40 @@ private struct WidgetBlockView: View {
     }
 
     private var summaryBlock: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            blockLabel("SUMMARY")
-            HStack(spacing: 10) {
-                summaryValue(entry.snapshot.commits, label: "COMMITS")
-                divider
-                summaryValue(entry.snapshot.repositories.count, label: "REPOS")
-                divider
-                summaryValue(activeIntervals, label: "ACTIVE")
-            }
-            Spacer(minLength: 0)
-            if preferences.showUpdateTime {
-                statusText
+        GeometryReader { proxy in
+            VStack(alignment: .leading, spacing: 8) {
+                blockLabel("SUMMARY")
+
+                if isExpandedFamily {
+                    LazyVGrid(
+                        columns: Array(
+                            repeating: GridItem(.flexible(), spacing: 7),
+                            count: proxy.size.width > proxy.size.height * 1.45 ? 3 : 2
+                        ),
+                        spacing: 7
+                    ) {
+                        expandedSummaryValue(entry.snapshot.commits, label: "COMMITS")
+                        expandedSummaryValue(entry.snapshot.repositories.count, label: "REPOS")
+                        expandedSummaryValue(activeIntervals, label: "ACTIVE")
+                        expandedSummaryValue(totalChanged, label: "CHANGED")
+                        expandedSummaryValue(entry.snapshot.additions - entry.snapshot.deletions, label: "NET", signed: true)
+                        expandedSummaryValue(averagePerCommit, label: "AVG / COMMIT")
+                    }
+                    .frame(maxHeight: .infinity)
+                } else {
+                    HStack(spacing: 10) {
+                        summaryValue(entry.snapshot.commits, label: "COMMITS")
+                        divider
+                        summaryValue(entry.snapshot.repositories.count, label: "REPOS")
+                        divider
+                        summaryValue(activeIntervals, label: "ACTIVE")
+                    }
+                    Spacer(minLength: 0)
+                }
+
+                if preferences.showUpdateTime {
+                    statusText
+                }
             }
         }
         .padding(contentPadding)
@@ -333,9 +364,12 @@ private struct WidgetBlockView: View {
             }
             ActivityAxisLabels(
                 labels: activityLabels,
-                fontSize: 6.5,
+                fontSize: isExpandedFamily ? 7.5 : 6.5,
                 color: foreground.opacity(0.7)
             )
+            if isExpandedFamily {
+                activityInsightRail
+            }
             if preferences.showUpdateTime {
                 statusText
             }
@@ -347,17 +381,53 @@ private struct WidgetBlockView: View {
     private var activityTableBlock: some View {
         VStack(alignment: .leading, spacing: 7) {
             blockLabel("ACTIVITY TABLE")
-            ActivityGrid(
-                cells: entry.snapshot.activity,
-                labels: activityLabels.count == entry.snapshot.activity.count ? activityLabels : [],
-                labelFontSize: 6,
-                additionColor: palette.activityAddition,
-                deletionColor: palette.deletion,
-                neutralColor: palette.neutral,
-                labelColor: foreground.opacity(0.68)
-            )
-            .frame(maxHeight: .infinity, alignment: .top)
-            .clipped()
+
+            if isExpandedFamily {
+                GeometryReader { proxy in
+                    VStack(alignment: .leading, spacing: 6) {
+                        ActivityStrip(
+                            cells: entry.snapshot.activity,
+                            height: expandedActivityChartHeight(availableHeight: proxy.size.height),
+                            additionColor: palette.activityAddition,
+                            deletionColor: palette.deletion,
+                            neutralColor: palette.neutral
+                        )
+
+                        ActivityAxisLabels(
+                            labels: activityLabels,
+                            fontSize: 7,
+                            color: foreground.opacity(0.7)
+                        )
+
+                        if proxy.size.height > 115 {
+                            ActivityGrid(
+                                cells: entry.snapshot.activity,
+                                labels: [],
+                                additionColor: palette.activityAddition,
+                                deletionColor: palette.deletion,
+                                neutralColor: palette.neutral,
+                                labelColor: foreground.opacity(0.68)
+                            )
+                        }
+
+                        activityInsightRail
+                    }
+                    .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+                    .clipped()
+                }
+            } else {
+                ActivityGrid(
+                    cells: entry.snapshot.activity,
+                    labels: activityLabels.count == entry.snapshot.activity.count ? activityLabels : [],
+                    labelFontSize: 6,
+                    additionColor: palette.activityAddition,
+                    deletionColor: palette.deletion,
+                    neutralColor: palette.neutral,
+                    labelColor: foreground.opacity(0.68)
+                )
+                .frame(maxHeight: .infinity, alignment: .top)
+                .clipped()
+            }
         }
         .padding(contentPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -375,10 +445,13 @@ private struct WidgetBlockView: View {
         return VStack(alignment: .leading, spacing: 9) {
             blockLabel("NET / PEAK / AVG")
             insightValue(signedCompact(net), label: "NET LINES", color: net < 0 ? palette.deletion : foreground)
+                .frame(maxHeight: isExpandedFamily ? .infinity : nil, alignment: .topLeading)
             divider.frame(maxWidth: .infinity, maxHeight: 2)
             insightValue(peak.uppercased(), label: "PEAK INTERVAL", color: foreground)
+                .frame(maxHeight: isExpandedFamily ? .infinity : nil, alignment: .topLeading)
             divider.frame(maxWidth: .infinity, maxHeight: 2)
             insightValue(average.formatted(), label: "LINES / COMMIT", color: foreground)
+                .frame(maxHeight: isExpandedFamily ? .infinity : nil, alignment: .topLeading)
         }
         .padding(contentPadding)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -394,21 +467,15 @@ private struct WidgetBlockView: View {
                     .foregroundStyle(foreground.opacity(0.62))
             } else {
                 ForEach(entry.snapshot.visibleRepositories(limit: repositoryLimit)) { repository in
-                    VStack(spacing: 4) {
-                        HStack(spacing: 5) {
-                            Text(repository.name)
-                                .font(.system(size: family == .extraLarge ? 10 : 8, weight: .black, design: .rounded))
-                                .lineLimit(1)
-                            Spacer(minLength: 3)
-                            Text(ActivityNumberFormat.compact(repository.additions, sign: "+"))
-                            Text(ActivityNumberFormat.compact(repository.deletions, sign: "−"))
-                                .foregroundStyle(palette.deletion)
-                        }
-                        .font(.system(size: 7, weight: .black, design: .monospaced))
-                        Rectangle()
-                            .fill(foreground.opacity(0.7))
-                            .frame(height: preferences.visualTheme == .blockwork ? 2 : 1)
-                    }
+                    repositoryRow(repository)
+                        .frame(maxHeight: isExpandedFamily ? .infinity : nil, alignment: .top)
+                }
+
+                let hiddenCount = entry.snapshot.hiddenRepositoryCount(limit: repositoryLimit)
+                if hiddenCount > 0 {
+                    Text("+\(hiddenCount) MORE REPOSITORIES")
+                        .font(.system(size: 6.5, weight: .black, design: .monospaced))
+                        .foregroundStyle(foreground.opacity(0.62))
                 }
             }
         }
@@ -419,10 +486,164 @@ private struct WidgetBlockView: View {
 
     private func blockLabel(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 7.5, weight: .black, design: .monospaced))
+            .font(.system(size: isExpandedFamily ? 8.5 : 7.5, weight: .black, design: .monospaced))
             .tracking(0.8)
             .foregroundStyle(foreground.opacity(0.72))
             .lineLimit(1)
+    }
+
+    @ViewBuilder
+    private func metricContext(horizontal: Bool) -> some View {
+        if horizontal {
+            HStack(spacing: 5) {
+                metricContextValue(entry.snapshot.commits.formatted(), label: "COMMITS")
+                metricContextValue(signedCompact(entry.snapshot.additions - entry.snapshot.deletions), label: "NET")
+                metricContextValue(averagePerCommit.formatted(), label: "AVG / COMMIT")
+            }
+            .frame(height: 34)
+        } else {
+            VStack(spacing: 5) {
+                metricContextValue(entry.snapshot.commits.formatted(), label: "COMMITS")
+                metricContextValue(signedCompact(entry.snapshot.additions - entry.snapshot.deletions), label: "NET")
+                metricContextValue(averagePerCommit.formatted(), label: "AVG / COMMIT")
+            }
+            .frame(maxHeight: .infinity)
+        }
+    }
+
+    private func metricContextValue(_ value: String, label: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Text(value)
+                .font(.system(size: 10.5, weight: .black, design: .rounded))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+
+            Spacer(minLength: 2)
+
+            Text(label)
+                .font(.system(size: 5.5, weight: .black, design: .monospaced))
+                .foregroundStyle(foreground.opacity(0.62))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(.horizontal, 6)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay {
+            Rectangle().stroke(foreground.opacity(0.42), lineWidth: 1)
+        }
+    }
+
+    private func expandedSummaryValue(_ value: Int, label: String, signed: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(signed ? signedCompact(value) : value.formatted())
+                .font(.system(size: family == .extraLarge ? 18 : 16, weight: .black, design: .rounded))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.58)
+
+            Text(label)
+                .font(.system(size: 5.8, weight: .black, design: .monospaced))
+                .foregroundStyle(foreground.opacity(0.62))
+                .lineLimit(1)
+        }
+        .padding(6)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .overlay {
+            Rectangle().stroke(foreground.opacity(0.42), lineWidth: 1)
+        }
+    }
+
+    private var activityInsightRail: some View {
+        HStack(spacing: 5) {
+            activityRailValue(activeIntervals.formatted(), label: "ACTIVE")
+            activityRailValue(peakActivityLabel, label: "PEAK")
+            activityRailValue(
+                String(ActivityNumberFormat.compact(totalChanged, sign: "+").dropFirst()),
+                label: "CHANGED"
+            )
+        }
+        .frame(height: 29)
+    }
+
+    private func activityRailValue(_ value: String, label: String) -> some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(value)
+                .font(.system(size: 8, weight: .black, design: .rounded))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.64)
+            Text(label)
+                .font(.system(size: 5.2, weight: .black, design: .monospaced))
+                .foregroundStyle(foreground.opacity(0.58))
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 5)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .overlay {
+            Rectangle().stroke(foreground.opacity(0.4), lineWidth: 1)
+        }
+    }
+
+    @ViewBuilder
+    private func repositoryRow(_ repository: RepositoryActivity) -> some View {
+        if isExpandedFamily {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Text(repository.name)
+                        .font(.system(size: family == .extraLarge ? 10.5 : 9.5, weight: .black, design: .rounded))
+                        .lineLimit(1)
+
+                    Spacer(minLength: 3)
+
+                    Text(ActivityNumberFormat.compact(repository.additions, sign: "+"))
+                    Text(ActivityNumberFormat.compact(repository.deletions, sign: "−"))
+                        .foregroundStyle(palette.deletion)
+                }
+                .font(.system(size: 7, weight: .black, design: .monospaced))
+
+                HStack(spacing: 6) {
+                    Text("\(repository.commits) COMMITS")
+                    Text("\(ActivityNumberFormat.compact(repository.totalChanged, sign: "+").dropFirst()) CHANGED")
+                }
+                .font(.system(size: 5.6, weight: .black, design: .monospaced))
+                .foregroundStyle(foreground.opacity(0.58))
+
+                GeometryReader { proxy in
+                    let total = CGFloat(max(repository.totalChanged, 1))
+                    HStack(spacing: 0) {
+                        foreground
+                            .opacity(0.76)
+                            .frame(width: proxy.size.width * CGFloat(repository.additions) / total)
+                        palette.deletion
+                            .opacity(0.84)
+                    }
+                    .background(foreground.opacity(0.14))
+                }
+                .frame(height: 4)
+            }
+        } else {
+            VStack(spacing: 4) {
+                HStack(spacing: 5) {
+                    Text(repository.name)
+                        .font(.system(size: 8, weight: .black, design: .rounded))
+                        .lineLimit(1)
+                    Spacer(minLength: 3)
+                    Text(ActivityNumberFormat.compact(repository.additions, sign: "+"))
+                    Text(ActivityNumberFormat.compact(repository.deletions, sign: "−"))
+                        .foregroundStyle(palette.deletion)
+                }
+                .font(.system(size: 7, weight: .black, design: .monospaced))
+                Rectangle()
+                    .fill(foreground.opacity(0.7))
+                    .frame(height: preferences.visualTheme == .blockwork ? 2 : 1)
+            }
+        }
+    }
+
+    private func expandedActivityChartHeight(availableHeight: CGFloat) -> CGFloat {
+        let reservedHeight: CGFloat = availableHeight > 115 ? 82 : 45
+        return max(24, availableHeight - reservedHeight)
     }
 
     private func summaryValue(_ value: Int, label: String) -> some View {
@@ -495,6 +716,30 @@ private struct WidgetBlockView: View {
 
     private var activeIntervals: Int {
         entry.snapshot.activity.filter { $0.totalChanged > 0 }.count
+    }
+
+    private var isExpandedFamily: Bool {
+        family == .large || family == .extraLarge
+    }
+
+    private var totalChanged: Int {
+        entry.snapshot.additions + entry.snapshot.deletions
+    }
+
+    private var averagePerCommit: Int {
+        entry.snapshot.commits == 0 ? 0 : totalChanged / entry.snapshot.commits
+    }
+
+    private var peakActivityLabel: String {
+        guard let peakIndex = entry.snapshot.activity.enumerated().max(by: {
+            $0.element.totalChanged < $1.element.totalChanged
+        })?.offset,
+        entry.snapshot.activity.indices.contains(peakIndex),
+        entry.snapshot.activity[peakIndex].totalChanged > 0,
+        activityLabels.indices.contains(peakIndex) else {
+            return "—"
+        }
+        return activityLabels[peakIndex].uppercased()
     }
 
     private var activityLabels: [String] {

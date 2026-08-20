@@ -280,6 +280,7 @@ private enum CommitSnakeMood {
 struct CommitSnakeView: View {
     let snapshot: ActivitySnapshot
     let commitsPerBlock: Int
+    var expanded = false
 
     private var mood: CommitSnakeMood {
         CommitSnakeMood(snapshot: snapshot)
@@ -297,31 +298,88 @@ struct CommitSnakeView: View {
     }
 
     var body: some View {
-        ZStack {
-            CommitSnakeBackdrop(accent: mood.accent)
+        GeometryReader { proxy in
+            ZStack {
+                CommitSnakeBackdrop(accent: mood.accent)
 
-            HStack(spacing: 8) {
-                BlockyCommitSnake(
-                    mood: mood,
-                    bodySegments: bodySegments,
-                    maximumSegments: CommitSnakeLimits.visualBlockCount
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                if expanded {
+                    expandedContent(size: proxy.size)
+                } else {
+                    HStack(spacing: 8) {
+                        snake
 
-                VStack(alignment: .leading) {
-                    Text(mood.title)
-                        .font(.system(size: 11, weight: .black, design: .rounded))
-                        .foregroundStyle(WidtgetPalette.paper)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.72)
+                        VStack(alignment: .leading) {
+                            Text(mood.title)
+                                .font(.system(size: 11, weight: .black, design: .rounded))
+                                .foregroundStyle(WidtgetPalette.paper)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.72)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(mood.title), based on \(snapshot.commits) commits.")
+    }
+
+    @ViewBuilder
+    private func expandedContent(size: CGSize) -> some View {
+        if size.width > size.height * 1.65 {
+            HStack(spacing: 14) {
+                snake
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                snakeDetails
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.horizontal, 15)
+            .padding(.vertical, 12)
+        } else {
+            VStack(alignment: .leading, spacing: 10) {
+                snake
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .layoutPriority(1)
+                snakeDetails
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.horizontal, 13)
+            .padding(.vertical, 12)
+        }
+    }
+
+    private var snake: some View {
+        BlockyCommitSnake(
+            mood: mood,
+            bodySegments: bodySegments,
+            maximumSegments: CommitSnakeLimits.visualBlockCount
+        )
+    }
+
+    private var snakeDetails: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(mood.title)
+                .font(.system(size: 14, weight: .black, design: .rounded))
+                .foregroundStyle(WidtgetPalette.paper)
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+
+            Text("\(snapshot.commits) COMMITS")
+                .font(.system(size: 7, weight: .black, design: .monospaced))
+                .foregroundStyle(mood.accent)
+
+            HStack(spacing: 7) {
+                Text("\(bodySegments)/\(CommitSnakeLimits.visualBlockCount) BLOCKS")
+                Text("1 = \(commitsPerBlock) COMMITS")
+            }
+            .font(.system(size: 5.8, weight: .black, design: .monospaced))
+            .foregroundStyle(WidtgetPalette.paper.opacity(0.58))
+            .lineLimit(1)
+            .minimumScaleFactor(0.65)
+        }
     }
 }
 
