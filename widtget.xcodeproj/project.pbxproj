@@ -33,6 +33,8 @@
 		A10000000000000000000018 /* GitHubActivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000018 /* GitHubActivityService.swift */; };
 		A10000000000000000000019 /* GitHubAccountModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000019 /* GitHubAccountModel.swift */; };
 		A1000000000000000000001A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001A /* Security.framework */; };
+		A1000000000000000000001B /* DashboardAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001B /* DashboardAnalytics.swift */; };
+		A1000000000000000000001C /* AnalyticsDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001C /* AnalyticsDashboardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,6 +88,8 @@
 		B10000000000000000000018 /* GitHubActivityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubActivityService.swift; sourceTree = "<group>"; };
 		B10000000000000000000019 /* GitHubAccountModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubAccountModel.swift; sourceTree = "<group>"; };
 		B1000000000000000000001A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		B1000000000000000000001B /* DashboardAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardAnalytics.swift; sourceTree = "<group>"; };
+		B1000000000000000000001C /* AnalyticsDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsDashboardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,6 +212,8 @@
 			children = (
 				B10000000000000000000012 /* WidtgetHostApp.swift */,
 				B10000000000000000000013 /* WidgetSettingsView.swift */,
+				B1000000000000000000001C /* AnalyticsDashboardView.swift */,
+				B1000000000000000000001B /* DashboardAnalytics.swift */,
 				B10000000000000000000019 /* GitHubAccountModel.swift */,
 				B10000000000000000000018 /* GitHubActivityService.swift */,
 				B10000000000000000000014 /* Info.plist */,
@@ -348,6 +354,8 @@
 				A10000000000000000000015 /* ActivityModels.swift in Sources */,
 				A10000000000000000000017 /* ActivitySnapshotStore.swift in Sources */,
 				A10000000000000000000019 /* GitHubAccountModel.swift in Sources */,
+				A1000000000000000000001B /* DashboardAnalytics.swift in Sources */,
+				A1000000000000000000001C /* AnalyticsDashboardView.swift in Sources */,
 				A10000000000000000000018 /* GitHubActivityService.swift in Sources */,
 				A1000000000000000000000F /* WidtgetHostApp.swift in Sources */,
 				A10000000000000000000010 /* WidgetSettingsView.swift in Sources */,

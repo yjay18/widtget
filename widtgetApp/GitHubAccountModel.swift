@@ -13,6 +13,7 @@ final class GitHubAccountModel: ObservableObject {
     }
 
     @Published var tokenInput = ""
+    @Published var replacementAccountTokenInput = ""
     @Published var organizationInput = ""
     @Published var additionalTokenInput = ""
     @Published private(set) var username = ""
@@ -23,6 +24,7 @@ final class GitHubAccountModel: ObservableObject {
     @Published private(set) var hasStoredToken = false
     @Published private(set) var tokenCount = 0
     @Published private(set) var connections: [GitHubConnectionSummary] = []
+    @Published private(set) var activityArchive: ActivitySnapshotArchive?
 
     private let service: GitHubActivityService
     private var didBootstrap = false
@@ -47,6 +49,11 @@ final class GitHubAccountModel: ObservableObject {
     var canAddToken: Bool {
         GitHubOrganizationName.isValid(organizationInput)
             && !additionalTokenInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !isBusy
+    }
+
+    var canReplaceAccountToken: Bool {
+        !replacementAccountTokenInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && !isBusy
     }
 
@@ -87,6 +94,7 @@ final class GitHubAccountModel: ObservableObject {
 
             let archive = try ActivitySnapshotStore.read()
             if let archive {
+                activityArchive = archive
                 username = archive.username
                 lastRefresh = archive.savedAt
                 reloadWidgets()
@@ -223,6 +231,64 @@ final class GitHubAccountModel: ObservableObject {
         }
     }
 
+    func replaceAccountToken() async {
+        let token = replacementAccountTokenInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !token.isEmpty else { return }
+
+        phase = .connecting
+        message = nil
+        notice = nil
+
+        do {
+            let existing = storedConnections.isEmpty
+                ? try GitHubTokenStore.readConnections(defaultUsername: username)
+                : storedConnections
+            guard let currentAccount = existing.first(where: { $0.kind == .account }) else {
+                phase = .disconnected
+                message = "Connect a GitHub account before replacing its token."
+                return
+            }
+            guard !existing.contains(where: { $0.id != currentAccount.id && $0.token == token }) else {
+                phase = .connected
+                message = "This token is already connected."
+                return
+            }
+
+            let inspection = try await service.inspectToken(token: token)
+            guard inspection.username.caseInsensitiveCompare(currentAccount.owner) == .orderedSame else {
+                throw GitHubActivityError.tokenAccountMismatch
+            }
+
+            let updatedConnections = existing.map { connection in
+                guard connection.id == currentAccount.id else { return connection }
+                return GitHubStoredConnection(
+                    id: connection.id,
+                    owner: inspection.username,
+                    kind: .account,
+                    token: token,
+                    repositoryCount: inspection.repositoryCount,
+                    privateRepositoryCount: inspection.privateRepositoryCount,
+                    validatedAt: .now
+                )
+            }
+            let archive = try await service.fetchSnapshots(
+                tokens: updatedConnections.map(\.token),
+                scope: .allBranches
+            )
+
+            try GitHubTokenStore.replace(with: updatedConnections)
+            storedConnections = updatedConnections
+            syncConnectionState()
+            try persist(archive)
+            replacementAccountTokenInput = ""
+            phase = .connected
+            notice = "Account token replaced. \(inspection.repositoryCount) repositories, including \(inspection.privateRepositoryCount) private, are available to widtget."
+        } catch {
+            phase = .failed
+            message = error.localizedDescription
+        }
+    }
+
     func removeOrganization(id: UUID) async {
         guard let connection = storedConnections.first(where: { $0.id == id }),
               connection.kind == .organization else { return }
@@ -287,9 +353,11 @@ final class GitHubAccountModel: ObservableObject {
         GitHubBranchCache.remove()
         username = ""
         lastRefresh = nil
+        activityArchive = nil
         storedConnections = []
         syncConnectionState()
         tokenInput = ""
+        replacementAccountTokenInput = ""
         organizationInput = ""
         additionalTokenInput = ""
         phase = cacheRemovalError == nil ? .disconnected : .failed
@@ -312,7 +380,9 @@ final class GitHubAccountModel: ObservableObject {
         } catch {
             let userMessage = error.localizedDescription
             if let archive = try? ActivitySnapshotStore.read() {
-                try? ActivitySnapshotStore.write(archive.markingRefreshError(userMessage))
+                let failedArchive = archive.markingRefreshError(userMessage)
+                try? ActivitySnapshotStore.write(failedArchive)
+                activityArchive = failedArchive
                 reloadWidgets()
             }
             phase = .failed
@@ -364,6 +434,7 @@ final class GitHubAccountModel: ObservableObject {
 
     private func persist(_ archive: ActivitySnapshotArchive) throws {
         try ActivitySnapshotStore.write(archive)
+        activityArchive = archive
         username = archive.username
         lastRefresh = archive.savedAt
         SharedPreferences.defaults.set(archive.username, forKey: SharedPreferences.Key.githubUsername)
