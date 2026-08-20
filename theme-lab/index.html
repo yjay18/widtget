@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>widtget — strange directions</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      color-scheme: dark;
+      --green: #35d17b;
+      --red: #ff6268;
+    }
+    html, body { margin: 0; min-height: 100%; }
+    body { background: #080a0c; color: #eef1f4; overflow-x: hidden; }
+    button { font: inherit; }
+
+    .labbar {
+      position: sticky; top: 0; z-index: 50;
+      height: 58px; padding: 0 18px;
+      display: flex; align-items: center; gap: 18px;
+      background: rgba(8,10,12,.92);
+      border-bottom: 1px solid #24282d;
+      backdrop-filter: blur(18px);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 150px; }
+    .brand-mark {
+      width: 24px; height: 24px; display: grid; place-items: center;
+      background: #eef1f4; color: #080a0c; border-radius: 7px;
+      font: 900 14px/1 ui-monospace, monospace;
+      transform: rotate(-5deg);
+    }
+    .brand strong { font-size: 14px; letter-spacing: -.02em; }
+    .brand small { color: #767f89; font: 10px/1 ui-monospace, monospace; display: block; margin-top: 3px; }
+    .switcher { display: flex; gap: 5px; flex: 1; justify-content: center; }
+    .switcher button {
+      appearance: none; border: 1px solid transparent; color: #79828c;
+      background: transparent; border-radius: 99px; padding: 7px 12px;
+      cursor: pointer; font-size: 12px; font-weight: 700;
+      transition: .2s ease;
+    }
+    .switcher button:hover { color: #fff; background: #171a1e; }
+    .switcher button.active { color: #0a0c0e; background: #f0f2f4; }
+    .hint { color: #737b84; font: 10px/1.3 ui-monospace, monospace; text-align: right; min-width: 150px; }
+
+    .concept { display: none; min-height: calc(100vh - 58px); animation: enter .42s cubic-bezier(.2,.8,.2,1); }
+    .concept.active { display: block; }
+    @keyframes enter { from { opacity: 0; transform: translateY(6px); } }
+    .eyebrow { text-transform: uppercase; letter-spacing: .18em; font-size: 10px; font-weight: 800; }
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+
+    /* 01 CHANGE MAP */
+    #map {
+      --ink: #181b20; --paper: #e8e2d4; --blue: #245bf1; --yellow: #ffd338;
+      color: var(--ink); background: var(--paper);
+      background-image: radial-gradient(#c5beaf 1px, transparent 1px);
+      background-size: 22px 22px;
+      padding: 34px;
+    }
+    .map-head { display: grid; grid-template-columns: 1fr auto; align-items: end; border-bottom: 3px solid var(--ink); padding-bottom: 18px; }
+    .map-head h1 { margin: 4px 0 0; font-size: clamp(42px,6vw,86px); letter-spacing: -.075em; line-height: .85; }
+    .map-head .route-no { font: 800 12px/1 ui-monospace, monospace; border: 2px solid; border-radius: 99px; padding: 9px 12px; }
+    .map-grid { display: grid; grid-template-columns: minmax(680px,1fr) 280px; min-height: 650px; }
+    .route-board { position: relative; overflow: hidden; border-right: 3px solid var(--ink); padding: 36px 38px; }
+    .route-board:after {
+      content: "29 STOPS · 3 LINES · CURRENT SERVICE";
+      position: absolute; right: -70px; bottom: 135px; transform: rotate(-90deg);
+      font: 800 10px/1 ui-monospace, monospace; letter-spacing: .14em;
+    }
+    .route { position: relative; height: 145px; display: flex; align-items: center; }
+    .route:before { content: ""; position: absolute; left: 52px; right: 25px; top: 70px; height: 11px; background: var(--route); border-radius: 9px; animation: draw 1s ease both; transform-origin: left; }
+    @keyframes draw { from { transform: scaleX(0); } }
+    .route-label {
+      position: relative; z-index: 2; width: 44px; height: 44px; border-radius: 50%;
+      display: grid; place-items: center; color: white; background: var(--route);
+      font: 900 14px/1 ui-monospace, monospace; box-shadow: 0 0 0 5px var(--paper);
+    }
+    .stops { flex: 1; display: flex; justify-content: space-around; align-items: center; margin-left: 22px; z-index: 2; }
+    .stop { display: grid; justify-items: center; gap: 8px; position: relative; }
+    .stop i { width: 23px; height: 23px; border-radius: 50%; border: 6px solid var(--route); background: var(--paper); transition: .2s; }
+    .stop:hover i { transform: scale(1.35); background: var(--yellow); }
+    .stop b { font: 750 9px/1 ui-monospace, monospace; background: var(--paper); padding: 2px; }
+    .stop em { font: 700 9px/1 ui-monospace, monospace; color: #656158; font-style: normal; }
+    .map-transfer { border-top: 3px solid var(--ink); display: grid; grid-template-columns: 1fr 1fr 1fr; }
+    .transfer-cell { padding: 24px; border-right: 1px solid #a9a294; }
+    .transfer-cell:last-child { border: 0; }
+    .transfer-cell strong { display: block; font-size: 31px; letter-spacing: -.05em; margin-top: 7px; }
+    .map-side { padding: 28px 22px; background: #dcd5c7; }
+    .map-side h2 { margin: 5px 0 30px; font-size: 24px; letter-spacing: -.045em; }
+    .legend-item { padding: 16px 0; border-top: 1px solid #a49d90; display: grid; grid-template-columns: 14px 1fr auto; gap: 10px; align-items: center; }
+    .legend-item span:first-child { width: 11px; height: 11px; border-radius: 50%; background: var(--dot); }
+    .legend-item b { font-size: 13px; } .legend-item code { font: 700 10px/1 ui-monospace, monospace; }
+    .map-note { margin-top: 35px; border: 2px solid; padding: 15px; transform: rotate(1.5deg); background: var(--yellow); box-shadow: 5px 5px 0 var(--ink); }
+    .map-note b { font-size: 13px; } .map-note p { font-size: 12px; line-height: 1.45; margin: 7px 0 0; }
+
+    /* 02 WEEK RECEIPT */
+    #receipt {
+      --paper: #f2eee2; --ink: #171714; --faded: #746f63;
+      color: var(--ink); background: #3151c6;
+      background-image: linear-gradient(135deg,rgba(255,255,255,.06) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.06) 50%,rgba(255,255,255,.06) 75%,transparent 75%);
+      background-size: 28px 28px; padding: 42px 20px 80px;
+    }
+    .receipt-paper {
+      width: min(620px,calc(100vw - 40px)); margin: auto; background: var(--paper);
+      filter: drop-shadow(16px 20px 0 rgba(11,25,83,.32));
+      padding: 42px 48px 0; position: relative;
+    }
+    .receipt-paper:after {
+      content:""; display:block; height:20px; margin: 42px -48px 0;
+      background: linear-gradient(135deg,transparent 10px,var(--paper) 0) 0 0/20px 20px repeat-x,
+                  linear-gradient(45deg,transparent 10px,var(--paper) 0) 10px 0/20px 20px repeat-x;
+      transform: translateY(19px);
+    }
+    .receipt-logo { text-align: center; font: 900 30px/1 ui-monospace, monospace; letter-spacing: -.09em; }
+    .receipt-meta { text-align: center; color: var(--faded); font: 11px/1.7 ui-monospace, monospace; margin: 10px 0 28px; }
+    .dash { border-top: 2px dashed #8d887c; }
+    .receipt-title { display:flex; align-items:baseline; justify-content:space-between; padding:24px 0 14px; }
+    .receipt-title h1 { margin:0; font:900 34px/.9 ui-monospace,monospace; letter-spacing:-.08em; }
+    .receipt-title span { font:800 10px/1 ui-monospace,monospace; }
+    .receipt-row { display:grid; grid-template-columns:40px 1fr auto; gap:12px; padding:11px 0; font:12px/1.2 ui-monospace,monospace; border-bottom:1px dotted #aaa396; }
+    .receipt-row b { font-size:13px; } .receipt-row span:first-child { color:var(--faded); }
+    .receipt-row .amount { text-align:right; font-weight:800; }
+    .receipt-bars { display:flex; gap:6px; height:104px; align-items:end; padding:17px 0 13px; border-bottom:2px dashed #8d887c; }
+    .receipt-bar { flex:1; min-height:3px; height:var(--h); background:var(--ink); position:relative; animation:rise .6s cubic-bezier(.2,.8,.2,1) both; animation-delay:var(--d); }
+    .receipt-bar:after { content:attr(data-day); position:absolute; top:calc(100% + 4px); width:100%; text-align:center; font:8px/1 ui-monospace,monospace; }
+    @keyframes rise { from { height:0; } }
+    .receipt-total { display:grid; grid-template-columns:1fr auto; gap:8px; padding:20px 0; font:800 12px/1.5 ui-monospace,monospace; }
+    .receipt-total .big { font-size:30px; letter-spacing:-.06em; }
+    .receipt-story { padding:20px 0; border-top:2px dashed #8d887c; }
+    .receipt-story h2 { margin:0 0 10px; font:900 13px/1 ui-monospace,monospace; }
+    .receipt-story p { font:12px/1.65 ui-monospace,monospace; margin:0; }
+    .receipt-stamp { width:max-content; margin:24px auto 0; border:3px double #d14444; color:#d14444; padding:8px 13px; transform:rotate(-3deg); font:900 11px/1 ui-monospace,monospace; }
+
+    /* 03 COMMIT SCORE */
+    #score { background:#171717; color:#eee9df; min-height:calc(100vh - 58px); padding:34px clamp(24px,5vw,72px) 60px; }
+    .score-head { display:grid; grid-template-columns:1fr auto; border-bottom:1px solid #4d4a44; padding-bottom:22px; align-items:end; }
+    .score-head h1 { margin:4px 0 0; font-family:Georgia,serif; font-size:clamp(46px,7vw,96px); font-weight:400; font-style:italic; letter-spacing:-.065em; line-height:.82; }
+    .score-head .tempo { font:11px/1.5 ui-monospace,monospace; text-align:right; color:#aaa49a; }
+    .movement { display:grid; grid-template-columns:110px 1fr; gap:25px; padding:42px 0 24px; }
+    .movement-label { font-family:Georgia,serif; font-style:italic; }
+    .movement-label b { display:block; font:800 10px/1 ui-monospace,monospace; letter-spacing:.14em; margin-bottom:8px; color:#99938a; }
+    .staff { min-height:340px; position:relative; background:repeating-linear-gradient(to bottom,transparent 0,transparent 53px,#45423e 54px,#45423e 55px); }
+    .notes { position:absolute; inset:0; display:grid; grid-template-columns:repeat(7,1fr); align-items:center; }
+    .note { height:280px; position:relative; border-left:1px solid rgba(255,255,255,.04); }
+    .note:before { content:""; position:absolute; top:50%; left:15%; right:15%; height:1px; background:#77716a; }
+    .note .add { position:absolute; left:25%; width:50%; bottom:50%; height:var(--a); background:#e5d94d; border-radius:50% 50% 4px 4px; transform-origin:bottom; animation:scoreup .7s both; animation-delay:var(--d); }
+    .note .del { position:absolute; left:25%; width:50%; top:50%; height:var(--r); background:#e85649; border-radius:4px 4px 50% 50%; transform-origin:top; animation:scoreup .7s both; animation-delay:var(--d); }
+    @keyframes scoreup { from { transform:scaleY(0); } }
+    .note .day { position:absolute; bottom:-24px; width:100%; text-align:center; font:9px/1 ui-monospace,monospace; color:#8e8981; }
+    .note.current:after { content:""; position:absolute; width:9px; height:9px; border:2px solid #eee9df; border-radius:50%; left:calc(50% - 6px); top:calc(50% - 6px); }
+    .score-legend { display:flex; gap:24px; padding:22px 0 6px 135px; font:10px/1 ui-monospace,monospace; color:#aaa49a; }
+    .score-legend i { display:inline-block;width:17px;height:7px;margin-right:7px;background:var(--c); }
+    .voices { border-top:1px solid #4d4a44; }
+    .voice { display:grid;grid-template-columns:110px 1fr 90px;gap:25px;align-items:center;padding:19px 0;border-bottom:1px solid #302f2c; }
+    .voice b { font:700 12px/1 ui-monospace,monospace; }
+    .voice-track { height:12px;display:flex;gap:3px; }
+    .voice-track span { height:100%;flex:var(--w);background:var(--c);border-radius:99px; }
+    .voice code { font:11px/1 ui-monospace,monospace;text-align:right;color:#aaa49a; }
+    .coda { margin:40px 0 0 135px; max-width:720px; display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:start; }
+    .coda-mark { font:italic 70px/.6 Georgia,serif;color:#e5d94d; }
+    .coda p { margin:0;font:italic 20px/1.5 Georgia,serif;color:#d2cdc4; }
+
+    /* 04 BLOCKWORK */
+    #blocks { --cream:#f0e7d2;--black:#11110f;--orange:#f05a2b;--lime:#b8dc3c;--sky:#68badd; background:var(--cream);color:var(--black);padding:22px; }
+    .block-shell { min-height:calc(100vh - 102px);display:grid;grid-template-columns:1.35fr .8fr 1fr;grid-template-rows:150px 310px 230px;gap:10px; }
+    .tile { padding:20px;overflow:hidden;position:relative; }
+    .tile h2 { margin:0;font:900 12px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase; }
+    .block-logo { background:var(--black);color:var(--cream);grid-column:1/3;display:flex;align-items:flex-end;justify-content:space-between; }
+    .block-logo strong { font-size:clamp(52px,8vw,112px);line-height:.7;letter-spacing:-.09em; }
+    .block-logo span { font:11px/1.4 ui-monospace,monospace;text-align:right; }
+    .block-week { background:var(--lime); }
+    .block-week .number { position:absolute;right:14px;bottom:-20px;font-size:130px;font-weight:950;letter-spacing:-.1em; }
+    .block-add { background:var(--orange);color:var(--black);display:flex;flex-direction:column;justify-content:space-between; }
+    .block-add .hero-number { font-size:clamp(66px,9vw,135px);font-weight:950;line-height:.72;letter-spacing:-.095em; }
+    .block-add small { font:10px/1.4 ui-monospace,monospace;max-width:180px; }
+    .block-activity { background:var(--sky);grid-column:2/4; }
+    .block-bars { position:absolute;left:20px;right:20px;bottom:20px;height:210px;display:flex;align-items:flex-end;gap:8px; }
+    .block-bars div { flex:1;height:var(--h);background:var(--black);position:relative;animation:rise .7s both;animation-delay:var(--d); }
+    .block-bars div:nth-child(even) { background:var(--cream); }
+    .block-bars span { position:absolute;bottom:8px;left:8px;font:900 10px/1 ui-monospace,monospace;writing-mode:vertical-rl; }
+    .block-snek { background:#d6d0c1;grid-column:1/3;display:grid;grid-template-columns:1fr 1fr;align-items:center; }
+    .pixels { display:grid;grid-template-columns:repeat(9,18px);grid-auto-rows:18px;gap:3px;justify-content:center; }
+    .pixels i { background:transparent; }
+    .pixels i.on { background:var(--black); }.pixels i.hot { background:var(--orange); }
+    .snek-copy strong {display:block;font-size:35px;letter-spacing:-.06em}.snek-copy p{font:11px/1.5 ui-monospace,monospace;max-width:220px}
+    .block-minus { background:var(--black);color:var(--cream);display:flex;flex-direction:column;justify-content:space-between; }
+    .block-minus strong { font-size:60px;letter-spacing:-.08em;color:var(--orange); }
+    .block-ticker { grid-column:1/4;background:var(--cream);border:2px solid var(--black);height:56px;display:flex;align-items:center;overflow:hidden;padding:0; }
+    .ticker-inner { white-space:nowrap;font:900 17px/1 ui-monospace,monospace;animation:ticker 18s linear infinite; }
+    @keyframes ticker { to { transform:translateX(-50%); } }
+
+    /* 05 BLOCKWORK WIDGET FAMILY */
+    #widgets {
+      --bw-cream:#efe5cd; --bw-black:#10110f; --bw-orange:#f35b2c;
+      --bw-lime:#b9dc3c; --bw-sky:#69badb; --bw-red:#ef4e42;
+      background:#9f2d53; color:var(--bw-black); padding:34px 28px 90px;
+      background-image:
+        linear-gradient(64deg, transparent 76%, rgba(84,15,43,.35) 76%, rgba(84,15,43,.35) 78%, transparent 78%),
+        linear-gradient(-18deg, transparent 82%, rgba(84,15,43,.28) 82%, rgba(84,15,43,.28) 85%, transparent 85%);
+    }
+    .widget-sheet { max-width:1180px; margin:auto; }
+    .widget-sheet-head { color:#fff; display:grid; grid-template-columns:1fr 380px; align-items:end; gap:40px; margin-bottom:30px; }
+    .widget-sheet-head h1 { margin:5px 0 0;font-size:clamp(46px,7vw,92px);line-height:.8;letter-spacing:-.085em; }
+    .widget-sheet-head p { margin:0;font:12px/1.55 ui-monospace,monospace;color:#e5c5d1; }
+    .widget-rules { display:flex;gap:8px;flex-wrap:wrap;margin-top:17px; }
+    .widget-rules span { border:1px solid rgba(255,255,255,.45);padding:6px 8px;font:800 9px/1 ui-monospace,monospace;letter-spacing:.08em; }
+    .widget-gallery { display:grid;grid-template-columns:340px 1fr;gap:36px;align-items:start; }
+    .widget-column { display:grid;gap:32px; }
+    .mock-group > label { color:#f4dfe6;display:flex;justify-content:space-between;margin-bottom:9px;font:800 10px/1 ui-monospace,monospace;letter-spacing:.12em; }
+    .mock-group > label span { opacity:.65; }
+    .mac-widget {
+      position:relative;overflow:hidden;background:var(--bw-cream);color:var(--bw-black);
+      border-radius:30px;box-shadow:0 22px 45px rgba(55,5,25,.28),inset 0 0 0 1px rgba(255,255,255,.16);
+    }
+    .mac-widget * { box-sizing:border-box; }
+    .bw-head { height:37px;background:var(--bw-black);color:var(--bw-cream);display:flex;align-items:center;padding:0 12px;gap:7px; }
+    .bw-head b { font-size:11px;letter-spacing:-.02em; }.bw-head i{margin-left:auto;font:800 8px/1 ui-monospace,monospace;font-style:normal;letter-spacing:.1em}
+    .bw-head .refresh { font:900 11px/1 ui-monospace,monospace;color:var(--bw-lime); }
+    .bw-label { font:900 8px/1 ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase; }
+    .bw-value { font-weight:950;line-height:.72;letter-spacing:-.09em;white-space:nowrap; }
+    .bw-tile { position:relative;overflow:hidden;padding:11px; }
+    .bw-tile.orange { background:var(--bw-orange); }.bw-tile.lime{background:var(--bw-lime)}.bw-tile.sky{background:var(--bw-sky)}.bw-tile.black{background:var(--bw-black);color:var(--bw-cream)}.bw-tile.cream{background:var(--bw-cream)}
+    .bw-micro { font:800 7px/1.25 ui-monospace,monospace;letter-spacing:.03em; }
+    .bw-bars { position:absolute;left:10px;right:10px;bottom:10px;height:calc(100% - 35px);display:flex;align-items:flex-end;gap:4px; }
+    .bw-bars i { flex:1;height:var(--h);background:var(--bw-black);min-height:3px;animation:rise .7s both;animation-delay:var(--d); }
+    .bw-bars i:nth-child(even){background:var(--bw-cream)}
+    .bw-bars.invert i { background:var(--bw-lime); }.bw-bars.invert i:nth-child(even){background:#333630}
+    .bw-repo { display:grid;grid-template-columns:1fr auto;align-items:end;padding:8px 0;border-bottom:2px solid currentColor;gap:8px; }
+    .bw-repo:last-child{border-bottom:0}.bw-repo b{font-size:10px}.bw-repo code{font:800 8px/1 ui-monospace,monospace}
+    .bw-snake { display:grid;grid-template-columns:repeat(8,10px);grid-auto-rows:10px;gap:2px; }
+    .bw-snake i { background:#77776e; }.bw-snake i.on{background:var(--bw-lime)}.bw-snake i.hot{background:var(--bw-orange)}
+
+    .widget-small { width:220px;height:220px;display:grid;grid-template-rows:37px 1fr 50px; }
+    .widget-small .main-metric { background:var(--bw-orange);padding:15px 13px;display:flex;flex-direction:column;justify-content:space-between; }
+    .widget-small .main-metric .bw-value{font-size:53px}.widget-small .subline{display:flex;align-items:end;justify-content:space-between}
+    .widget-small .mini-stats{display:grid;grid-template-columns:1fr 1fr;background:var(--bw-black);color:var(--bw-cream)}
+    .widget-small .mini-stats div{padding:8px 11px;border-right:2px solid var(--bw-cream)}.widget-small .mini-stats div:last-child{border:0}
+    .widget-small .mini-stats b{font-size:18px;line-height:.8}.widget-small .mini-stats span{font:700 7px/1 ui-monospace,monospace;margin-left:3px}
+
+    .widget-medium { width:510px;height:240px;display:grid;grid-template-rows:38px 1fr; }
+    .medium-body { display:grid;grid-template-columns:1.05fr .75fr 1fr;gap:0;min-height:0; }
+    .medium-add{display:flex;flex-direction:column;justify-content:space-between}.medium-add .bw-value{font-size:54px}
+    .medium-minus{display:flex;flex-direction:column;justify-content:space-between;border-left:3px solid var(--bw-black)}.medium-minus .bw-value{font-size:37px;color:var(--bw-orange)}
+    .medium-activity{border-left:3px solid var(--bw-black)}
+    .medium-activity .bw-bars{height:92px;bottom:40px}.medium-activity .days{position:absolute;bottom:11px;left:10px;right:10px;display:flex;justify-content:space-around;font:800 6px/1 ui-monospace,monospace}
+
+    .widget-large { width:510px;height:510px;display:grid;grid-template-rows:40px 160px 54px 1fr; }
+    .large-metrics { display:grid;grid-template-columns:1.35fr .75fr;border-bottom:4px solid var(--bw-black); }
+    .large-metrics .bw-value{font-size:72px}.large-metrics .delete .bw-value{font-size:43px;color:var(--bw-orange)}
+    .large-facts { display:grid;grid-template-columns:repeat(3,1fr);background:var(--bw-lime);border-bottom:4px solid var(--bw-black); }
+    .large-facts div{padding:8px 12px;border-right:3px solid var(--bw-black)}.large-facts div:last-child{border:0}
+    .large-facts b{display:block;font-size:19px;line-height:.85}.large-facts span{font:800 7px/1 ui-monospace,monospace}
+    .large-lower { display:grid;grid-template-columns:1.15fr .85fr;min-height:0; }
+    .large-activity{border-right:4px solid var(--bw-black)}.large-activity .bw-bars{height:103px;bottom:auto;top:33px}
+    .heatrow{position:absolute;left:10px;right:10px;top:150px;display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+    .heatrow i{height:25px;background:var(--bw-black);opacity:var(--o)}.large-insights{position:absolute;left:10px;right:10px;bottom:11px;border-top:2px solid var(--bw-black);padding-top:9px;display:flex;justify-content:space-between}
+    .large-insights b{font-size:15px}.large-insights span{display:block;font:800 6px/1 ui-monospace,monospace;margin-bottom:4px}
+    .large-repos{padding:11px}.large-repos h3{margin:0 0 12px;font:900 8px/1 ui-monospace,monospace;letter-spacing:.1em}
+
+    .widget-xl-wrap{grid-column:1/3}.widget-xl{width:100%;height:430px;display:grid;grid-template-rows:40px 1fr}
+    .xl-body{display:grid;grid-template-columns:1fr 1.05fr .82fr;min-height:0}
+    .xl-left{display:grid;grid-template-rows:1fr 1fr 72px;border-right:4px solid var(--bw-black)}
+    .xl-left .bw-value{font-size:61px}.xl-left .bw-tile{display:flex;flex-direction:column;justify-content:space-between}.xl-left .bw-tile:not(:last-child){border-bottom:4px solid var(--bw-black)}
+    .xl-mid{display:grid;grid-template-rows:2fr 1fr;border-right:4px solid var(--bw-black);min-height:0}
+    .xl-chart{border-bottom:4px solid var(--bw-black)}.xl-chart .bw-bars{height:145px;bottom:32px}
+    .xl-snek{display:grid;grid-template-columns:120px 1fr;align-items:center;padding:12px 18px}.xl-snek strong{font-size:29px;letter-spacing:-.06em}.xl-snek p{margin:4px 0 0;font:700 7px/1.4 ui-monospace,monospace}
+    .xl-repos{padding:13px;background:var(--bw-cream)}.xl-repos h3{margin:0 0 13px;font:900 9px/1 ui-monospace,monospace;letter-spacing:.1em}
+    .fixed-note { color:#f4dfe6;margin:20px 0 0;font:10px/1.5 ui-monospace,monospace;max-width:780px; }
+
+    @media (max-width: 900px) {
+      .labbar { height:auto;min-height:58px;flex-wrap:wrap;padding:10px 14px; }
+      .switcher { order:3;width:100%;overflow:auto;justify-content:flex-start; }
+      .hint { display:none; }
+      .concept { min-height:calc(100vh - 100px); }
+      #map { padding:18px;overflow:auto; }.map-grid{grid-template-columns:minmax(620px,1fr) 250px}
+      .receipt-paper{padding-left:28px;padding-right:28px}.receipt-paper:after{margin-left:-28px;margin-right:-28px}
+      .movement{grid-template-columns:70px 1fr}.score-legend,.coda{padding-left:0;margin-left:0}.voice{grid-template-columns:80px 1fr 70px}
+      .block-shell{min-width:760px}#blocks{overflow:auto}
+      .widget-sheet-head{grid-template-columns:1fr}.widget-gallery{display:flex;flex-direction:column}.widget-xl-wrap{width:900px}.widget-sheet{min-width:900px}#widgets{overflow:auto}
+    }
+  </style>
+</head>
+<body>
+  <nav class="labbar">
+    <div class="brand"><span class="brand-mark">w</span><span><strong>widtget directions</strong><small>NOT A PALETTE PICKER</small></span></div>
+    <div class="switcher" role="tablist">
+      <button class="active" data-target="map">01 Change Map</button>
+      <button data-target="receipt">02 Week Receipt</button>
+      <button data-target="score">03 Commit Score</button>
+      <button data-target="blocks">04 Blockwork</button>
+      <button data-target="widgets">05 Widget Mockups</button>
+    </div>
+    <div class="hint">same data<br>four mental models</div>
+  </nav>
+
+  <main>
+    <section class="concept active" id="map">
+      <header class="map-head">
+        <div><span class="eyebrow">A network of change</span><h1>Change Map</h1></div>
+        <span class="route-no">W33 / AUG 14—20</span>
+      </header>
+      <div class="map-grid">
+        <div>
+          <div class="route-board">
+            <div class="route" style="--route:#245bf1"><span class="route-label">L</span><div class="stops">
+              <span class="stop"><i></i><b>THU</b><em>4.2k</em></span><span class="stop"><i></i><b>FRI</b><em>3.6k</em></span><span class="stop"><i></i><b>SAT</b><em>659</em></span><span class="stop"><i></i><b>SUN</b><em>74</em></span><span class="stop"><i></i><b>MON</b><em>3.9k</em></span><span class="stop"><i></i><b>TUE</b><em>3.4k</em></span><span class="stop"><i></i><b>WED</b><em>3.3k</em></span>
+            </div></div>
+            <div class="route" style="--route:#ef4d38"><span class="route-label">S</span><div class="stops">
+              <span class="stop"><i></i><b>THU</b><em>2</em></span><span class="stop"><i></i><b>FRI</b><em>5</em></span><span class="stop"><i></i><b>SAT</b><em>1</em></span><span class="stop"><i></i><b>SUN</b><em>0</em></span><span class="stop"><i></i><b>MON</b><em>7</em></span><span class="stop"><i></i><b>TUE</b><em>8</em></span><span class="stop"><i></i><b>WED</b><em>6</em></span>
+            </div></div>
+            <div class="route" style="--route:#10815b"><span class="route-label">W</span><div class="stops">
+              <span class="stop"><i></i><b>THU</b><em>1</em></span><span class="stop"><i></i><b>FRI</b><em>1</em></span><span class="stop"><i></i><b>SAT</b><em>—</em></span><span class="stop"><i></i><b>SUN</b><em>—</em></span><span class="stop"><i></i><b>MON</b><em>2</em></span><span class="stop"><i></i><b>TUE</b><em>1</em></span><span class="stop"><i></i><b>WED</b><em>3</em></span>
+            </div></div>
+          </div>
+          <div class="map-transfer">
+            <div class="transfer-cell"><span class="eyebrow">Distance travelled</span><strong>+24,005</strong></div>
+            <div class="transfer-cell"><span class="eyebrow">Busiest junction</span><strong>Mon 17</strong></div>
+            <div class="transfer-cell"><span class="eyebrow">Service rhythm</span><strong>5 / 7 days</strong></div>
+          </div>
+        </div>
+        <aside class="map-side">
+          <span class="eyebrow">Line index</span><h2>Where the week moved</h2>
+          <div class="legend-item" style="--dot:#245bf1"><span></span><b>linguist</b><code>19k</code></div>
+          <div class="legend-item" style="--dot:#ef4d38"><span></span><b>Studio</b><code>5.0k</code></div>
+          <div class="legend-item" style="--dot:#10815b"><span></span><b>storymode</b><code>659</code></div>
+          <div class="map-note"><b>WEEKLY DISPATCH</b><p>You returned strongly after Sunday. Monday carried the most change; linguist remained the main line all week.</p></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="concept" id="receipt">
+      <article class="receipt-paper">
+        <div class="receipt-logo">WIDTGET</div>
+        <div class="receipt-meta">WEEKLY DEVELOPMENT RECORD<br>YJAY18 · AUG 14—20, 2026<br>NO. 000033</div>
+        <div class="dash"></div>
+        <div class="receipt-title"><h1>YOUR WEEK</h1><span>QTY / CHANGE</span></div>
+        <div class="receipt-row"><span>01</span><b>linguist</b><span class="amount">+19,004 −586</span></div>
+        <div class="receipt-row"><span>02</span><b>Studio</b><span class="amount">+5,001 −424</span></div>
+        <div class="receipt-row"><span>03</span><b>storymode</b><span class="amount">+659 −21</span></div>
+        <div class="receipt-bars">
+          <i class="receipt-bar" data-day="TH" style="--h:92%;--d:.05s"></i><i class="receipt-bar" data-day="FR" style="--h:72%;--d:.1s"></i><i class="receipt-bar" data-day="SA" style="--h:23%;--d:.15s"></i><i class="receipt-bar" data-day="SU" style="--h:4%;--d:.2s"></i><i class="receipt-bar" data-day="MO" style="--h:78%;--d:.25s"></i><i class="receipt-bar" data-day="TU" style="--h:69%;--d:.3s"></i><i class="receipt-bar" data-day="WE" style="--h:66%;--d:.35s"></i>
+        </div>
+        <div class="receipt-total"><span>COMMITS<br>REPOSITORIES<br>ACTIVE DAYS<br><span class="big">NET TOTAL</span></span><span style="text-align:right">29<br>3<br>5 / 7<br><span class="big">+24,005</span></span></div>
+        <div class="receipt-story"><h2>WEEKLY REVIEW // TEMPLATE 04B</h2><p>A front-loaded week softened over the weekend, then recovered on Monday. Most of the work concentrated in <b>linguist</b>, while the other two repositories made smaller supporting moves. Your output finished <b>18% above</b> your four-week baseline.</p></div>
+        <div class="receipt-stamp">REVIEWED · KEEP SHIPPING</div>
+      </article>
+    </section>
+
+    <section class="concept" id="score">
+      <header class="score-head"><div><span class="eyebrow">Opus 33 · for three repositories</span><h1>Commit Score</h1></div><div class="tempo">ANDANTE → ALLEGRO<br>29 COMMITS / 5 ACTIVE DAYS</div></header>
+      <div class="movement">
+        <div class="movement-label"><b>I. ACTIVITY</b>With momentum</div>
+        <div class="staff"><div class="notes">
+          <div class="note" style="--a:125px;--r:8px;--d:.05s"><i class="add"></i><i class="del"></i><span class="day">THU</span></div>
+          <div class="note" style="--a:94px;--r:25px;--d:.1s"><i class="add"></i><i class="del"></i><span class="day">FRI</span></div>
+          <div class="note" style="--a:35px;--r:5px;--d:.15s"><i class="add"></i><i class="del"></i><span class="day">SAT</span></div>
+          <div class="note" style="--a:5px;--r:2px;--d:.2s"><i class="add"></i><i class="del"></i><span class="day">SUN</span></div>
+          <div class="note" style="--a:99px;--r:4px;--d:.25s"><i class="add"></i><i class="del"></i><span class="day">MON</span></div>
+          <div class="note" style="--a:88px;--r:29px;--d:.3s"><i class="add"></i><i class="del"></i><span class="day">TUE</span></div>
+          <div class="note current" style="--a:86px;--r:5px;--d:.35s"><i class="add"></i><i class="del"></i><span class="day">WED</span></div>
+        </div></div>
+      </div>
+      <div class="score-legend"><span><i style="--c:#e5d94d"></i>ADDITIONS / ABOVE THE LINE</span><span><i style="--c:#e85649"></i>DELETIONS / BELOW THE LINE</span></div>
+      <div class="voices">
+        <div class="voice"><b>LINGUIST</b><div class="voice-track"><span style="--w:19;--c:#e5d94d"></span><span style="--w:.6;--c:#e85649"></span></div><code>FORTE</code></div>
+        <div class="voice"><b>STUDIO</b><div class="voice-track"><span style="--w:5;--c:#e5d94d"></span><span style="--w:.4;--c:#e85649"></span></div><code>MEZZO</code></div>
+        <div class="voice"><b>STORYMODE</b><div class="voice-track"><span style="--w:.65;--c:#e5d94d"></span><span style="--w:.02;--c:#e85649"></span></div><code>PIANO</code></div>
+      </div>
+      <div class="coda"><span class="coda-mark">”</span><p>The week opened loudly, paused, and found its tempo again on Monday. A sustained main theme in linguist carried the composition.</p></div>
+    </section>
+
+    <section class="concept" id="blocks">
+      <div class="block-shell">
+        <div class="tile block-logo"><strong>widtget</strong><span>@YJAY18<br>AUG 14—20<br>LIVE / WEEKLY</span></div>
+        <div class="tile block-week"><h2>Week number</h2><span class="number">33</span></div>
+        <div class="tile block-add"><h2>Lines made</h2><strong class="hero-number">25,036</strong><small>THE DOMINANT SHAPE OF YOUR WEEK. 18% ABOVE THE FOUR-WEEK BASELINE.</small></div>
+        <div class="tile block-activity"><h2>Seven day rhythm</h2><div class="block-bars"><div style="--h:88%;--d:.05s"><span>THU</span></div><div style="--h:70%;--d:.1s"><span>FRI</span></div><div style="--h:25%;--d:.15s"><span>SAT</span></div><div style="--h:5%;--d:.2s"><span>SUN</span></div><div style="--h:76%;--d:.25s"><span>MON</span></div><div style="--h:68%;--d:.3s"><span>TUE</span></div><div style="--h:66%;--d:.35s"><span>WED</span></div></div></div>
+        <div class="tile block-snek"><div class="pixels" aria-label="pixel contribution snake">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <i class="on"></i><i class="on"></i><i class="on"></i><i class="hot"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i>
+          <i></i><i class="hot"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i>
+        </div><div class="snek-copy"><strong>snek happy</strong><p>Five active days kept the contribution creature moving.</p></div></div>
+        <div class="tile block-minus"><h2>Lines removed</h2><strong>−1,031</strong><span class="eyebrow">clean cuts / 4.1%</span></div>
+        <div class="block-ticker"><div class="ticker-inner">&nbsp; LINGUIST +19K &nbsp;◆&nbsp; STUDIO +5K &nbsp;◆&nbsp; STORYMODE +659 &nbsp;◆&nbsp; 29 COMMITS &nbsp;◆&nbsp; NET +24K &nbsp;◆&nbsp; LINGUIST +19K &nbsp;◆&nbsp; STUDIO +5K &nbsp;◆&nbsp; STORYMODE +659 &nbsp;◆&nbsp; 29 COMMITS &nbsp;◆&nbsp; NET +24K &nbsp;◆</div></div>
+      </div>
+    </section>
+
+    <section class="concept" id="widgets">
+      <div class="widget-sheet">
+        <header class="widget-sheet-head">
+          <div>
+            <span class="eyebrow">Blockwork translated to WidgetKit</span>
+            <h1>The widget family</h1>
+          </div>
+          <div>
+            <p>One visual grammar, recomposed at each size. The information is not shrunk from one master dashboard: every family gets its own hierarchy.</p>
+            <div class="widget-rules"><span>FIXED TRACKS</span><span>DATA-FILLED AREA</span><span>ZERO FLOATING CARDS</span></div>
+          </div>
+        </header>
+
+        <div class="widget-gallery">
+          <div class="widget-column">
+            <div class="mock-group">
+              <label>SMALL <span>220 × 220 MOCK SCALE</span></label>
+              <div class="mac-widget widget-small">
+                <div class="bw-head"><b>@yjay18</b><i>WEEKLY</i><span class="refresh">↻</span></div>
+                <div class="main-metric">
+                  <span class="bw-label">Lines made</span>
+                  <strong class="bw-value">+25k</strong>
+                  <div class="subline"><span class="bw-micro">−1,031 REMOVED</span><span class="bw-micro">NET +24K</span></div>
+                </div>
+                <div class="mini-stats"><div><b>29</b><span>COMMITS</span></div><div><b>3</b><span>REPOS</span></div></div>
+              </div>
+            </div>
+            <div class="mock-group">
+              <label>MEDIUM <span>510 × 240 MOCK SCALE</span></label>
+              <div class="mac-widget widget-medium">
+                <div class="bw-head"><b>@yjay18</b><i>W33 / AUG 14—20</i><span class="refresh">↻</span></div>
+                <div class="medium-body">
+                  <div class="bw-tile orange medium-add"><span class="bw-label">Lines made</span><strong class="bw-value">+25k</strong><span class="bw-micro">29 COMMITS · 3 REPOS</span></div>
+                  <div class="bw-tile black medium-minus"><span class="bw-label">Removed</span><strong class="bw-value">−1k</strong><span class="bw-micro">4.1% OF CHANGE</span></div>
+                  <div class="bw-tile sky medium-activity"><span class="bw-label">Seven day rhythm</span>
+                    <div class="bw-bars"><i style="--h:92%;--d:.05s"></i><i style="--h:72%;--d:.1s"></i><i style="--h:23%;--d:.15s"></i><i style="--h:5%;--d:.2s"></i><i style="--h:78%;--d:.25s"></i><i style="--h:69%;--d:.3s"></i><i style="--h:66%;--d:.35s"></i></div>
+                    <div class="days"><span>T</span><span>F</span><span>S</span><span>S</span><span>M</span><span>T</span><span>W</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="widget-column">
+            <div class="mock-group">
+              <label>LARGE <span>510 × 510 MOCK SCALE</span></label>
+              <div class="mac-widget widget-large">
+                <div class="bw-head"><b>@yjay18</b><i>WEEK 33 / WEEKLY</i><span class="refresh">↻</span></div>
+                <div class="large-metrics">
+                  <div class="bw-tile orange"><span class="bw-label">Lines made</span><strong class="bw-value" style="position:absolute;left:11px;bottom:19px">+25k</strong></div>
+                  <div class="bw-tile black delete"><span class="bw-label">Removed</span><strong class="bw-value" style="position:absolute;left:11px;bottom:21px">−1k</strong></div>
+                </div>
+                <div class="large-facts"><div><b>+24k</b><span>NET LINES</span></div><div><b>MON</b><span>PEAK DAY</span></div><div><b>899</b><span>AVG / COMMIT</span></div></div>
+                <div class="large-lower">
+                  <div class="bw-tile sky large-activity"><span class="bw-label">Activity</span>
+                    <div class="bw-bars"><i style="--h:92%;--d:.05s"></i><i style="--h:72%;--d:.1s"></i><i style="--h:23%;--d:.15s"></i><i style="--h:5%;--d:.2s"></i><i style="--h:78%;--d:.25s"></i><i style="--h:69%;--d:.3s"></i><i style="--h:66%;--d:.35s"></i></div>
+                    <div class="heatrow"><i style="--o:.8"></i><i style="--o:.65"></i><i style="--o:.25"></i><i style="--o:.08"></i><i style="--o:.72"></i><i style="--o:.61"></i><i style="--o:.58"></i></div>
+                    <div class="large-insights"><div><span>ACTIVE</span><b>5/7</b></div><div><span>STALE</span><b>2h</b></div></div>
+                  </div>
+                  <div class="large-repos">
+                    <h3>REPOSITORIES / 03</h3>
+                    <div class="bw-repo"><b>linguist</b><code>+19k</code></div>
+                    <div class="bw-repo"><b>Studio</b><code>+5.0k</code></div>
+                    <div class="bw-repo"><b>storymode</b><code>+659</code></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mock-group widget-xl-wrap">
+            <label>EXTRA LARGE <span>FULL-WIDTH MOCK SCALE</span></label>
+            <div class="mac-widget widget-xl">
+              <div class="bw-head"><b>@yjay18</b><i>WEEK 33 · AUGUST 14—20 · WEEKLY</i><span class="refresh">↻</span></div>
+              <div class="xl-body">
+                <div class="xl-left">
+                  <div class="bw-tile orange"><span class="bw-label">Lines made</span><strong class="bw-value">+25,036</strong><span class="bw-micro">18% ABOVE 4-WEEK BASELINE</span></div>
+                  <div class="bw-tile black"><span class="bw-label">Lines removed</span><strong class="bw-value" style="color:var(--bw-orange)">−1,031</strong><span class="bw-micro">NET CHANGE +24,005</span></div>
+                  <div class="bw-tile lime" style="display:grid;grid-template-columns:repeat(3,1fr);padding:0">
+                    <div style="padding:11px;border-right:3px solid var(--bw-black)"><strong>29</strong><span class="bw-micro"> COMMITS</span></div>
+                    <div style="padding:11px;border-right:3px solid var(--bw-black)"><strong>3</strong><span class="bw-micro"> REPOS</span></div>
+                    <div style="padding:11px"><strong>5/7</strong><span class="bw-micro"> ACTIVE</span></div>
+                  </div>
+                </div>
+                <div class="xl-mid">
+                  <div class="bw-tile sky xl-chart"><span class="bw-label">Seven day rhythm</span>
+                    <div class="bw-bars"><i style="--h:92%;--d:.05s"></i><i style="--h:72%;--d:.1s"></i><i style="--h:23%;--d:.15s"></i><i style="--h:5%;--d:.2s"></i><i style="--h:78%;--d:.25s"></i><i style="--h:69%;--d:.3s"></i><i style="--h:66%;--d:.35s"></i></div>
+                    <span class="bw-micro" style="position:absolute;bottom:10px;left:11px">THU &nbsp;&nbsp; FRI &nbsp;&nbsp; SAT &nbsp;&nbsp; SUN &nbsp;&nbsp; MON &nbsp;&nbsp; TUE &nbsp;&nbsp; WED</span>
+                  </div>
+                  <div class="bw-tile black xl-snek">
+                    <div class="bw-snake">
+                      <i class="on"></i><i class="on"></i><i class="on"></i><i class="hot"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+                      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i>
+                      <i class="hot"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+                    </div>
+                    <div><strong>snek happy</strong><p>29 commits. The creature grows inside a reserved row and can never push the chart.</p></div>
+                  </div>
+                </div>
+                <div class="xl-repos">
+                  <h3>REPOSITORIES / BY CHANGE</h3>
+                  <div class="bw-repo"><b>linguist</b><code>8c&nbsp;&nbsp;+19k&nbsp;&nbsp;−586</code></div>
+                  <div class="bw-repo"><b>Studio</b><code>20c&nbsp;&nbsp;+5k&nbsp;&nbsp;−424</code></div>
+                  <div class="bw-repo"><b>storymode</b><code>1c&nbsp;&nbsp;+659&nbsp;&nbsp;−21</code></div>
+                  <div class="bw-tile lime" style="margin:18px -13px -13px;padding:13px">
+                    <span class="bw-label">Weekly verdict</span>
+                    <p class="bw-micro" style="font-size:8px;line-height:1.5;margin:9px 0 0">STRONG RECOVERY MONDAY.<br>LINGUIST LED THE WEEK.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="fixed-note">LAYOUT BEHAVIOR — EACH CHART LIVES IN A FIXED GRID TRACK. VALUES NORMALIZE TO THE TRACK HEIGHT, WHILE THE SNEK HAS ITS OWN RESERVED ROW. EXTREME ACTIVITY CHANGES INK, NEVER GEOMETRY.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const buttons = [...document.querySelectorAll('.switcher button')];
+    const concepts = [...document.querySelectorAll('.concept')];
+    function show(id) {
+      buttons.forEach(button => button.classList.toggle('active', button.dataset.target === id));
+      concepts.forEach(concept => concept.classList.toggle('active', concept.id === id));
+      history.replaceState(null, '', '#' + id);
+    }
+    buttons.forEach(button => button.addEventListener('click', () => show(button.dataset.target)));
+    const initial = location.hash.slice(1);
+    if (concepts.some(concept => concept.id === initial)) show(initial);
+    addEventListener('keydown', event => {
+      const index = buttons.findIndex(button => button.classList.contains('active'));
+      if (event.key === 'ArrowRight') show(buttons[(index + 1) % buttons.length].dataset.target);
+      if (event.key === 'ArrowLeft') show(buttons[(index - 1 + buttons.length) % buttons.length].dataset.target);
+    });
+  </script>
+</body>
+</html>
