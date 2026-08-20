@@ -8,6 +8,7 @@ struct ActivityEntry: TimelineEntry {
     let period: ActivityPeriod
     let username: String
     let snapshot: ActivitySnapshot
+    var preferences: WidgetViewPreferences = .defaults
 }
 
 struct ActivityProvider: AppIntentTimelineProvider {
@@ -48,18 +49,32 @@ struct ActivityProvider: AppIntentTimelineProvider {
         )
         let period = SharedPreferences.defaults.string(forKey: key)
             .flatMap(ActivityPeriod.init(rawValue:)) ?? configuredPeriod
-        let windowMode = SharedPreferences.defaults.string(
-            forKey: SharedPreferences.Key.periodWindowMode
-        )
-        .flatMap(PeriodWindowMode.init(rawValue:)) ?? .fixed
+        let windowMode = configuration.windowMode
         let content = ActivityDataSource.content(for: period, windowMode: windowMode)
+        let modularPreferences = SharedPreferences.modularPreferences
 
         return ActivityEntry(
             date: date,
             configuredPeriod: configuredPeriod,
             period: period,
             username: content.username,
-            snapshot: content.snapshot
+            snapshot: content.snapshot,
+            preferences: WidgetViewPreferences(
+                showRepositories: configuration.showRepositories
+                    && modularPreferences.enabledPanes.contains(.repositories),
+                showActivity: configuration.showActivity
+                    && modularPreferences.enabledPanes.contains(.activity),
+                showUpdateTime: configuration.showUpdateTime,
+                repositoryDetail: configuration.repositoryDetail,
+                periodWindowMode: configuration.windowMode,
+                snakeCommitsPerBlock: configuration.snakeCommitsPerBlock,
+                paneOrder: modularPreferences.paneOrder,
+                enabledPanes: modularPreferences.enabledPanes,
+                colorway: modularPreferences.colorway,
+                visualTheme: modularPreferences.visualTheme,
+                familyLayouts: modularPreferences.familyLayouts,
+                blockColors: modularPreferences.blockColors
+            )
         )
     }
 }

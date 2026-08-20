@@ -46,6 +46,22 @@ enum ActivityWidgetFamily: String, AppEnum, CaseIterable, Sendable {
     }
 }
 
+extension RepositoryDetail: AppEnum {
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Repository detail")
+    static let caseDisplayRepresentations: [RepositoryDetail: DisplayRepresentation] = [
+        .focused: "Focused",
+        .expanded: "More rows"
+    ]
+}
+
+extension PeriodWindowMode: AppEnum {
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Activity window")
+    static let caseDisplayRepresentations: [PeriodWindowMode: DisplayRepresentation] = [
+        .fixed: "Calendar",
+        .rolling: "Rolling"
+    ]
+}
+
 struct WidtgetConfigurationIntent: WidgetConfigurationIntent {
     static let title: LocalizedStringResource = "Activity period"
     static let description = IntentDescription("Choose daily or weekly code activity.")
@@ -53,11 +69,36 @@ struct WidtgetConfigurationIntent: WidgetConfigurationIntent {
     @Parameter(title: "Period", default: .daily)
     var period: ActivityPeriod
 
+    @Parameter(title: "Activity window", default: .fixed)
+    var windowMode: PeriodWindowMode
+
+    @Parameter(title: "Show repositories", default: true)
+    var showRepositories: Bool
+
+    @Parameter(title: "Show activity", default: true)
+    var showActivity: Bool
+
+    @Parameter(title: "Show update time", default: true)
+    var showUpdateTime: Bool
+
+    @Parameter(title: "Repository detail", default: .expanded)
+    var repositoryDetail: RepositoryDetail
+
+    @Parameter(title: "Snake commits per block", default: 8, inclusiveRange: (1, 20))
+    var snakeCommitsPerBlock: Int
+
     init() {
         period = .daily
+        windowMode = .fixed
+        showRepositories = true
+        showActivity = true
+        showUpdateTime = true
+        repositoryDetail = .expanded
+        snakeCommitsPerBlock = CommitSnakeLimits.defaultCommitsPerBlock
     }
 
     init(period: ActivityPeriod) {
+        self.init()
         self.period = period
     }
 }
