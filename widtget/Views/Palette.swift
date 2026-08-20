@@ -2,15 +2,38 @@ import SwiftUI
 import WidgetKit
 
 enum WidtgetPalette {
-    static let background = Color(red: 0.035, green: 0.047, blue: 0.063)
-    static let surface = Color(red: 0.075, green: 0.094, blue: 0.118)
-    static let raisedSurface = Color(red: 0.092, green: 0.115, blue: 0.143)
-    static let border = Color.white.opacity(0.075)
-    static let primaryText = Color(red: 0.93, green: 0.95, blue: 0.97)
-    static let secondaryText = Color(red: 0.52, green: 0.57, blue: 0.63)
-    static let green = Color(red: 0.22, green: 0.80, blue: 0.46)
-    static let coral = Color(red: 0.95, green: 0.38, blue: 0.40)
-    static let neutral = Color(red: 0.13, green: 0.16, blue: 0.20)
+    static let ink = Color(red: 0.063, green: 0.067, blue: 0.059)
+    static let paper = Color(red: 0.937, green: 0.898, blue: 0.804)
+    static let orange = Color(red: 0.953, green: 0.357, blue: 0.173)
+    static let lime = Color(red: 0.725, green: 0.863, blue: 0.235)
+    static let sky = Color(red: 0.412, green: 0.729, blue: 0.859)
+
+    // Compatibility names keep the existing data views and state logic intact.
+    static let background = paper
+    static let surface = ink
+    static let raisedSurface = sky
+    static let border = ink.opacity(0.9)
+    static let primaryText = ink
+    static let secondaryText = ink.opacity(0.62)
+    static let green = lime
+    static let coral = orange
+    static let neutral = ink.opacity(0.18)
+}
+
+extension BlockworkColorway {
+    var hueRotation: Angle {
+        switch self {
+        case .original, .mono: .zero
+        case .cobalt: .degrees(198)
+        }
+    }
+
+    var saturation: Double {
+        switch self {
+        case .original, .cobalt: 1
+        case .mono: 0
+        }
+    }
 }
 
 struct SurfaceModifier: ViewModifier {
@@ -21,12 +44,12 @@ struct SurfaceModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .background {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                Rectangle()
                     .fill(renderingMode == .fullColor ? WidtgetPalette.surface : Color.clear)
             }
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .clipShape(Rectangle())
             .overlay {
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                Rectangle()
                     .stroke(
                         renderingMode == .fullColor
                             ? WidtgetPalette.border

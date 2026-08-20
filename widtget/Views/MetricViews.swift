@@ -8,15 +8,9 @@ struct PeriodHeader: View {
 
     var body: some View {
         HStack(spacing: compact ? 4 : 7) {
-            if !compact {
-                Image(systemName: "point.3.connected.trianglepath.dotted")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(WidtgetPalette.green)
-            }
-
             Text(entry.username.isEmpty ? "GitHub" : "@\(entry.username)")
-                .font(.system(size: compact ? 10 : 11, weight: .semibold, design: .rounded))
-                .foregroundStyle(WidtgetPalette.primaryText)
+                .font(.system(size: compact ? 9 : 10, weight: .black, design: .rounded))
+                .foregroundStyle(WidtgetPalette.paper)
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
 
@@ -38,22 +32,23 @@ struct PeriodHeader: View {
                 )
             ) {
                 Text(entry.period.displayName)
-                    .font(.system(size: 9, weight: .bold, design: .rounded))
-                    .tracking(0.8)
-                    .foregroundStyle(WidtgetPalette.primaryText)
+                    .font(.system(size: compact ? 7 : 8, weight: .black, design: .monospaced))
+                    .tracking(0.7)
+                    .foregroundStyle(WidtgetPalette.ink)
                     .padding(.horizontal, compact ? 5 : 7)
-                    .padding(.vertical, 4)
-                    .background(.clear)
-                    .clipShape(Capsule())
-                    .overlay { Capsule().stroke(WidtgetPalette.border, lineWidth: 1) }
+                    .padding(.vertical, compact ? 3 : 4)
+                    .background(WidtgetPalette.lime)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Show \(entry.period.toggled.rawValue) activity")
         }
+        .padding(.horizontal, compact ? 9 : 12)
+        .padding(.vertical, compact ? 6 : 7)
+        .background(WidtgetPalette.ink)
     }
 
     private var refreshColor: Color {
-        entry.snapshot.state == .error ? WidtgetPalette.coral : WidtgetPalette.secondaryText
+        entry.snapshot.state == .error ? WidtgetPalette.orange : WidtgetPalette.lime
     }
 }
 
@@ -86,14 +81,14 @@ struct SecondaryMetrics: View {
         HStack(spacing: compact ? 7 : 12) {
             metric(value: snapshot.commits, label: "commit")
             Rectangle()
-                .fill(WidtgetPalette.border)
+                .fill(WidtgetPalette.ink)
                 .frame(width: 1, height: 11)
             metric(value: snapshot.repositories.count, label: "repository")
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, compact ? 8 : 10)
-        .frame(height: compact ? 23 : 27)
-        .widtgetSurface(cornerRadius: 8)
+        .padding(.horizontal, compact ? 9 : 11)
+        .frame(height: compact ? 25 : 30)
+        .background(WidtgetPalette.lime)
     }
 
     private func metric(value: Int, label: String) -> some View {
@@ -103,10 +98,10 @@ struct SecondaryMetrics: View {
             Text(snapshot.state == .loading ? "––" : value.formatted())
                 .font(.system(size: compact ? 10 : 11, weight: .bold, design: .rounded))
                 .monospacedDigit()
-                .foregroundStyle(WidtgetPalette.primaryText)
+                .foregroundStyle(WidtgetPalette.ink)
             Text(displayLabel)
-                .font(.system(size: compact ? 8 : 9, weight: .medium, design: .rounded))
-                .foregroundStyle(WidtgetPalette.secondaryText)
+                .font(.system(size: compact ? 7 : 8, weight: .bold, design: .monospaced))
+                .foregroundStyle(WidtgetPalette.ink.opacity(0.66))
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
         }
@@ -136,7 +131,7 @@ struct UpdateStatus: View {
             }
         }
         .font(.system(size: 8, weight: .medium, design: .rounded))
-        .foregroundStyle(WidtgetPalette.secondaryText)
+        .foregroundStyle(WidtgetPalette.ink.opacity(0.64))
         .lineLimit(1)
     }
 }

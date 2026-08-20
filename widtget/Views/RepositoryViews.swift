@@ -36,7 +36,7 @@ struct RepositoryList: View {
             Text(snapshot.state == .loading ? "Loading repositories" : "No repository activity")
                 .font(.system(size: 10, weight: .medium, design: .rounded))
                 .foregroundStyle(WidtgetPalette.secondaryText)
-            Capsule()
+            Rectangle()
                 .fill(WidtgetPalette.neutral)
                 .frame(height: 4)
         }
@@ -53,20 +53,20 @@ private struct RepositoryRow: View {
         VStack(spacing: compact ? 3 : 5) {
             HStack(spacing: 6) {
                 Text(repository.name)
-                    .font(.system(size: compact ? 9 : 10, weight: .semibold, design: .rounded))
-                    .foregroundStyle(WidtgetPalette.primaryText)
+                    .font(.system(size: compact ? 8 : 9, weight: .black, design: .rounded))
+                    .foregroundStyle(WidtgetPalette.ink)
                     .lineLimit(1)
 
                 Text("\(repository.commits)c")
                     .font(.system(size: compact ? 8 : 9, weight: .medium, design: .monospaced))
-                    .foregroundStyle(WidtgetPalette.secondaryText)
+                    .foregroundStyle(WidtgetPalette.ink.opacity(0.58))
 
                 Spacer(minLength: 3)
 
                 Text(ActivityNumberFormat.compact(repository.additions, sign: "+"))
-                    .foregroundStyle(WidtgetPalette.green)
+                    .foregroundStyle(WidtgetPalette.ink)
                 Text(ActivityNumberFormat.compact(repository.deletions, sign: "−"))
-                    .foregroundStyle(WidtgetPalette.coral)
+                    .foregroundStyle(WidtgetPalette.orange)
             }
             .font(.system(size: compact ? 8 : 9, weight: .bold, design: .monospaced))
             .monospacedDigit()
@@ -76,12 +76,11 @@ private struct RepositoryRow: View {
                 let additionsWidth = repository.totalChanged == 0 ? 0 : totalWidth * CGFloat(repository.additions) / CGFloat(repository.totalChanged)
 
                 HStack(spacing: 1) {
-                    Capsule().fill(WidtgetPalette.green).frame(width: additionsWidth)
-                    Capsule().fill(WidtgetPalette.coral).frame(width: max(0, totalWidth - additionsWidth))
+                    Rectangle().fill(WidtgetPalette.ink).frame(width: additionsWidth)
+                    Rectangle().fill(WidtgetPalette.orange).frame(width: max(0, totalWidth - additionsWidth))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(WidtgetPalette.neutral)
-                .clipShape(Capsule())
             }
             .frame(height: compact ? 3 : 4)
         }

@@ -98,6 +98,7 @@ enum ActivityIntervalLabels {
 struct ActivityAxisLabels: View {
     let labels: [String]
     var fontSize: CGFloat = 7
+    var color = WidtgetPalette.secondaryText
 
     var body: some View {
         HStack(spacing: 2) {
@@ -105,7 +106,7 @@ struct ActivityAxisLabels: View {
                 Text(labels[index])
                     .font(.system(size: fontSize, weight: .semibold, design: .rounded))
                     .monospacedDigit()
-                    .foregroundStyle(WidtgetPalette.secondaryText)
+                    .foregroundStyle(color)
                     .lineLimit(1)
                     .minimumScaleFactor(0.72)
                     .frame(maxWidth: .infinity)
@@ -166,7 +167,7 @@ struct ActivityInsights: View {
                 title: "PEAK",
                 value: peakLabel,
                 detail: peakChanged == 0 ? "NO ACTIVITY" : "\(unsignedCompact(peakChanged)) LINES",
-                color: WidtgetPalette.primaryText
+                color: WidtgetPalette.ink
             )
 
             separator
@@ -175,7 +176,7 @@ struct ActivityInsights: View {
                 title: "AVG",
                 value: unsignedCompact(averagePerCommit),
                 detail: "LINES / COMMIT",
-                color: WidtgetPalette.primaryText
+                color: WidtgetPalette.ink
             )
         }
         .accessibilityElement(children: .ignore)
@@ -187,9 +188,9 @@ struct ActivityInsights: View {
     private func insight(title: String, value: String, detail: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: compact ? 2 : 3) {
             Text(title)
-                .font(.system(size: compact ? 6.5 : 7.5, weight: .bold, design: .rounded))
+                .font(.system(size: compact ? 6.5 : 7.5, weight: .black, design: .monospaced))
                 .tracking(compact ? 0.7 : 0.9)
-                .foregroundStyle(WidtgetPalette.secondaryText)
+                .foregroundStyle(WidtgetPalette.ink.opacity(0.62))
 
             Text(value)
                 .font(.system(size: compact ? 12 : 15, weight: .bold, design: .rounded))
@@ -199,8 +200,8 @@ struct ActivityInsights: View {
                 .minimumScaleFactor(0.7)
 
             Text(detail)
-                .font(.system(size: compact ? 5.5 : 6.5, weight: .semibold, design: .rounded))
-                .foregroundStyle(WidtgetPalette.secondaryText)
+                .font(.system(size: compact ? 5.5 : 6.5, weight: .bold, design: .monospaced))
+                .foregroundStyle(WidtgetPalette.ink.opacity(0.62))
                 .lineLimit(1)
                 .minimumScaleFactor(0.72)
         }
@@ -209,14 +210,14 @@ struct ActivityInsights: View {
 
     private var separator: some View {
         Rectangle()
-            .fill(WidtgetPalette.border)
+            .fill(WidtgetPalette.ink.opacity(0.72))
             .frame(width: 1, height: compact ? 35 : 42)
     }
 
     private var netColor: Color {
-        if netChanged > 0 { return WidtgetPalette.green }
-        if netChanged < 0 { return WidtgetPalette.coral }
-        return WidtgetPalette.secondaryText
+        if netChanged > 0 { return WidtgetPalette.ink }
+        if netChanged < 0 { return WidtgetPalette.orange }
+        return WidtgetPalette.ink.opacity(0.62)
     }
 
     private func signedCompact(_ value: Int) -> String {
@@ -261,13 +262,9 @@ private enum CommitSnakeMood {
 
     var title: String {
         switch self {
-        case .sleeping: "SNAKE IS SNOOZING"
-        case .hatched: "A SNAKE HATCHED"
-        case .growing: "SNAKE IS GROWING"
-        case .thriving: "SNAKE IS HUGE"
-        case .setupRequired: "SNAKE NEEDS GITHUB"
-        case .loading: "SNAKE IS HUNTING"
-        case .worried: "SNAKE LOST THE TRAIL"
+        case .sleeping, .hatched, .setupRequired, .loading, .worried: "smol snek"
+        case .growing: "growing snek"
+        case .thriving: "snek happy"
         }
     }
 
@@ -282,100 +279,49 @@ private enum CommitSnakeMood {
 
 struct CommitSnakeView: View {
     let snapshot: ActivitySnapshot
-    let minimumSegments: Int
-    let maximumSegments: Int
+    let commitsPerBlock: Int
 
     private var mood: CommitSnakeMood {
         CommitSnakeMood(snapshot: snapshot)
     }
 
-    private var lowerLimit: Int {
-        min(max(minimumSegments, CommitSnakeLimits.minimumRange.lowerBound), CommitSnakeLimits.minimumRange.upperBound)
-    }
-
-    private var upperLimit: Int {
-        max(
-            lowerLimit,
-            min(maximumSegments, CommitSnakeLimits.maximumRange.upperBound)
-        )
-    }
-
     private var bodySegments: Int {
-        min(max(snapshot.commits, lowerLimit), upperLimit)
-    }
-
-    private var growthProgress: Double {
-        guard upperLimit > lowerLimit else { return 1 }
-        return Double(bodySegments - lowerLimit) / Double(upperLimit - lowerLimit)
+        let commitsPerBlock = min(
+            max(commitsPerBlock, CommitSnakeLimits.commitsPerBlockRange.lowerBound),
+            CommitSnakeLimits.commitsPerBlockRange.upperBound
+        )
+        return min(
+            max(Int(ceil(Double(snapshot.commits) / Double(commitsPerBlock))), 0),
+            CommitSnakeLimits.visualBlockCount
+        )
     }
 
     var body: some View {
         ZStack {
             CommitSnakeBackdrop(accent: mood.accent)
 
-            HStack(spacing: 11) {
+            HStack(spacing: 8) {
                 BlockyCommitSnake(
                     mood: mood,
                     bodySegments: bodySegments,
-                    maximumSegments: upperLimit
+                    maximumSegments: CommitSnakeLimits.visualBlockCount
                 )
-                .frame(width: 118, height: 67)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("COMMIT SNAKE")
-                        .font(.system(size: 7, weight: .bold, design: .monospaced))
-                        .tracking(0.7)
-                        .foregroundStyle(WidtgetPalette.secondaryText)
-
+                VStack(alignment: .leading) {
                     Text(mood.title)
-                        .font(.system(size: 10.5, weight: .bold, design: .monospaced))
-                        .foregroundStyle(WidtgetPalette.primaryText)
+                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .foregroundStyle(WidtgetPalette.paper)
                         .lineLimit(1)
                         .minimumScaleFactor(0.72)
-
-                    Text(activityDescription)
-                        .font(.system(size: 7, weight: .semibold, design: .monospaced))
-                        .monospacedDigit()
-                        .foregroundStyle(mood.accent)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.68)
-
-                    GeometryReader { proxy in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(WidtgetPalette.neutral)
-                            Capsule()
-                                .fill(mood.accent)
-                                .frame(width: max(3, proxy.size.width * growthProgress))
-                        }
-                    }
-                    .frame(height: 3)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.vertical, 10)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Commit snake. \(mood.title). \(activityDescription).")
-    }
-
-    private var activityDescription: String {
-        switch mood {
-        case .setupRequired:
-            "CONNECT GITHUB"
-        case .loading:
-            "FETCHING ACTIVITY"
-        case .worried:
-            "REFRESH NEEDED"
-        case .sleeping, .hatched, .growing, .thriving:
-            if snapshot.commits < lowerLimit {
-                "\(snapshot.commits) COMMITS · RESTING \(bodySegments)/\(upperLimit)"
-            } else if snapshot.commits >= upperLimit {
-                "\(snapshot.commits) COMMITS · \(bodySegments)/\(upperLimit) BLOCKS"
-            } else {
-                "\(snapshot.commits) COMMITS · \(bodySegments)/\(upperLimit) BLOCKS"
-            }
-        }
+        .accessibilityLabel("\(mood.title), based on \(snapshot.commits) commits.")
     }
 }
 
@@ -564,50 +510,81 @@ private struct BlockyCommitSnake: View {
 struct ActivityStrip: View {
     let cells: [ActivityCell]
     var height: CGFloat = 12
-
-    private var maximum: CGFloat {
-        CGFloat(max(cells.map(\.totalChanged).max() ?? 0, 1))
-    }
-
-    var body: some View {
-        HStack(alignment: .bottom, spacing: 2) {
-            ForEach(cells) { cell in
-                ActivityBar(cell: cell, maximum: maximum)
-            }
-        }
-        .frame(height: height)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Activity intensity for \(cells.count) intervals")
-    }
-}
-
-private struct ActivityBar: View {
-    let cell: ActivityCell
-    let maximum: CGFloat
+    var additionColor = WidtgetPalette.ink
+    var deletionColor = WidtgetPalette.orange
+    var neutralColor = WidtgetPalette.neutral
 
     var body: some View {
-        GeometryReader { proxy in
-            let available = proxy.size.height
-            let totalHeight = max(3, available * CGFloat(cell.totalChanged) / maximum)
-            let additionShare = cell.totalChanged == 0 ? 0 : CGFloat(cell.additions) / CGFloat(cell.totalChanged)
-            let deletionShare = cell.totalChanged == 0 ? 0 : CGFloat(cell.deletions) / CGFloat(cell.totalChanged)
+        Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
+            guard !cells.isEmpty, size.width > 0, size.height > 0 else { return }
 
-            VStack(spacing: 1) {
-                Spacer(minLength: 0)
+            let maximum = CGFloat(max(cells.map(\.totalChanged).max() ?? 0, 1))
+            let spacing: CGFloat = 2
+            let totalSpacing = spacing * CGFloat(max(cells.count - 1, 0))
+            let barWidth = max(1, (size.width - totalSpacing) / CGFloat(cells.count))
+
+            for (index, cell) in cells.enumerated() {
+                let x = CGFloat(index) * (barWidth + spacing)
+
                 if cell.totalChanged == 0 {
-                    RoundedRectangle(cornerRadius: 1.5, style: .continuous)
-                        .fill(WidtgetPalette.neutral)
-                        .frame(height: 3)
-                } else {
-                    RoundedRectangle(cornerRadius: 1.5, style: .continuous)
-                        .fill(WidtgetPalette.green.opacity(0.5 + 0.5 * Double(totalHeight / available)))
-                        .frame(height: max(1, totalHeight * additionShare))
-                    RoundedRectangle(cornerRadius: 1.5, style: .continuous)
-                        .fill(WidtgetPalette.coral.opacity(0.45 + 0.5 * Double(totalHeight / available)))
-                        .frame(height: max(1, totalHeight * deletionShare))
+                    let baseline = CGRect(
+                        x: x,
+                        y: max(0, size.height - 3),
+                        width: barWidth,
+                        height: min(3, size.height)
+                    )
+                    context.fill(
+                        Path(baseline),
+                        with: .color(neutralColor)
+                    )
+                    continue
+                }
+
+                let intensity = min(1, CGFloat(cell.totalChanged) / maximum)
+                let totalHeight = min(size.height, max(3, size.height * intensity))
+                let hasAdditions = cell.additions > 0
+                let hasDeletions = cell.deletions > 0
+                let segmentSpacing: CGFloat = hasAdditions && hasDeletions ? 1 : 0
+                let drawableHeight = max(0, totalHeight - segmentSpacing)
+                let additionShare = CGFloat(cell.additions) / CGFloat(cell.totalChanged)
+                let additionHeight = hasAdditions ? drawableHeight * additionShare : 0
+                let deletionHeight = hasDeletions ? drawableHeight - additionHeight : 0
+                let opacity = 0.5 + 0.5 * Double(intensity)
+                var bottom = size.height
+
+                if hasDeletions {
+                    let deletionRect = CGRect(
+                        x: x,
+                        y: bottom - deletionHeight,
+                        width: barWidth,
+                        height: deletionHeight
+                    )
+                    context.fill(
+                        Path(deletionRect),
+                        with: .color(deletionColor.opacity(max(0.55, opacity)))
+                    )
+                    bottom -= deletionHeight + segmentSpacing
+                }
+
+                if hasAdditions {
+                    let additionRect = CGRect(
+                        x: x,
+                        y: bottom - additionHeight,
+                        width: barWidth,
+                        height: additionHeight
+                    )
+                    context.fill(
+                        Path(additionRect),
+                        with: .color(additionColor.opacity(max(0.52, opacity)))
+                    )
                 }
             }
         }
+        .frame(maxWidth: .infinity)
+        .frame(height: height)
+        .clipped()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Activity intensity for \(cells.count) intervals")
     }
 }
 
@@ -615,6 +592,10 @@ struct ActivityGrid: View {
     let cells: [ActivityCell]
     var labels: [String] = []
     var labelFontSize: CGFloat = 6.5
+    var additionColor = WidtgetPalette.ink
+    var deletionColor = WidtgetPalette.orange
+    var neutralColor = WidtgetPalette.neutral
+    var labelColor = WidtgetPalette.secondaryText
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
 
@@ -631,18 +612,17 @@ struct ActivityGrid: View {
                 VStack(spacing: labels.indices.contains(index) ? 3 : 0) {
                     GeometryReader { proxy in
                         HStack(spacing: 0) {
-                            WidtgetPalette.green
+                            additionColor
                                 .opacity(cell.totalChanged == 0 ? 0 : 0.25 + intensity * 0.75)
                                 .frame(width: proxy.size.width * additionShare)
-                            WidtgetPalette.coral
+                            deletionColor
                                 .opacity(cell.totalChanged == 0 ? 0 : 0.22 + intensity * 0.68)
                         }
-                        .background(WidtgetPalette.neutral)
-                        .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
+                        .background(neutralColor)
                         .overlay {
                             if cell.totalChanged > 0 && Double(cell.totalChanged) == maximum {
-                                RoundedRectangle(cornerRadius: 3, style: .continuous)
-                                    .stroke(WidtgetPalette.primaryText.opacity(0.62), lineWidth: 1)
+                                Rectangle()
+                                    .stroke(WidtgetPalette.ink.opacity(0.72), lineWidth: 1)
                             }
                         }
                     }
@@ -652,7 +632,7 @@ struct ActivityGrid: View {
                         Text(labels[index])
                             .font(.system(size: labelFontSize, weight: .semibold, design: .rounded))
                             .monospacedDigit()
-                            .foregroundStyle(WidtgetPalette.secondaryText)
+                            .foregroundStyle(labelColor)
                             .lineLimit(1)
                             .frame(maxWidth: .infinity)
                     }
