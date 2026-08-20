@@ -179,7 +179,7 @@ struct WidgetModularPreferences: Sendable {
         paneOrder: WidgetPane.allCases,
         enabledPanes: Set(WidgetPane.allCases),
         colorway: .original,
-        visualTheme: .blockwork,
+        visualTheme: .defaultTheme,
         familyLayouts: [
             .small: [.additions],
             .medium: [.additions, .activity],

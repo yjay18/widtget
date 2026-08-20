@@ -7,11 +7,21 @@ struct WidtgetWidgetView: View {
     let entry: ActivityEntry
 
     var body: some View {
-        ComposedWidgetView(
-            entry: entry,
-            preferences: entry.preferences,
-            family: layoutFamily
-        )
+        Group {
+            if entry.preferences.visualTheme == .blockwork {
+                ComposedWidgetView(
+                    entry: entry,
+                    preferences: entry.preferences,
+                    family: layoutFamily
+                )
+            } else {
+                DefaultWidgetView(
+                    entry: entry,
+                    preferences: entry.preferences,
+                    family: layoutFamily
+                )
+            }
+        }
         .widgetURL(githubURL)
     }
 

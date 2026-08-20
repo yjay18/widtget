@@ -35,6 +35,7 @@
 		A1000000000000000000001A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001A /* Security.framework */; };
 		A1000000000000000000001B /* DashboardAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001B /* DashboardAnalytics.swift */; };
 		A1000000000000000000001C /* AnalyticsDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001C /* AnalyticsDashboardView.swift */; };
+		A1000000000000000000001D /* DefaultWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001D /* DefaultWidgetView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -90,6 +91,7 @@
 		B1000000000000000000001A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		B1000000000000000000001B /* DashboardAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardAnalytics.swift; sourceTree = "<group>"; };
 		B1000000000000000000001C /* AnalyticsDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsDashboardView.swift; sourceTree = "<group>"; };
+		B1000000000000000000001D /* DefaultWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultWidgetView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -194,6 +196,7 @@
 				B10000000000000000000006 /* ActivityVisualization.swift */,
 				B10000000000000000000007 /* RepositoryViews.swift */,
 				B10000000000000000000008 /* WidtgetWidgetView.swift */,
+				B1000000000000000000001D /* DefaultWidgetView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -341,6 +344,7 @@
 				A10000000000000000000006 /* ActivityVisualization.swift in Sources */,
 				A10000000000000000000007 /* RepositoryViews.swift in Sources */,
 				A10000000000000000000008 /* WidtgetWidgetView.swift in Sources */,
+				A1000000000000000000001D /* DefaultWidgetView.swift in Sources */,
 				A10000000000000000000009 /* WidtgetWidget.swift in Sources */,
 				A1000000000000000000000A /* WidtgetPreviews.swift in Sources */,
 				A1000000000000000000000E /* WidgetPreferences.swift in Sources */,
