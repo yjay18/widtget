@@ -77,6 +77,7 @@ struct WidgetSettingsView: View {
         .background(DashboardPalette.ink)
         .preferredColorScheme(.dark)
         .task {
+            migrateToFixedDefaultIfNeeded()
             reloadWidgets()
             await github.bootstrap()
         }
@@ -220,11 +221,15 @@ struct WidgetSettingsView: View {
         VStack(spacing: 0) {
             HStack(alignment: .bottom, spacing: 24) {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("MODULAR / WIDGET SYSTEM")
+                    Text(
+                        visualTheme == .blockwork
+                            ? "BLOCKWORK / WIDGET SYSTEM"
+                            : "DEFAULT / ORIGINAL SYSTEM"
+                    )
                         .font(.system(size: 9, weight: .black, design: .monospaced))
                         .tracking(1.2)
                         .foregroundStyle(studioOrange)
-                    Text("Build your widtget")
+                    Text(visualTheme == .blockwork ? "Build your widtget" : "The original widtget")
                         .font(.system(size: 30, weight: .black, design: .rounded))
                         .tracking(-1.2)
                 }
@@ -251,7 +256,8 @@ struct WidgetSettingsView: View {
             .foregroundStyle(studioPaper)
             .background(studioInk)
 
-            HStack(spacing: 0) {
+            if visualTheme == .blockwork {
+                HStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
@@ -322,6 +328,308 @@ struct WidgetSettingsView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .background(Color(red: 0.62, green: 0.18, blue: 0.32))
+                }
+            } else {
+                defaultWidgetStudioOverview
+            }
+        }
+    }
+
+    private var defaultWidgetStudioOverview: some View {
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("DEFAULT IS FIXED")
+                        .font(.system(size: 10, weight: .black, design: .monospaced))
+                        .tracking(1)
+                        .foregroundStyle(DashboardPalette.green)
+                    Text("The layout you already had")
+                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .tracking(-0.6)
+                    Text("Default keeps its original size-specific hierarchy. Blockwork slots, block order, and poster colors never alter it.")
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundStyle(DashboardPalette.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                VStack(alignment: .leading, spacing: 12) {
+                    defaultRule("Small, Medium, Large, and Extra Large keep their original compositions")
+                    defaultRule("Daily / Weekly and per-widget App Intent controls still apply")
+                    defaultRule("Activity values normalize inside bounded chart frames")
+                    defaultRule("Repository detail and update visibility remain supported")
+                }
+                .padding(14)
+                .background(DashboardPalette.lifted, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(DashboardPalette.line, lineWidth: 1)
+                }
+
+                Button {
+                    withAnimation(.snappy(duration: 0.24)) {
+                        visualTheme = .blockwork
+                    }
+                } label: {
+                    Label("Customize Blockwork", systemImage: "square.grid.3x3.fill")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(DashboardPalette.green)
+                .foregroundStyle(DashboardPalette.ink)
+
+                Spacer()
+            }
+            .padding(24)
+            .frame(width: 330)
+            .foregroundStyle(DashboardPalette.text)
+            .background(DashboardPalette.panel)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("FIXED FAMILY LAYOUTS")
+                                .font(.system(size: 10, weight: .black, design: .monospaced))
+                                .tracking(1)
+                            Text("Read-only previews · no slots or block colors")
+                                .font(.system(size: 9, weight: .medium, design: .rounded))
+                                .foregroundStyle(DashboardPalette.muted)
+                        }
+                        Spacer()
+                        Text("ORIGINAL")
+                            .font(.system(size: 8, weight: .black, design: .monospaced))
+                            .foregroundStyle(DashboardPalette.green)
+                    }
+
+                    HStack(alignment: .top, spacing: 18) {
+                        fixedDefaultPreview(.small, width: 170, height: 170)
+                        fixedDefaultPreview(.medium, width: 360, height: 170)
+                    }
+
+                    fixedDefaultPreview(.large, width: 360, height: 330)
+                    fixedDefaultPreview(.extraLarge, width: 650, height: 310)
+                }
+                .padding(24)
+            }
+            .frame(maxWidth: .infinity)
+            .foregroundStyle(DashboardPalette.text)
+            .background(DashboardPalette.ink)
+        }
+    }
+
+    private func defaultRule(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 9) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(DashboardPalette.green)
+                .padding(.top, 1)
+            Text(text)
+                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .foregroundStyle(DashboardPalette.text)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func fixedDefaultPreview(
+        _ family: WidgetLayoutFamily,
+        width: CGFloat,
+        height: CGFloat
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack {
+                Text(family.displayName.uppercased())
+                    .font(.system(size: 9, weight: .black, design: .monospaced))
+                    .tracking(0.9)
+                Spacer()
+                Text("FIXED")
+                    .font(.system(size: 7, weight: .black, design: .monospaced))
+                    .foregroundStyle(DashboardPalette.green)
+            }
+
+            VStack(spacing: 0) {
+                HStack(spacing: 6) {
+                    if family != .small {
+                        Image(systemName: "point.3.connected.trianglepath.dotted")
+                            .foregroundStyle(DashboardPalette.green)
+                    }
+                    Text(github.username.isEmpty ? "@yjay18" : "@\(github.username)")
+                        .font(.system(size: 8, weight: .semibold, design: .rounded))
+                    Spacer()
+                    Text("DAILY")
+                        .font(.system(size: 7, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 3)
+                        .overlay { Capsule().stroke(DashboardPalette.line, lineWidth: 1) }
+                }
+                .padding(.horizontal, 10)
+                .frame(height: 30)
+
+                defaultPreviewBody(family)
+                    .padding(family == .small ? 9 : 10)
+            }
+            .frame(width: width, height: height)
+            .background(DashboardPalette.ink)
+            .clipShape(RoundedRectangle(cornerRadius: family == .small ? 24 : 20, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: family == .small ? 24 : 20, style: .continuous)
+                    .stroke(Color.white.opacity(0.16), lineWidth: 1)
+            }
+            .shadow(color: Color.black.opacity(0.24), radius: 14, y: 9)
+        }
+    }
+
+    @ViewBuilder
+    private func defaultPreviewBody(_ family: WidgetLayoutFamily) -> some View {
+        switch family {
+        case .small:
+            VStack(alignment: .leading, spacing: 4) {
+                defaultPreviewMetric("+25,036", color: DashboardPalette.green, size: 25)
+                defaultPreviewMetric("−1,031", color: DashboardPalette.coral, size: 21)
+                Spacer(minLength: 0)
+                defaultPreviewSummary
+                defaultPreviewBars(height: 8)
+            }
+        case .medium:
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 5) {
+                    defaultPreviewMetric("+25,036", color: DashboardPalette.green, size: 24)
+                    defaultPreviewMetric("−1,031", color: DashboardPalette.coral, size: 21)
+                    defaultPreviewSummary
+                }
+                Rectangle().fill(DashboardPalette.line).frame(width: 1)
+                VStack(alignment: .leading, spacing: 7) {
+                    defaultPreviewRepos(rows: 2)
+                    Spacer(minLength: 0)
+                    defaultPreviewBars(height: 13)
+                }
+            }
+        case .large:
+            VStack(spacing: 8) {
+                HStack(spacing: 8) {
+                    defaultPreviewCard("+25,036", color: DashboardPalette.green)
+                    defaultPreviewCard("−1,031", color: DashboardPalette.coral)
+                }
+                defaultPreviewSummary
+                HStack(spacing: 8) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("ACTIVITY").font(.system(size: 7, weight: .bold, design: .rounded))
+                        defaultPreviewBars(height: 38)
+                        HStack(spacing: 3) {
+                            ForEach(0..<7, id: \.self) { _ in
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(DashboardPalette.green.opacity(0.5))
+                                    .frame(height: 10)
+                            }
+                        }
+                    }
+                    .padding(9)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 9))
+
+                    defaultPreviewRepos(rows: 4)
+                        .padding(9)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 9))
+                }
+            }
+        case .extraLarge:
+            HStack(spacing: 10) {
+                VStack(spacing: 8) {
+                    defaultPreviewCard("+25,036", color: DashboardPalette.green)
+                    defaultPreviewCard("−1,031", color: DashboardPalette.coral)
+                    defaultPreviewSummary
+                }
+                VStack(spacing: 8) {
+                    VStack(alignment: .leading, spacing: 7) {
+                        Text("ACTIVITY").font(.system(size: 7, weight: .bold, design: .rounded))
+                        defaultPreviewBars(height: 48)
+                    }
+                    .padding(9)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 9))
+                    HStack(spacing: 3) {
+                        ForEach(0..<12, id: \.self) { index in
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(index < 8 ? DashboardPalette.green : DashboardPalette.lifted)
+                        }
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 9))
+                }
+                defaultPreviewRepos(rows: 6)
+                    .padding(9)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 9))
+            }
+        }
+    }
+
+    private func defaultPreviewMetric(_ text: String, color: Color, size: CGFloat) -> some View {
+        Text(text)
+            .font(.system(size: size, weight: .heavy, design: .rounded))
+            .monospacedDigit()
+            .foregroundStyle(color)
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
+    }
+
+    private var defaultPreviewSummary: some View {
+        HStack(spacing: 7) {
+            Text("29 commits")
+            Rectangle().fill(DashboardPalette.line).frame(width: 1, height: 9)
+            Text("3 repositories")
+            Spacer(minLength: 0)
+        }
+        .font(.system(size: 7, weight: .semibold, design: .rounded))
+        .foregroundStyle(DashboardPalette.muted)
+        .padding(.horizontal, 8)
+        .frame(height: 22)
+        .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 7))
+    }
+
+    private func defaultPreviewCard(_ text: String, color: Color) -> some View {
+        defaultPreviewMetric(text, color: color, size: 25)
+            .padding(9)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 9))
+    }
+
+    private func defaultPreviewBars(height: CGFloat) -> some View {
+        HStack(alignment: .bottom, spacing: 3) {
+            ForEach(Array([0.22, 0.68, 0.34, 0.92, 0.08, 0.56, 0.75].enumerated()), id: \.offset) { _, value in
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(DashboardPalette.green)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: max(2, height * value))
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: height, alignment: .bottom)
+        .clipped()
+    }
+
+    private func defaultPreviewRepos(rows: Int) -> some View {
+        VStack(spacing: 6) {
+            ForEach(Array(0..<rows), id: \.self) { index in
+                VStack(spacing: 3) {
+                    HStack {
+                        Text(["widtget", "studio", "signal", "tools", "notes", "parser"][index % 6])
+                        Spacer()
+                        Text("+\(index + 1)k")
+                            .foregroundStyle(DashboardPalette.green)
+                    }
+                    .font(.system(size: 7, weight: .semibold, design: .rounded))
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(DashboardPalette.lifted)
+                        .frame(height: 3)
+                        .overlay(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 1)
+                                .fill(DashboardPalette.green)
+                                .frame(maxWidth: .infinity)
+                                .scaleEffect(x: 1 - Double(index) * 0.12, anchor: .leading)
+                        }
+                }
             }
         }
     }
@@ -414,11 +722,7 @@ struct WidgetSettingsView: View {
                 }
             }
 
-            Text(
-                visualTheme == .defaultTheme
-                    ? "Auto restores the original dark surface and semantic green/red values."
-                    : "Auto uses Blockwork's semantic poster color for this block."
-            )
+            Text("Auto uses Blockwork's semantic poster color for this block.")
             .font(.system(size: 8, weight: .medium))
             .foregroundStyle(studioMuted)
             .fixedSize(horizontal: false, vertical: true)
@@ -465,10 +769,10 @@ struct WidgetSettingsView: View {
 
                 GeometryReader { proxy in
                     familySlotLayout(family, size: proxy.size)
-                        .padding(visualTheme == .blockwork ? 3 : 8)
+                        .padding(3)
                         .frame(width: proxy.size.width, height: proxy.size.height)
                 }
-                .background(visualTheme == .blockwork ? studioInk : DashboardPalette.ink)
+                .background(studioInk)
             }
             .frame(width: width, height: height)
             .clipShape(RoundedRectangle(cornerRadius: family == .small ? 24 : 20, style: .continuous))
@@ -485,7 +789,7 @@ struct WidgetSettingsView: View {
         let slots = familyLayouts[family]
             ?? WidgetModularPreferences.defaults.familyLayouts[family]
             ?? []
-        let spacing: CGFloat = visualTheme == .blockwork ? 3 : 7
+        let spacing: CGFloat = 3
 
         switch family {
         case .small:
@@ -588,7 +892,7 @@ struct WidgetSettingsView: View {
     private func studioSwatch(_ color: WidgetBlockColor) -> Color {
         switch color {
         case .automatic:
-            visualTheme == .defaultTheme ? DashboardPalette.panel : studioPaper
+            studioPaper
         case .orange: studioOrange
         case .lime: studioLime
         case .sky: studioSky
@@ -602,9 +906,6 @@ struct WidgetSettingsView: View {
         if selected != .automatic {
             return studioSwatch(selected)
         }
-        if visualTheme == .defaultTheme {
-            return DashboardPalette.panel
-        }
         switch block {
         case .additions: return studioOrange
         case .deletions, .snake: return studioInk
@@ -616,9 +917,6 @@ struct WidgetSettingsView: View {
 
     private func studioBlockForeground(_ block: WidgetPane) -> Color {
         let selected = blockColors[block] ?? .automatic
-        if visualTheme == .defaultTheme && selected == .automatic {
-            return DashboardPalette.text
-        }
         let fillChoice: WidgetBlockColor
         if selected == .automatic {
             fillChoice = block == .deletions || block == .snake ? .ink : .paper
@@ -1208,6 +1506,17 @@ struct WidgetSettingsView: View {
 
     private func reloadWidgets() {
         WidgetCenter.shared.reloadTimelines(ofKind: WidtgetWidgetKind.value)
+    }
+
+    private func migrateToFixedDefaultIfNeeded() {
+        let currentVersion = SharedPreferences.defaults.integer(
+            forKey: SharedPreferences.Key.themeScopeVersion
+        )
+        guard currentVersion < 1 else { return }
+
+        visualTheme = .defaultTheme
+        SharedPreferences.defaults.set(1, forKey: SharedPreferences.Key.themeScopeVersion)
+        saveWidgetStudio()
     }
 
     private func saveWidgetStudio() {

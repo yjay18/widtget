@@ -207,6 +207,7 @@ enum SharedPreferences {
         static let visualTheme = "appearance.widget.visualTheme"
         static let layoutPrefix = "appearance.widget.layout"
         static let blockColorPrefix = "appearance.widget.blockColor"
+        static let themeScopeVersion = "appearance.widget.themeScopeVersion"
         static let githubUsername = "github.username"
         static let lastSuccessfulRefresh = "github.lastSuccessfulRefresh"
         static let githubRefreshRequested = "github.refreshRequested"
