@@ -5,10 +5,9 @@ struct WidtgetHostApp: App {
     var body: some Scene {
         Window("widtget", id: "settings") {
             WidgetSettingsView()
-                .frame(width: 420)
         }
-        .defaultSize(width: 420, height: 620)
-        .windowResizability(.contentSize)
+        .defaultSize(width: 980, height: 760)
+        .windowResizability(.contentMinSize)
         .handlesExternalEvents(matching: ["refresh"])
         .commands {
             CommandGroup(replacing: .newItem) { }
