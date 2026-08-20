@@ -68,7 +68,11 @@ case "$action" in
     unregister_app "$unsigned_derived_data/Build/Products/$configuration/widtget.app"
     unregister_app "$legacy_derived_data/Build/Products/$configuration/widtget.app"
     "$lsregister_path" -f -R -trusted "$app_path"
-    open "$app_path"
+
+    # `open` only activates an existing process for the same app. Restart both the host and its
+    # embedded extension so WidgetKit cannot keep rendering through an older loaded executable.
+    pkill -f "$app_path" >/dev/null 2>&1 || true
+    open -n "$app_path"
     ;;
   clean)
     xcodebuild "${common_build_args[@]}" -derivedDataPath "$unsigned_derived_data" clean
