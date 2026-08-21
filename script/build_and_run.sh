@@ -53,8 +53,11 @@ case "$action" in
     ;;
   run)
     # A signed run registers the embedded WidgetKit extension with macOS.
+    # -allowProvisioningUpdates renews the 7-day development profile, which otherwise expires
+    # and makes macOS refuse to launch the app ("The application \"widtget\" can't be opened.").
     xcodebuild "${common_build_args[@]}" \
       -derivedDataPath "$signed_derived_data" \
+      -allowProvisioningUpdates \
       build
 
     app_path="$signed_derived_data/Build/Products/$configuration/widtget.app"
