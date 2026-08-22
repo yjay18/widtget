@@ -19,11 +19,7 @@ struct WidtgetWidget: Widget {
         ) { entry in
             WidtgetWidgetView(entry: entry)
                 .containerBackground(for: .widget) {
-                    if entry.preferences.visualTheme == .blockwork {
-                        WidtgetPalette.background
-                    } else {
-                        DefaultWidgetPalette.background
-                    }
+                    entry.preferences.visualTheme.containerBackgroundColor
                 }
         }
         .configurationDisplayName("widtget")

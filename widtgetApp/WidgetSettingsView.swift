@@ -224,12 +224,12 @@ struct WidgetSettingsView: View {
                     Text(
                         visualTheme == .blockwork
                             ? "BLOCKWORK / WIDGET SYSTEM"
-                            : "DEFAULT / ORIGINAL SYSTEM"
+                            : "\(visualTheme.displayName.uppercased()) / FIXED LAYOUT"
                     )
                         .font(.system(size: 9, weight: .black, design: .monospaced))
                         .tracking(1.2)
                         .foregroundStyle(studioOrange)
-                    Text(visualTheme == .blockwork ? "Build your widtget" : "The original widtget")
+                    Text(visualTheme == .blockwork ? "Build your widtget" : visualTheme.displayName)
                         .font(.system(size: 30, weight: .black, design: .rounded))
                         .tracking(-1.2)
                 }
@@ -247,7 +247,7 @@ struct WidgetSettingsView: View {
                         }
                     }
                     .labelsHidden()
-                    .pickerStyle(.segmented)
+                    .pickerStyle(.menu)
                     .frame(width: 230)
                 }
             }
@@ -339,14 +339,14 @@ struct WidgetSettingsView: View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 18) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("DEFAULT IS FIXED")
+                    Text("\(visualTheme.displayName.uppercased()) IS FIXED")
                         .font(.system(size: 10, weight: .black, design: .monospaced))
                         .tracking(1)
                         .foregroundStyle(DashboardPalette.green)
-                    Text("The layout you already had")
+                    Text("A fixed size-specific layout")
                         .font(.system(size: 22, weight: .black, design: .rounded))
                         .tracking(-0.6)
-                    Text("Default keeps its original size-specific hierarchy. Blockwork slots, block order, and poster colors never alter it.")
+                    Text("\(visualTheme.displayName) keeps its own size-specific hierarchy. Blockwork slots, block order, and poster colors never alter it.")
                         .font(.system(size: 11, weight: .medium, design: .rounded))
                         .foregroundStyle(DashboardPalette.muted)
                         .fixedSize(horizontal: false, vertical: true)

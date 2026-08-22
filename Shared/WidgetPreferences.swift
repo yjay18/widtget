@@ -91,6 +91,7 @@ enum WidgetPane: String, CaseIterable, Identifiable, Codable, Sendable {
 enum WidgetVisualTheme: String, CaseIterable, Identifiable, Codable, Sendable {
     case defaultTheme
     case blockwork
+    case glasshouse
 
     var id: String { rawValue }
 
@@ -98,6 +99,7 @@ enum WidgetVisualTheme: String, CaseIterable, Identifiable, Codable, Sendable {
         switch self {
         case .defaultTheme: "Default"
         case .blockwork: "Blockwork"
+        case .glasshouse: "Glasshouse"
         }
     }
 }

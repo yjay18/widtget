@@ -8,13 +8,20 @@ struct WidtgetWidgetView: View {
 
     var body: some View {
         Group {
-            if entry.preferences.visualTheme == .blockwork {
+            switch entry.preferences.visualTheme {
+            case .blockwork:
                 ComposedWidgetView(
                     entry: entry,
                     preferences: entry.preferences,
                     family: layoutFamily
                 )
-            } else {
+            case .glasshouse:
+                GlasshouseWidgetView(
+                    entry: entry,
+                    preferences: entry.preferences,
+                    family: layoutFamily
+                )
+            case .defaultTheme:
                 DefaultWidgetView(
                     entry: entry,
                     preferences: entry.preferences,

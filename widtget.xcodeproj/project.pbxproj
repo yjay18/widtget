@@ -36,6 +36,8 @@
 		A1000000000000000000001B /* DashboardAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001B /* DashboardAnalytics.swift */; };
 		A1000000000000000000001C /* AnalyticsDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001C /* AnalyticsDashboardView.swift */; };
 		A1000000000000000000001D /* DefaultWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001D /* DefaultWidgetView.swift */; };
+		A1000000000000000000001E /* ThemeMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001E /* ThemeMetrics.swift */; };
+		A1000000000000000000001F /* GlasshouseWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001F /* GlasshouseWidgetView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +94,8 @@
 		B1000000000000000000001B /* DashboardAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardAnalytics.swift; sourceTree = "<group>"; };
 		B1000000000000000000001C /* AnalyticsDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsDashboardView.swift; sourceTree = "<group>"; };
 		B1000000000000000000001D /* DefaultWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultWidgetView.swift; sourceTree = "<group>"; };
+		B1000000000000000000001E /* ThemeMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeMetrics.swift; sourceTree = "<group>"; };
+		B1000000000000000000001F /* GlasshouseWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlasshouseWidgetView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -197,6 +201,8 @@
 				B10000000000000000000007 /* RepositoryViews.swift */,
 				B10000000000000000000008 /* WidtgetWidgetView.swift */,
 				B1000000000000000000001D /* DefaultWidgetView.swift */,
+				B1000000000000000000001E /* ThemeMetrics.swift */,
+				B1000000000000000000001F /* GlasshouseWidgetView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -345,6 +351,8 @@
 				A10000000000000000000007 /* RepositoryViews.swift in Sources */,
 				A10000000000000000000008 /* WidtgetWidgetView.swift in Sources */,
 				A1000000000000000000001D /* DefaultWidgetView.swift in Sources */,
+				A1000000000000000000001E /* ThemeMetrics.swift in Sources */,
+				A1000000000000000000001F /* GlasshouseWidgetView.swift in Sources */,
 				A10000000000000000000009 /* WidtgetWidget.swift in Sources */,
 				A1000000000000000000000A /* WidtgetPreviews.swift in Sources */,
 				A1000000000000000000000E /* WidgetPreferences.swift in Sources */,
