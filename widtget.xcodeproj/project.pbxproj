@@ -40,6 +40,7 @@
 		A1000000000000000000001F /* GlasshouseWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001F /* GlasshouseWidgetView.swift */; };
 		A10000000000000000000020 /* PhosphorWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* PhosphorWidgetView.swift */; };
 		A10000000000000000000021 /* BroadsheetWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* BroadsheetWidgetView.swift */; };
+		A10000000000000000000022 /* ArcadeWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000022 /* ArcadeWidgetView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -100,6 +101,7 @@
 		B1000000000000000000001F /* GlasshouseWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlasshouseWidgetView.swift; sourceTree = "<group>"; };
 		B10000000000000000000020 /* PhosphorWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhosphorWidgetView.swift; sourceTree = "<group>"; };
 		B10000000000000000000021 /* BroadsheetWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadsheetWidgetView.swift; sourceTree = "<group>"; };
+		B10000000000000000000022 /* ArcadeWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeWidgetView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,6 +211,7 @@
 				B1000000000000000000001F /* GlasshouseWidgetView.swift */,
 				B10000000000000000000020 /* PhosphorWidgetView.swift */,
 				B10000000000000000000021 /* BroadsheetWidgetView.swift */,
+				B10000000000000000000022 /* ArcadeWidgetView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -361,6 +364,7 @@
 				A1000000000000000000001F /* GlasshouseWidgetView.swift in Sources */,
 				A10000000000000000000020 /* PhosphorWidgetView.swift in Sources */,
 				A10000000000000000000021 /* BroadsheetWidgetView.swift in Sources */,
+				A10000000000000000000022 /* ArcadeWidgetView.swift in Sources */,
 				A10000000000000000000009 /* WidtgetWidget.swift in Sources */,
 				A1000000000000000000000A /* WidtgetPreviews.swift in Sources */,
 				A1000000000000000000000E /* WidgetPreferences.swift in Sources */,

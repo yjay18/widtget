@@ -33,6 +33,12 @@ struct WidtgetWidgetView: View {
                     preferences: entry.preferences,
                     family: layoutFamily
                 )
+            case .arcade:
+                ArcadeWidgetView(
+                    entry: entry,
+                    preferences: entry.preferences,
+                    family: layoutFamily
+                )
             case .defaultTheme:
                 DefaultWidgetView(
                     entry: entry,

@@ -94,6 +94,7 @@ enum WidgetVisualTheme: String, CaseIterable, Identifiable, Codable, Sendable {
     case glasshouse
     case phosphor
     case broadsheet
+    case arcade
 
     var id: String { rawValue }
 
@@ -104,6 +105,7 @@ enum WidgetVisualTheme: String, CaseIterable, Identifiable, Codable, Sendable {
         case .glasshouse: "Glasshouse"
         case .phosphor: "Phosphor"
         case .broadsheet: "Broadsheet"
+        case .arcade: "Arcade"
         }
     }
 }

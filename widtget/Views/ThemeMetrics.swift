@@ -48,6 +48,7 @@ extension WidgetVisualTheme {
         case .glasshouse: Color(red: 0.110, green: 0.114, blue: 0.129)
         case .phosphor: Color(red: 0.024, green: 0.035, blue: 0.039)
         case .broadsheet: Color(red: 0.914, green: 0.894, blue: 0.835)
+        case .arcade: Color(red: 0.059, green: 0.220, blue: 0.059)
         }
     }
 }
