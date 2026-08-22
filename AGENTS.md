@@ -44,6 +44,65 @@ The signed run is required for macOS to register the embedded widget extension c
 - `Shared/WidgetPreferences.swift`: App Group preferences shared by both targets.
 - `widtget/Provider/ActivityProvider.swift`: current fixture data and the integration seam for live GitHub activity.
 
+## Widget themes
+
+A theme owns type, chrome, and pane shape; a colorway only swaps hues. `WidgetVisualTheme`
+(in `Shared/WidgetPreferences.swift`) selects one, and every theme renders the same
+`ActivitySnapshot` — the numbers never change, only their treatment.
+
+Two families of theme live side by side:
+
+- **Blockwork** is modular: `ComposedWidgetView` in `WidtgetWidgetView.swift` lays out
+  user-arranged panes (`WidgetPane`) per family, with drag-and-drop editing in the host.
+  Modular slot/colorway/block-color editing stays scoped to Blockwork.
+- **Default and the four themes below are fixed**: each is one hand-composed layout per
+  family, like `DefaultWidgetView`. They ignore `familyLayouts`/`blockColors`.
+
+### Adding a fixed theme (the pattern every new theme follows)
+
+1. Add a case to `WidgetVisualTheme` and its `displayName` switch in
+   `Shared/WidgetPreferences.swift`.
+2. Add one `…WidgetView.swift` under `widtget/Views/` exposing
+   `init(entry:preferences:family:)` and switching on `WidgetLayoutFamily`. Paint the
+   theme's own `.background(...)`.
+3. Route it from the `switch entry.preferences.visualTheme` in `WidtgetWidgetView.body`,
+   and give it a base colour in `WidgetVisualTheme.containerBackgroundColor`
+   (`widtget/Views/ThemeMetrics.swift`) so the widget's bleed area matches.
+4. Register the new file in `widtget.xcodeproj/project.pbxproj` (the project is not
+   file-system-synchronized): add a `PBXFileReference` (`B1…`), a `PBXBuildFile` (`A1…`),
+   a child in the `Views` group, and an entry in the widget target's `Sources` phase.
+5. The host theme picker (`WidgetSettingsView`) iterates `WidgetVisualTheme.allCases`, so
+   it adopts the case automatically; only Blockwork shows the composer, every other theme
+   shows the fixed-layout overview.
+
+Shared derivations (`net`, `averagePerCommit`, `activeIntervals`, `peakIndex`) and the
+interval-label helper live in `widtget/Views/ThemeMetrics.swift` — reuse them, don't
+recompute per theme.
+
+### The four themes
+
+- **Glasshouse** — the one that disappears. Dark translucent ground, SF, hairline
+  separators, no frame of its own; colour appears only on the data (mint additions, rose
+  deletions), everything else white at a few opacities. Cheapest to build: Default's
+  hierarchy in system chrome. Strongest at small/medium beside system widgets.
+  Palette: `#1c1d21 · #f2f3f5 · #7ee2a8 · #f0868c`.
+- **Phosphor** — the week as terminal output. `.monospaced` throughout; block glyphs
+  (`▁▃▂█▆▄▁`) do the charting instead of bar views; deletions in amber; a caret marks the
+  widget as live. Strongest at medium/large where the repository rows read as a `git log`.
+  Palette: `#06090a · #4af08a · #1f7a4a · #ffb340`.
+- **Broadsheet** — Blockwork's opposite twin: same newsprint stock, but hairlines and a
+  high-contrast serif (system New York, `.serif`) instead of slabs and heavy mono. Front-page
+  figure, a day book with dotted leaders, activity engraved as hatched rules; press red on
+  deletions. Wants column space — best at large/XL. Palette: `#e9e4d5 · #19170f · #9e2f1b`.
+  Upgrade path: bundle Bodoni Moda for a closer match to the mockup.
+- **Arcade** — built around the commit-snek pane that already exists. Four-colour Game Boy
+  palette, pixel grid for the snek playfield and bars; commits are score, peak day is a
+  hi-score. Best at XL where the playfield is the point. Palette:
+  `#0f380f · #306230 · #8bac0f · #9bbc0f · #d94f1e (food)`. Ships with `.monospaced`;
+  upgrade path: bundle a pixel face (Silkscreen) for the true arcade look.
+
+Mockups of all four (small + medium) live in the project's design board artifact.
+
 When adding live GitHub data, store credentials in Keychain from the host app, fetch there, write only display-ready snapshots into the App Group container, and reload WidgetKit timelines. Never place a token in source, plist files, UserDefaults, or widget timeline entries.
 
 ## Validation
