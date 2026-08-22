@@ -46,6 +46,7 @@ extension WidgetVisualTheme {
         case .defaultTheme: Color(red: 0.035, green: 0.047, blue: 0.063)
         case .blockwork: Color(red: 0.937, green: 0.898, blue: 0.804)
         case .glasshouse: Color(red: 0.110, green: 0.114, blue: 0.129)
+        case .phosphor: Color(red: 0.024, green: 0.035, blue: 0.039)
         }
     }
 }

@@ -21,6 +21,12 @@ struct WidtgetWidgetView: View {
                     preferences: entry.preferences,
                     family: layoutFamily
                 )
+            case .phosphor:
+                PhosphorWidgetView(
+                    entry: entry,
+                    preferences: entry.preferences,
+                    family: layoutFamily
+                )
             case .defaultTheme:
                 DefaultWidgetView(
                     entry: entry,
