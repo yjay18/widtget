@@ -27,6 +27,12 @@ struct WidtgetWidgetView: View {
                     preferences: entry.preferences,
                     family: layoutFamily
                 )
+            case .broadsheet:
+                BroadsheetWidgetView(
+                    entry: entry,
+                    preferences: entry.preferences,
+                    family: layoutFamily
+                )
             case .defaultTheme:
                 DefaultWidgetView(
                     entry: entry,
