@@ -168,7 +168,7 @@ struct WidgetSettingsView: View {
                                 .font(.system(size: 12, weight: .bold, design: .rounded))
                             Spacer()
                         }
-                        .foregroundStyle(selectedSection == section ? DashboardPalette.text : DashboardPalette.muted)
+                        .foregroundStyle(selectedSection == section ? DashboardPalette.text : DashboardPalette.text.opacity(0.68))
                         .padding(.horizontal, 12)
                         .frame(height: 36)
                         .background(
@@ -397,18 +397,18 @@ struct WidgetSettingsView: View {
                                 .foregroundStyle(DashboardPalette.muted)
                         }
                         Spacer()
-                        Text("ORIGINAL")
+                        Text(visualTheme.displayName.uppercased())
                             .font(.system(size: 8, weight: .black, design: .monospaced))
                             .foregroundStyle(DashboardPalette.green)
                     }
 
                     HStack(alignment: .top, spacing: 18) {
-                        fixedDefaultPreview(.small, width: 170, height: 170)
-                        fixedDefaultPreview(.medium, width: 360, height: 170)
+                        fixedThemePreview(.small, width: 170, height: 170)
+                        fixedThemePreview(.medium, width: 360, height: 170)
                     }
 
-                    fixedDefaultPreview(.large, width: 360, height: 330)
-                    fixedDefaultPreview(.extraLarge, width: 650, height: 310)
+                    fixedThemePreview(.large, width: 360, height: 330)
+                    fixedThemePreview(.extraLarge, width: 650, height: 310)
                 }
                 .padding(24)
             }
@@ -629,6 +629,291 @@ struct WidgetSettingsView: View {
                                 .frame(maxWidth: .infinity)
                                 .scaleEffect(x: 1 - Double(index) * 0.12, anchor: .leading)
                         }
+                }
+            }
+        }
+    }
+
+    // MARK: - Themed fixed-layout previews
+    //
+    // Host-local mocks so the studio shows each fixed theme differently, the same
+    // way Default and Blockwork are mocked here. The real widget views live in the
+    // widget target and can't be instantiated from the app, so these mirror their
+    // look (palette, type, signature treatment) rather than importing them.
+
+    private struct ThemePreviewStyle {
+        let theme: WidgetVisualTheme
+        let base: Color
+        let text: Color
+        let add: Color
+        let del: Color
+        let muted: Color
+        let panel: Color
+        let font: Font.Design
+        let corner: CGFloat
+    }
+
+    private var themePreviewStyle: ThemePreviewStyle {
+        switch visualTheme {
+        case .glasshouse:
+            ThemePreviewStyle(
+                theme: .glasshouse,
+                base: Color(red: 0.110, green: 0.114, blue: 0.129),
+                text: Color(red: 0.949, green: 0.953, blue: 0.961),
+                add: Color(red: 0.494, green: 0.886, blue: 0.659),
+                del: Color(red: 0.941, green: 0.525, blue: 0.549),
+                muted: Color.white.opacity(0.5), panel: Color.white.opacity(0.06),
+                font: .default, corner: 20)
+        case .phosphor:
+            ThemePreviewStyle(
+                theme: .phosphor,
+                base: Color(red: 0.024, green: 0.035, blue: 0.039),
+                text: Color(red: 0.290, green: 0.941, blue: 0.541),
+                add: Color(red: 0.290, green: 0.941, blue: 0.541),
+                del: Color(red: 1.0, green: 0.702, blue: 0.251),
+                muted: Color(red: 0.173, green: 0.561, blue: 0.345), panel: Color.white.opacity(0.04),
+                font: .monospaced, corner: 12)
+        case .broadsheet:
+            ThemePreviewStyle(
+                theme: .broadsheet,
+                base: Color(red: 0.914, green: 0.894, blue: 0.835),
+                text: Color(red: 0.098, green: 0.090, blue: 0.059),
+                add: Color(red: 0.098, green: 0.090, blue: 0.059),
+                del: Color(red: 0.620, green: 0.184, blue: 0.106),
+                muted: Color(red: 0.427, green: 0.396, blue: 0.333),
+                panel: Color(red: 0.098, green: 0.090, blue: 0.059).opacity(0.06),
+                font: .serif, corner: 4)
+        case .arcade:
+            ThemePreviewStyle(
+                theme: .arcade,
+                base: Color(red: 0.059, green: 0.220, blue: 0.059),
+                text: Color(red: 0.545, green: 0.675, blue: 0.059),
+                add: Color(red: 0.608, green: 0.737, blue: 0.059),
+                del: Color(red: 0.851, green: 0.310, blue: 0.118),
+                muted: Color(red: 0.188, green: 0.384, blue: 0.188),
+                panel: Color(red: 0.114, green: 0.302, blue: 0.114),
+                font: .monospaced, corner: 6)
+        case .defaultTheme, .blockwork:
+            ThemePreviewStyle(
+                theme: .defaultTheme, base: DashboardPalette.ink, text: DashboardPalette.text,
+                add: DashboardPalette.green, del: DashboardPalette.coral, muted: DashboardPalette.muted,
+                panel: DashboardPalette.panel, font: .rounded, corner: 20)
+        }
+    }
+
+    @ViewBuilder
+    private func fixedThemePreview(_ family: WidgetLayoutFamily, width: CGFloat, height: CGFloat) -> some View {
+        if visualTheme == .defaultTheme {
+            fixedDefaultPreview(family, width: width, height: height)
+        } else {
+            themedPreviewCard(themePreviewStyle, family: family, width: width, height: height)
+        }
+    }
+
+    private func themedPreviewCard(
+        _ style: ThemePreviewStyle,
+        family: WidgetLayoutFamily,
+        width: CGFloat,
+        height: CGFloat
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack {
+                Text(family.displayName.uppercased())
+                    .font(.system(size: 9, weight: .black, design: .monospaced)).tracking(0.9)
+                Spacer()
+                Text(visualTheme.displayName.uppercased())
+                    .font(.system(size: 7, weight: .black, design: .monospaced))
+                    .foregroundStyle(DashboardPalette.green)
+            }
+
+            VStack(spacing: 0) {
+                themedPreviewHeader(style)
+                    .padding(.horizontal, 11).frame(height: 28)
+                themedPreviewBody(style, family: family)
+                    .padding(family == .small ? 10 : 11)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+            .frame(width: width, height: height)
+            .background(style.base)
+            .clipShape(RoundedRectangle(cornerRadius: style.corner, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: style.corner, style: .continuous)
+                    .stroke(style.text.opacity(0.14), lineWidth: 1)
+            }
+            .shadow(color: Color.black.opacity(0.24), radius: 14, y: 9)
+        }
+    }
+
+    @ViewBuilder
+    private func themedPreviewHeader(_ style: ThemePreviewStyle) -> some View {
+        let user = github.username.isEmpty ? "yjay18" : github.username
+        HStack(spacing: 6) {
+            switch style.theme {
+            case .phosphor:
+                Text("~/\(user)").foregroundStyle(style.text)
+            case .broadsheet:
+                Text("The commit record").font(.system(size: 10, weight: .semibold, design: .serif))
+            case .arcade:
+                Text(user.uppercased()).foregroundStyle(style.text)
+            default:
+                Circle().fill(style.add).frame(width: 10, height: 10)
+                Text(user).foregroundStyle(style.text)
+            }
+            Spacer()
+            Text(style.theme == .broadsheet ? "Daily" : (style.theme == .arcade ? "DAILY" : "daily"))
+                .foregroundStyle(style.theme == .arcade ? style.add : style.muted)
+                .padding(.horizontal, style.theme == .glasshouse ? 6 : 0).padding(.vertical, 3)
+                .background {
+                    if style.theme == .glasshouse {
+                        Capsule().fill(Color.white.opacity(0.12))
+                    }
+                }
+        }
+        .font(.system(size: 9, weight: .semibold, design: style.font))
+        .foregroundStyle(style.muted)
+    }
+
+    @ViewBuilder
+    private func themedPreviewBody(_ style: ThemePreviewStyle, family: WidgetLayoutFamily) -> some View {
+        let wide = family != .small
+        switch style.theme {
+        case .phosphor:
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("$ git log --stat").font(.system(size: 8, design: .monospaced)).foregroundStyle(style.muted)
+                    Text("+25,036").font(.system(size: wide ? 30 : 24, weight: .bold, design: .monospaced)).foregroundStyle(style.add)
+                    Text("−1,031").font(.system(size: 14, weight: .semibold, design: .monospaced)).foregroundStyle(style.del)
+                    Text("▃▅▁█▆▄▁").font(.system(size: 16, design: .monospaced)).foregroundStyle(style.add)
+                    Spacer(minLength: 0)
+                    Text("m t w t f s s · net +24k").font(.system(size: 8, design: .monospaced)).foregroundStyle(style.muted)
+                }
+                if wide { phosphorRepoColumn(style) }
+            }
+        case .broadsheet:
+            HStack(alignment: .top, spacing: 14) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Rectangle().fill(style.text).frame(height: 1)
+                    Text("LINES SET THIS WEEK").font(.system(size: 7, weight: .bold, design: .monospaced)).tracking(1)
+                        .foregroundStyle(style.muted).padding(.top, 8)
+                    Text("+25,036").font(.system(size: wide ? 40 : 34, weight: .semibold, design: .serif)).foregroundStyle(style.text)
+                    Text("−1,031 STRUCK").font(.system(size: 7, weight: .bold, design: .monospaced)).tracking(1)
+                        .foregroundStyle(style.del).padding(.top, 3)
+                    Spacer(minLength: 0)
+                    themedBars(style, height: 22, ink: true)
+                }
+                if wide { broadsheetDayBook(style) }
+            }
+        case .arcade:
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("LINES MADE").font(.system(size: 8, weight: .heavy, design: .monospaced)).foregroundStyle(style.muted)
+                    Text("+25036").font(.system(size: wide ? 28 : 22, weight: .heavy, design: .monospaced)).foregroundStyle(style.add)
+                    Text("-1031").font(.system(size: 13, weight: .heavy, design: .monospaced)).foregroundStyle(style.del)
+                    Spacer(minLength: 0)
+                    HStack { Text("LV.4"); Spacer(); Text("HI THU") }
+                        .font(.system(size: 8, weight: .heavy, design: .monospaced)).foregroundStyle(style.muted)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                arcadePlayfield(style, cols: wide ? 12 : 8, rows: wide ? 5 : 3)
+                    .frame(maxWidth: .infinity)
+            }
+        default: // glasshouse
+            let metrics = VStack(alignment: .leading, spacing: 4) {
+                Text("lines added").font(.system(size: 9, weight: .medium)).foregroundStyle(style.muted)
+                Text("+25,036").font(.system(size: wide ? 36 : 28, weight: .semibold)).foregroundStyle(style.add)
+                Text("−1,031 removed").font(.system(size: 11, weight: .medium)).foregroundStyle(style.del)
+            }
+            let rhythm = VStack(alignment: .leading, spacing: 6) {
+                Text("seven day rhythm").font(.system(size: 9, weight: .medium)).foregroundStyle(style.muted)
+                Spacer(minLength: 0)
+                themedBars(style, height: wide ? 44 : 30, ink: false)
+            }
+            if wide {
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        metrics
+                        Spacer(minLength: 0)
+                        Text("net +24k · 913 avg").font(.system(size: 9, weight: .medium)).foregroundStyle(style.muted)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    rhythm
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .overlay(alignment: .leading) {
+                            Rectangle().fill(style.text.opacity(0.12)).frame(width: 1).offset(x: -6)
+                        }
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    metrics
+                    Spacer(minLength: 0)
+                    themedBars(style, height: 26, ink: false)
+                }
+            }
+        }
+    }
+
+    private func themedBars(_ style: ThemePreviewStyle, height: CGFloat, ink: Bool) -> some View {
+        HStack(alignment: .bottom, spacing: 3) {
+            ForEach(Array([0.33, 0.55, 0.12, 0.92, 0.70, 0.41, 0.08].enumerated()), id: \.offset) { index, value in
+                Rectangle()
+                    .fill(index == 3 && ink ? style.del : (value > 0.15 ? style.add : style.muted.opacity(0.5)))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: max(2, height * value))
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: height, alignment: .bottom)
+    }
+
+    private func phosphorRepoColumn(_ style: ThemePreviewStyle) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("4 repositories").font(.system(size: 8, design: .monospaced)).foregroundStyle(style.muted)
+            ForEach(Array(["studio", "linguist", "widtget", "notes"].enumerated()), id: \.offset) { index, name in
+                HStack(spacing: 5) {
+                    Text(name).foregroundStyle(style.text).lineLimit(1)
+                    Spacer(minLength: 3)
+                    Text(String(repeating: "█", count: 8 - index * 2) + String(repeating: "░", count: index * 2))
+                        .foregroundStyle(style.muted)
+                    Text("+\(12 - index * 3)k").foregroundStyle(style.add)
+                }
+                .font(.system(size: 8, weight: .medium, design: .monospaced))
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func broadsheetDayBook(_ style: ThemePreviewStyle) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("THE DAY BOOK").font(.system(size: 7, weight: .bold, design: .monospaced)).tracking(1)
+                .foregroundStyle(style.muted).padding(.bottom, 6)
+            ForEach(Array(["Mon", "Tue", "Wed", "Thu", "Fri"].enumerated()), id: \.offset) { index, day in
+                HStack(spacing: 5) {
+                    Text(day).font(.system(size: 11, design: .serif))
+                    Rectangle().fill(style.muted.opacity(0.4)).frame(height: 1)
+                    Text(["3,204", "5,411", "1,102", "9,812", "6,904"][index])
+                        .font(.system(size: 11, weight: .semibold, design: .serif))
+                        .foregroundStyle(index == 3 ? style.del : style.text)
+                }
+                .padding(.vertical, 2)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(alignment: .leading) { Rectangle().fill(style.muted.opacity(0.4)).frame(width: 1).offset(x: -7) }
+    }
+
+    private func arcadePlayfield(_ style: ThemePreviewStyle, cols: Int, rows: Int) -> some View {
+        let lit = min(cols * rows - 1, Int(Double(cols * rows) * 0.45))
+        return VStack(spacing: 3) {
+            ForEach(0..<rows, id: \.self) { row in
+                HStack(spacing: 3) {
+                    ForEach(0..<cols, id: \.self) { col in
+                        let i = row * cols + col
+                        Rectangle()
+                            .fill(i == lit ? style.del : (i < lit ? style.add : style.panel))
+                            .aspectRatio(1, contentMode: .fit)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
             }
         }
