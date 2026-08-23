@@ -117,8 +117,24 @@ struct PhosphorWidgetView: View {
             statsLine
             Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 2)
             repoColumn(limit: preferences.repositoryDetail.largeLimit)
-            Spacer(minLength: 0)
+            Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 2)
+            pet
         }
+    }
+
+    private var pet: some View {
+        CommitPetView(
+            commits: entry.snapshot.commits,
+            perBlock: preferences.snakeCommitsPerBlock,
+            net: entry.snapshot.net,
+            bodyColor: PhosphorPalette.green,
+            headColor: PhosphorPalette.light,
+            foodColor: PhosphorPalette.amber,
+            trackColor: PhosphorPalette.dim.opacity(0.35),
+            textColor: PhosphorPalette.green,
+            mono: true
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var extraLarge: some View {
@@ -131,7 +147,7 @@ struct PhosphorWidgetView: View {
                         .font(.system(size: 46, weight: .bold, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.5)
                     Text(value(entry.snapshot.deletions, sign: "−"))
                         .font(.system(size: 22, weight: .semibold, design: .monospaced)).foregroundStyle(PhosphorPalette.amber)
-                    Spacer(minLength: 0)
+                    pet
                     statsLine
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

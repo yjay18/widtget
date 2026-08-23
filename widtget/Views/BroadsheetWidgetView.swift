@@ -114,8 +114,24 @@ struct BroadsheetWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            Spacer(minLength: 0)
+            Rectangle().fill(inkC).frame(height: 1).padding(.top, 6)
+            pet
         }
+    }
+
+    private var pet: some View {
+        CommitPetView(
+            commits: entry.snapshot.commits,
+            perBlock: preferences.snakeCommitsPerBlock,
+            net: entry.snapshot.net,
+            bodyColor: inkC,
+            headColor: redC,
+            foodColor: redC,
+            trackColor: hairC,
+            textColor: inkC,
+            caption: "Commit streak"
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var extraLarge: some View {

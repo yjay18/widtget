@@ -39,6 +39,69 @@ extension ActivityEntry {
     }
 }
 
+// The commit-snek pet, themeable so any fixed theme can drop it into the roomy
+// large / extra-large layouts. Length tracks commits with the same block formula
+// the Blockwork snek pane uses. Wrap it in a `.frame(maxHeight: .infinity)` to fill
+// leftover vertical space.
+struct CommitPetView: View {
+    let commits: Int
+    let perBlock: Int
+    let net: Int
+    let bodyColor: Color
+    let headColor: Color
+    let foodColor: Color
+    let trackColor: Color
+    let textColor: Color
+    var mono: Bool = false
+    var caption: String? = nil
+
+    private var segments: Int {
+        let per = min(max(perBlock, CommitSnakeLimits.commitsPerBlockRange.lowerBound),
+                      CommitSnakeLimits.commitsPerBlockRange.upperBound)
+        return min(max(Int(ceil(Double(commits) / Double(per))), 0), CommitSnakeLimits.visualBlockCount)
+    }
+
+    private var mood: String {
+        if commits == 0 { "asleep" }
+        else if segments >= 16 { "stuffed" }
+        else if net < 0 { "slimming" }
+        else { "happy" }
+    }
+
+    private var design: Font.Design { mono ? .monospaced : .rounded }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Spacer(minLength: 0)
+            HStack {
+                Text(caption ?? "snek \(mood)")
+                    .font(.system(size: 11, weight: .semibold, design: design)).foregroundStyle(textColor)
+                Spacer()
+                Text("\(commits) commits")
+                    .font(.system(size: 9, weight: .medium, design: design)).foregroundStyle(textColor.opacity(0.6))
+            }
+            HStack(spacing: 3) {
+                ForEach(0..<CommitSnakeLimits.visualBlockCount, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(cell(index))
+                        .frame(height: 12)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            Text("1 block = \(perBlock) commits")
+                .font(.system(size: 8, weight: .medium, design: design)).foregroundStyle(textColor.opacity(0.5))
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func cell(_ index: Int) -> Color {
+        if index == segments && segments < CommitSnakeLimits.visualBlockCount { return foodColor }
+        if index == segments - 1 { return headColor }
+        if index < segments { return bodyColor }
+        return trackColor
+    }
+}
+
 extension WidgetVisualTheme {
     // Base colour painted behind the widget content and into the bleed margin.
     var containerBackgroundColor: Color {

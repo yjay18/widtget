@@ -104,8 +104,23 @@ struct GlasshouseWidgetView: View {
                 glassAxis()
             }
             reposList(limit: preferences.repositoryDetail.largeLimit)
-            Spacer(minLength: 0)
+            GlassDivider()
+            pet
         }
+    }
+
+    private var pet: some View {
+        CommitPetView(
+            commits: entry.snapshot.commits,
+            perBlock: preferences.snakeCommitsPerBlock,
+            net: entry.snapshot.net,
+            bodyColor: GlasshousePalette.mint,
+            headColor: GlasshousePalette.text,
+            foodColor: GlasshousePalette.rose,
+            trackColor: GlasshousePalette.hair,
+            textColor: GlasshousePalette.text
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var extraLarge: some View {
@@ -119,6 +134,8 @@ struct GlasshouseWidgetView: View {
                     GlassMetric(value: entry.snapshot.deletions, sign: "−", label: "lines deleted",
                                 color: GlasshousePalette.rose, size: 34, loading: loading, caption: "lines deleted")
                     statsRow
+                    GlassDivider()
+                    pet
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
