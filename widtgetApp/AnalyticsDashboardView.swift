@@ -12,6 +12,7 @@ enum DashboardPalette {
 }
 
 struct AnalyticsDashboardView: View {
+    @Environment(\.themePalette) private var palette
     @ObservedObject var github: GitHubAccountModel
     @Binding var windowMode: PeriodWindowMode
     let openConnections: () -> Void
@@ -28,7 +29,7 @@ struct AnalyticsDashboardView: View {
                 emptyState
             }
         }
-        .foregroundStyle(DashboardPalette.text)
+        .foregroundStyle(palette.text)
         .onAppear {
             withAnimation(.spring(response: 0.72, dampingFraction: 0.82)) {
                 revealed = true
@@ -55,7 +56,7 @@ struct AnalyticsDashboardView: View {
                         label: "COMMITS",
                         value: snapshot.commits,
                         suffix: "this week",
-                        color: DashboardPalette.text,
+                        color: palette.text,
                         revealed: revealed
                     )
                     NumberCard(
@@ -63,7 +64,7 @@ struct AnalyticsDashboardView: View {
                         value: snapshot.additions,
                         prefix: "+",
                         suffix: "additions",
-                        color: DashboardPalette.green,
+                        color: palette.green,
                         revealed: revealed
                     )
                     NumberCard(
@@ -71,7 +72,7 @@ struct AnalyticsDashboardView: View {
                         value: snapshot.deletions,
                         prefix: "−",
                         suffix: "deletions",
-                        color: DashboardPalette.coral,
+                        color: palette.coral,
                         revealed: revealed
                     )
                 }
@@ -97,14 +98,14 @@ struct AnalyticsDashboardView: View {
                 Text("WEEKLY SIGNAL")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .tracking(1.8)
-                    .foregroundStyle(DashboardPalette.green)
+                    .foregroundStyle(palette.green)
 
                 Text(github.username.isEmpty ? "Your activity" : "@\(github.username)")
                     .font(.system(size: 30, weight: .heavy, design: .rounded))
 
                 Text(windowMode == .fixed ? "This calendar week" : "The last seven days")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundStyle(DashboardPalette.muted)
+                    .foregroundStyle(palette.muted)
             }
 
             Spacer()
@@ -126,7 +127,7 @@ struct AnalyticsDashboardView: View {
                             if github.isBusy {
                                 ProgressView()
                                     .controlSize(.small)
-                                    .tint(DashboardPalette.green)
+                                    .tint(palette.green)
                             } else {
                                 Image(systemName: "arrow.clockwise")
                             }
@@ -135,8 +136,8 @@ struct AnalyticsDashboardView: View {
                         .font(.system(size: 10, weight: .bold, design: .monospaced))
                         .padding(.horizontal, 12)
                         .frame(height: 30)
-                        .background(DashboardPalette.lifted, in: Capsule())
-                        .overlay { Capsule().stroke(DashboardPalette.line, lineWidth: 1) }
+                        .background(palette.lifted, in: Capsule())
+                        .overlay { Capsule().stroke(palette.line, lineWidth: 1) }
                     }
                     .buttonStyle(.plain)
                     .disabled(github.isBusy)
@@ -144,7 +145,7 @@ struct AnalyticsDashboardView: View {
 
                 Text("Saved \(archive.savedAt, style: .relative)")
                     .font(.system(size: 10, weight: .medium, design: .rounded))
-                    .foregroundStyle(DashboardPalette.muted)
+                    .foregroundStyle(palette.muted)
             }
         }
     }
@@ -153,14 +154,14 @@ struct AnalyticsDashboardView: View {
         VStack(spacing: 18) {
             ZStack {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(DashboardPalette.panel)
+                    .fill(palette.panel)
                     .overlay {
                         RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .stroke(DashboardPalette.line, lineWidth: 1)
+                            .stroke(palette.line, lineWidth: 1)
                     }
                 Image(systemName: "waveform.path.ecg")
                     .font(.system(size: 36, weight: .bold))
-                    .foregroundStyle(DashboardPalette.green)
+                    .foregroundStyle(palette.green)
             }
             .frame(width: 84, height: 84)
 
@@ -169,13 +170,13 @@ struct AnalyticsDashboardView: View {
                     .font(.system(size: 25, weight: .heavy, design: .rounded))
                 Text("Connect GitHub once. widtget will build the dashboard from the same display-ready snapshots used by the widget.")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundStyle(DashboardPalette.muted)
+                    .foregroundStyle(palette.muted)
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: 420)
             }
 
             Button("OPEN CONNECTIONS", action: openConnections)
-                .buttonStyle(DashboardCapsuleButtonStyle())
+                .buttonStyle(DashboardCapsuleButtonStyle(palette: palette))
         }
         .padding(40)
     }
@@ -453,6 +454,7 @@ struct BlockworkAnalyticsDashboardView: View {
 }
 
 private struct NumberCard: View {
+    @Environment(\.themePalette) private var palette
     let label: String
     let value: Int
     var prefix = ""
@@ -473,7 +475,7 @@ private struct NumberCard: View {
                 .contentTransition(.numericText())
             Text(suffix)
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
-                .foregroundStyle(DashboardPalette.muted)
+                .foregroundStyle(palette.muted)
         }
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 124, alignment: .leading)
@@ -482,6 +484,7 @@ private struct NumberCard: View {
 }
 
 private struct WeeklyPulseCard: View {
+    @Environment(\.themePalette) private var palette
     let analytics: WeeklyDashboardAnalytics
     let revealed: Bool
 
@@ -493,7 +496,7 @@ private struct WeeklyPulseCard: View {
                 if let peak = analytics.peak {
                     Text("PEAK · \(peak.label.uppercased())")
                         .font(.system(size: 9, weight: .bold, design: .monospaced))
-                        .foregroundStyle(DashboardPalette.muted)
+                        .foregroundStyle(palette.muted)
                 }
             }
 
@@ -512,14 +515,14 @@ private struct WeeklyPulseCard: View {
                                 Spacer(minLength: 0)
                                 if cell.totalChanged == 0 {
                                     Capsule()
-                                        .fill(DashboardPalette.line)
+                                        .fill(palette.line)
                                         .frame(height: 3)
                                 } else {
                                     RoundedRectangle(cornerRadius: 3, style: .continuous)
-                                        .fill(DashboardPalette.green.opacity(0.92))
+                                        .fill(palette.green.opacity(0.92))
                                         .frame(height: max(2, available * additionRatio))
                                     RoundedRectangle(cornerRadius: 3, style: .continuous)
-                                        .fill(DashboardPalette.coral.opacity(0.88))
+                                        .fill(palette.coral.opacity(0.88))
                                         .frame(height: max(2, available * deletionRatio))
                                 }
                             }
@@ -535,7 +538,7 @@ private struct WeeklyPulseCard: View {
                              ? analytics.intervalLabels[index].prefix(2).uppercased()
                              : "\(index + 1)")
                             .font(.system(size: 8, weight: .bold, design: .monospaced))
-                            .foregroundStyle(DashboardPalette.muted)
+                            .foregroundStyle(palette.muted)
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -558,6 +561,7 @@ private struct WeeklyPulseCard: View {
 }
 
 private struct ChangeShapeCard: View {
+    @Environment(\.themePalette) private var palette
     let analytics: WeeklyDashboardAnalytics
     let revealed: Bool
 
@@ -570,26 +574,26 @@ private struct ChangeShapeCard: View {
                     Text(analytics.percentage(1 - analytics.deletionShare))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .monospacedDigit()
-                        .foregroundStyle(DashboardPalette.green)
+                        .foregroundStyle(palette.green)
                     Text("IN")
                         .font(.system(size: 7, weight: .bold, design: .monospaced))
                         .tracking(0.8)
-                        .foregroundStyle(DashboardPalette.muted)
+                        .foregroundStyle(palette.muted)
                 }
 
                 Text("/")
                     .font(.system(size: 24, weight: .light, design: .rounded))
-                    .foregroundStyle(DashboardPalette.line)
+                    .foregroundStyle(palette.line)
 
                 VStack(alignment: .leading, spacing: 1) {
                     Text(analytics.percentage(analytics.deletionShare))
                         .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .monospacedDigit()
-                        .foregroundStyle(DashboardPalette.coral)
+                        .foregroundStyle(palette.coral)
                     Text("OUT")
                         .font(.system(size: 7, weight: .bold, design: .monospaced))
                         .tracking(0.8)
-                        .foregroundStyle(DashboardPalette.muted)
+                        .foregroundStyle(palette.muted)
                 }
             }
 
@@ -598,10 +602,10 @@ private struct ChangeShapeCard: View {
                 let availableWidth = max(0, proxy.size.width - 3)
                 HStack(spacing: 3) {
                     RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(DashboardPalette.green)
+                        .fill(palette.green)
                         .frame(width: revealed ? availableWidth * additionShare : 3)
                     RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(DashboardPalette.coral)
+                        .fill(palette.coral)
                         .frame(maxWidth: .infinity)
                 }
                 .animation(.spring(response: 0.82, dampingFraction: 0.8), value: revealed)
@@ -611,7 +615,7 @@ private struct ChangeShapeCard: View {
                             var path = Path()
                             path.move(to: CGPoint(x: x - 4, y: size.height))
                             path.addLine(to: CGPoint(x: x + 4, y: 0))
-                            context.stroke(path, with: .color(DashboardPalette.ink.opacity(0.22)), lineWidth: 1)
+                            context.stroke(path, with: .color(palette.ink.opacity(0.22)), lineWidth: 1)
                         }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
@@ -620,15 +624,15 @@ private struct ChangeShapeCard: View {
             .frame(height: 52)
 
             VStack(spacing: 8) {
-                ShapeLegend(color: DashboardPalette.green, label: "Added", value: analytics.snapshot.additions)
-                ShapeLegend(color: DashboardPalette.coral, label: "Deleted", value: analytics.snapshot.deletions)
+                ShapeLegend(color: palette.green, label: "Added", value: analytics.snapshot.additions)
+                ShapeLegend(color: palette.coral, label: "Deleted", value: analytics.snapshot.deletions)
             }
 
             Spacer(minLength: 0)
 
             Text("Describes the mix of changed lines—not code quality or productivity.")
                 .font(.system(size: 9, weight: .medium, design: .rounded))
-                .foregroundStyle(DashboardPalette.muted)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(18)
@@ -638,6 +642,7 @@ private struct ChangeShapeCard: View {
 }
 
 private struct WeeklyReviewCard: View {
+    @Environment(\.themePalette) private var palette
     let review: WeeklyDashboardAnalytics.Review
     let revealed: Bool
 
@@ -649,18 +654,18 @@ private struct WeeklyReviewCard: View {
                 Text("DETERMINISTIC · SNAPSHOT BASED")
                     .font(.system(size: 8, weight: .bold, design: .monospaced))
                     .tracking(0.8)
-                    .foregroundStyle(DashboardPalette.muted.opacity(0.7))
+                    .foregroundStyle(palette.muted.opacity(0.7))
             }
 
             Text(review.title)
                 .font(.system(size: 27, weight: .heavy, design: .rounded))
-                .foregroundStyle(DashboardPalette.text)
+                .foregroundStyle(palette.text)
                 .offset(y: revealed ? 0 : 8)
                 .opacity(revealed ? 1 : 0)
 
             Text(review.summary)
                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundStyle(DashboardPalette.muted)
+                .foregroundStyle(palette.muted)
                 .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
                 .offset(y: revealed ? 0 : 8)
@@ -682,9 +687,9 @@ private struct WeeklyReviewCard: View {
         .background {
             ZStack(alignment: .trailing) {
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(DashboardPalette.panel)
+                    .fill(palette.panel)
                 Rectangle()
-                    .fill(DashboardPalette.green.opacity(0.8))
+                    .fill(palette.green.opacity(0.8))
                     .frame(width: 4)
                     .padding(.vertical, 18)
             }
@@ -692,12 +697,13 @@ private struct WeeklyReviewCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(DashboardPalette.line, lineWidth: 1)
+                .stroke(palette.line, lineWidth: 1)
         }
     }
 }
 
 private struct RepositoryLedgerCard: View {
+    @Environment(\.themePalette) private var palette
     let analytics: WeeklyDashboardAnalytics
     let revealed: Bool
 
@@ -709,13 +715,13 @@ private struct RepositoryLedgerCard: View {
                 Text("RANKED BY LINE MOVEMENT")
                     .font(.system(size: 8, weight: .bold, design: .monospaced))
                     .tracking(0.8)
-                    .foregroundStyle(DashboardPalette.muted.opacity(0.7))
+                    .foregroundStyle(palette.muted.opacity(0.7))
             }
 
             if analytics.snapshot.repositories.isEmpty {
                 Text("No active repositories in this window.")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundStyle(DashboardPalette.muted)
+                    .foregroundStyle(palette.muted)
                     .padding(.vertical, 16)
             } else {
                 ForEach(Array(analytics.snapshot.repositories.prefix(6).enumerated()), id: \.element.id) { index, repository in
@@ -735,6 +741,7 @@ private struct RepositoryLedgerCard: View {
 }
 
 private struct RepositoryLedgerRow: View {
+    @Environment(\.themePalette) private var palette
     let rank: Int
     let repository: RepositoryActivity
     let maximum: Int
@@ -745,7 +752,7 @@ private struct RepositoryLedgerRow: View {
         HStack(spacing: 12) {
             Text(rank.formatted(.number.precision(.integerLength(2))))
                 .font(.system(size: 9, weight: .bold, design: .monospaced))
-                .foregroundStyle(DashboardPalette.muted)
+                .foregroundStyle(palette.muted)
                 .frame(width: 20, alignment: .leading)
 
             VStack(alignment: .leading, spacing: 7) {
@@ -755,23 +762,23 @@ private struct RepositoryLedgerRow: View {
                         .lineLimit(1)
                     Text("\(repository.commits)c")
                         .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(DashboardPalette.muted)
+                        .foregroundStyle(palette.muted)
                     Spacer()
                     Text(ActivityNumberFormat.compact(repository.additions, sign: "+"))
-                        .foregroundStyle(DashboardPalette.green)
+                        .foregroundStyle(palette.green)
                     Text(ActivityNumberFormat.compact(repository.deletions, sign: "−"))
-                        .foregroundStyle(DashboardPalette.coral)
+                        .foregroundStyle(palette.coral)
                 }
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
 
                 GeometryReader { proxy in
                     let ratio = CGFloat(repository.totalChanged) / CGFloat(maximum)
                     ZStack(alignment: .leading) {
-                        Capsule().fill(DashboardPalette.line)
+                        Capsule().fill(palette.line)
                         Capsule()
                             .fill(
                                 LinearGradient(
-                                    colors: [DashboardPalette.green, DashboardPalette.green.opacity(0.7)],
+                                    colors: [palette.green, palette.green.opacity(0.7)],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
@@ -788,6 +795,7 @@ private struct RepositoryLedgerRow: View {
 }
 
 private struct ReviewNoteView: View {
+    @Environment(\.themePalette) private var palette
     let note: WeeklyDashboardAnalytics.Review.Note
 
     var body: some View {
@@ -802,24 +810,25 @@ private struct ReviewNoteView: View {
                 .minimumScaleFactor(0.72)
             Text(note.detail)
                 .font(.system(size: 9, weight: .medium, design: .rounded))
-                .foregroundStyle(DashboardPalette.muted)
+                .foregroundStyle(palette.muted)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(12)
         .frame(maxWidth: .infinity, minHeight: 88, alignment: .topLeading)
-        .background(DashboardPalette.lifted.opacity(0.64), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(palette.lifted.opacity(0.64), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private var noteColor: Color {
         switch note.tone {
-        case .green: DashboardPalette.green
-        case .coral: DashboardPalette.coral
-        case .neutral: DashboardPalette.muted
+        case .green: palette.green
+        case .coral: palette.coral
+        case .neutral: palette.muted
         }
     }
 }
 
 private struct PulseStat: View {
+    @Environment(\.themePalette) private var palette
     let label: String
     let value: String
     let detail: String
@@ -832,13 +841,14 @@ private struct PulseStat: View {
                 .monospacedDigit()
             Text(detail)
                 .font(.system(size: 8, weight: .semibold, design: .rounded))
-                .foregroundStyle(DashboardPalette.muted)
+                .foregroundStyle(palette.muted)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
 private struct ShapeLegend: View {
+    @Environment(\.themePalette) private var palette
     let color: Color
     let label: String
     let value: Int
@@ -848,7 +858,7 @@ private struct ShapeLegend: View {
             Circle().fill(color).frame(width: 6, height: 6)
             Text(label)
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
-                .foregroundStyle(DashboardPalette.muted)
+                .foregroundStyle(palette.muted)
             Spacer()
             Text(value.formatted())
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
@@ -857,6 +867,7 @@ private struct ShapeLegend: View {
 }
 
 private struct DashboardLabel: View {
+    @Environment(\.themePalette) private var palette
     let text: String
 
     init(_ text: String) {
@@ -867,13 +878,14 @@ private struct DashboardLabel: View {
         Text(text)
             .font(.system(size: 9, weight: .bold, design: .monospaced))
             .tracking(1.25)
-            .foregroundStyle(DashboardPalette.muted)
+            .foregroundStyle(palette.muted)
     }
 }
 
 private struct DashboardBackdrop: View {
+    @Environment(\.themePalette) private var palette
     var body: some View {
-        DashboardPalette.ink
+        palette.ink
             .overlay {
                 Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: true) { context, size in
                     let spacing: CGFloat = 34
@@ -882,7 +894,7 @@ private struct DashboardBackdrop: View {
                         var path = Path()
                         path.move(to: CGPoint(x: x, y: size.height))
                         path.addLine(to: CGPoint(x: x + size.height, y: 0))
-                        context.stroke(path, with: .color(DashboardPalette.green.opacity(0.025)), lineWidth: 1)
+                        context.stroke(path, with: .color(palette.green.opacity(0.025)), lineWidth: 1)
                         x += spacing
                     }
                 }
@@ -892,24 +904,26 @@ private struct DashboardBackdrop: View {
 }
 
 private struct DashboardSurfaceModifier: ViewModifier {
+    @Environment(\.themePalette) private var palette
     func body(content: Content) -> some View {
         content
-            .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .background(palette.panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(DashboardPalette.line, lineWidth: 1)
+                    .stroke(palette.line, lineWidth: 1)
             }
     }
 }
 
 private struct DashboardCapsuleButtonStyle: ButtonStyle {
+    let palette: ThemePalette
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 10, weight: .bold, design: .monospaced))
-            .foregroundStyle(DashboardPalette.ink)
+            .foregroundStyle(palette.ink)
             .padding(.horizontal, 16)
             .frame(height: 34)
-            .background(DashboardPalette.green.opacity(configuration.isPressed ? 0.72 : 1), in: Capsule())
+            .background(palette.green.opacity(configuration.isPressed ? 0.72 : 1), in: Capsule())
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
     }
 }

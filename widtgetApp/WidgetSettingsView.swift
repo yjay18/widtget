@@ -66,6 +66,7 @@ struct WidgetSettingsView: View {
                             windowMode: $dashboardWindowMode,
                             openConnections: { selectedSection = .connections }
                         )
+                        .environment(\.themePalette, visualTheme.dashboardPalette)
                     }
                 case .widgets:
                     widgetStudioContent

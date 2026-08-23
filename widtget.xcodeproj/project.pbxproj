@@ -35,6 +35,7 @@
 		A1000000000000000000001A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001A /* Security.framework */; };
 		A1000000000000000000001B /* DashboardAnalytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001B /* DashboardAnalytics.swift */; };
 		A1000000000000000000001C /* AnalyticsDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001C /* AnalyticsDashboardView.swift */; };
+		A10000000000000000000023 /* ThemePalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000023 /* ThemePalette.swift */; };
 		A1000000000000000000001D /* DefaultWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001D /* DefaultWidgetView.swift */; };
 		A1000000000000000000001E /* ThemeMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001E /* ThemeMetrics.swift */; };
 		A1000000000000000000001F /* GlasshouseWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001F /* GlasshouseWidgetView.swift */; };
@@ -96,6 +97,7 @@
 		B1000000000000000000001A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		B1000000000000000000001B /* DashboardAnalytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardAnalytics.swift; sourceTree = "<group>"; };
 		B1000000000000000000001C /* AnalyticsDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsDashboardView.swift; sourceTree = "<group>"; };
+		B10000000000000000000023 /* ThemePalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemePalette.swift; sourceTree = "<group>"; };
 		B1000000000000000000001D /* DefaultWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultWidgetView.swift; sourceTree = "<group>"; };
 		B1000000000000000000001E /* ThemeMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeMetrics.swift; sourceTree = "<group>"; };
 		B1000000000000000000001F /* GlasshouseWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlasshouseWidgetView.swift; sourceTree = "<group>"; };
@@ -231,6 +233,7 @@
 				B10000000000000000000012 /* WidtgetHostApp.swift */,
 				B10000000000000000000013 /* WidgetSettingsView.swift */,
 				B1000000000000000000001C /* AnalyticsDashboardView.swift */,
+				B10000000000000000000023 /* ThemePalette.swift */,
 				B1000000000000000000001B /* DashboardAnalytics.swift */,
 				B10000000000000000000019 /* GitHubAccountModel.swift */,
 				B10000000000000000000018 /* GitHubActivityService.swift */,
@@ -380,6 +383,7 @@
 				A10000000000000000000019 /* GitHubAccountModel.swift in Sources */,
 				A1000000000000000000001B /* DashboardAnalytics.swift in Sources */,
 				A1000000000000000000001C /* AnalyticsDashboardView.swift in Sources */,
+				A10000000000000000000023 /* ThemePalette.swift in Sources */,
 				A10000000000000000000018 /* GitHubActivityService.swift in Sources */,
 				A1000000000000000000000F /* WidtgetHostApp.swift in Sources */,
 				A10000000000000000000010 /* WidgetSettingsView.swift in Sources */,
