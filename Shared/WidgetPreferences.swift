@@ -110,6 +110,40 @@ enum WidgetVisualTheme: String, CaseIterable, Identifiable, Codable, Sendable {
     }
 }
 
+enum WidgetRefreshInterval: String, CaseIterable, Identifiable, Codable, Sendable {
+    case automatic
+    case everyQuarterHour
+    case everyHalfHour
+    case hourly
+    case everyThreeHours
+    case everySixHours
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .automatic: "Automatic"
+        case .everyQuarterHour: "Every 15 minutes"
+        case .everyHalfHour: "Every 30 minutes"
+        case .hourly: "Every hour"
+        case .everyThreeHours: "Every 3 hours"
+        case .everySixHours: "Every 6 hours"
+        }
+    }
+
+    // Minutes between timeline reloads. Automatic uses a WidgetKit-friendly default;
+    // the system still meters actual refreshes against the widget's daily budget.
+    var minutes: Int {
+        switch self {
+        case .automatic, .everyHalfHour: 30
+        case .everyQuarterHour: 15
+        case .hourly: 60
+        case .everyThreeHours: 180
+        case .everySixHours: 360
+        }
+    }
+}
+
 enum WidgetLayoutFamily: String, CaseIterable, Identifiable, Codable, Sendable {
     case small
     case medium
@@ -216,6 +250,7 @@ enum SharedPreferences {
         static let layoutPrefix = "appearance.widget.layout"
         static let blockColorPrefix = "appearance.widget.blockColor"
         static let themeScopeVersion = "appearance.widget.themeScopeVersion"
+        static let refreshInterval = "appearance.widget.refreshInterval"
         static let githubUsername = "github.username"
         static let lastSuccessfulRefresh = "github.lastSuccessfulRefresh"
         static let githubRefreshRequested = "github.refreshRequested"
@@ -223,6 +258,14 @@ enum SharedPreferences {
 
     static func displayedPeriodKey(family: String, configuredPeriod: String) -> String {
         "widget.displayedPeriod.\(family).\(configuredPeriod)"
+    }
+
+    static var refreshInterval: WidgetRefreshInterval {
+        get {
+            defaults.string(forKey: Key.refreshInterval)
+                .flatMap(WidgetRefreshInterval.init(rawValue:)) ?? .automatic
+        }
+        set { defaults.set(newValue.rawValue, forKey: Key.refreshInterval) }
     }
 
     static var modularPreferences: WidgetModularPreferences {

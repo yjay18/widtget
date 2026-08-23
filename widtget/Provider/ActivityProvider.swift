@@ -32,7 +32,9 @@ struct ActivityProvider: AppIntentTimelineProvider {
     func timeline(for configuration: WidtgetConfigurationIntent, in context: Context) async -> Timeline<ActivityEntry> {
         let now = Date()
         let entry = entry(for: configuration, context: context, date: now)
-        let nextRefresh = Calendar.current.date(byAdding: .minute, value: 30, to: now) ?? now.addingTimeInterval(1_800)
+        let minutes = SharedPreferences.refreshInterval.minutes
+        let nextRefresh = Calendar.current.date(byAdding: .minute, value: minutes, to: now)
+            ?? now.addingTimeInterval(TimeInterval(minutes * 60))
         return Timeline(entries: [entry], policy: .after(nextRefresh))
     }
 

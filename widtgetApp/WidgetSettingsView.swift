@@ -42,6 +42,7 @@ struct WidgetSettingsView: View {
     @State private var visualTheme = SharedPreferences.modularPreferences.visualTheme
     @State private var familyLayouts = SharedPreferences.modularPreferences.familyLayouts
     @State private var blockColors = SharedPreferences.modularPreferences.blockColors
+    @State private var refreshInterval = SharedPreferences.refreshInterval
     @State private var selectedBlock: WidgetPane = .additions
     @State private var draggedPane: WidgetPane?
     @State private var draggedOrigin: WidgetSlotOrigin?
@@ -1472,6 +1473,7 @@ struct WidgetSettingsView: View {
                         connectionNotice(notice)
                     }
                 }
+                refreshIntervalSection
                 widgetConfigurationGuide
             }
             .padding(28)
@@ -1479,6 +1481,30 @@ struct WidgetSettingsView: View {
             .frame(maxWidth: .infinity, alignment: .center)
         }
         .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    private var refreshIntervalSection: some View {
+        GroupBox("Widget refresh") {
+            VStack(alignment: .leading, spacing: 10) {
+                Picker("How often widgets reload", selection: $refreshInterval) {
+                    ForEach(WidgetRefreshInterval.allCases) { interval in
+                        Text(interval.displayName).tag(interval)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Text("Applies to every widtget widget. Automatic uses a system-tuned default; macOS still meters refreshes against the daily budget, so very short intervals are not guaranteed.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .onChange(of: refreshInterval) { _, newValue in
+            SharedPreferences.refreshInterval = newValue
+            reloadWidgets()
+        }
     }
 
     private var header: some View {
