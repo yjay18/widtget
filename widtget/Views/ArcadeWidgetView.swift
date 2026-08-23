@@ -16,6 +16,8 @@ enum ArcadePalette {
 }
 
 struct ArcadeWidgetView: View {
+    // Clear the opaque ground when macOS de-emphasizes the widget (vibrant mode).
+    @Environment(\.widgetRenderingMode) private var renderingMode
     let entry: ActivityEntry
     let preferences: WidgetViewPreferences
     let family: WidgetLayoutFamily
@@ -32,7 +34,7 @@ struct ArcadeWidgetView: View {
         .font(.system(size: 9, weight: .heavy, design: .monospaced))
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(ArcadePalette.darkest)
+        .background(renderingMode == .fullColor ? ArcadePalette.darkest : Color.clear)
         .foregroundStyle(ArcadePalette.light)
     }
 

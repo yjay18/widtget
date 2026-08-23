@@ -13,6 +13,10 @@ enum GlasshousePalette {
 }
 
 struct GlasshouseWidgetView: View {
+    // When the desktop is de-emphasized, macOS renders widgets in vibrant mode:
+    // clear the opaque background so the system material shows and the light
+    // content stays legible.
+    @Environment(\.widgetRenderingMode) private var renderingMode
     let entry: ActivityEntry
     let preferences: WidgetViewPreferences
     let family: WidgetLayoutFamily
@@ -28,7 +32,7 @@ struct GlasshouseWidgetView: View {
         }
         .padding(family == .small ? 14 : 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(GlasshousePalette.base)
+        .background(renderingMode == .fullColor ? GlasshousePalette.base : Color.clear)
         .foregroundStyle(GlasshousePalette.text)
     }
 

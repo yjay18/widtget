@@ -27,6 +27,8 @@ private func meterBar(fraction: Double, width: Int = 8) -> String {
 }
 
 struct PhosphorWidgetView: View {
+    // Clear the opaque ground when macOS de-emphasizes the widget (vibrant mode).
+    @Environment(\.widgetRenderingMode) private var renderingMode
     let entry: ActivityEntry
     let preferences: WidgetViewPreferences
     let family: WidgetLayoutFamily
@@ -43,7 +45,7 @@ struct PhosphorWidgetView: View {
         .font(.system(size: 11, weight: .medium, design: .monospaced))
         .padding(13)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(PhosphorPalette.base)
+        .background(renderingMode == .fullColor ? PhosphorPalette.base : Color.clear)
         .foregroundStyle(PhosphorPalette.green)
     }
 

@@ -8,6 +8,18 @@ struct WidtgetWidgetBundle: WidgetBundle {
     }
 }
 
+// In vibrant (de-emphasized) mode macOS supplies its own material, so a solid
+// theme colour here — especially a light one like Broadsheet's paper — washes the
+// widget out. Only paint the theme colour in full colour.
+private struct WidgetContainerBackground: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    let theme: WidgetVisualTheme
+
+    var body: some View {
+        renderingMode == .fullColor ? theme.containerBackgroundColor : Color.clear
+    }
+}
+
 struct WidtgetWidget: Widget {
     static let kind = WidtgetWidgetKind.value
 
@@ -19,7 +31,7 @@ struct WidtgetWidget: Widget {
         ) { entry in
             WidtgetWidgetView(entry: entry)
                 .containerBackground(for: .widget) {
-                    entry.preferences.visualTheme.containerBackgroundColor
+                    WidgetContainerBackground(theme: entry.preferences.visualTheme)
                 }
         }
         .configurationDisplayName("widtget")

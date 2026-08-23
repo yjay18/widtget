@@ -64,7 +64,11 @@ Two families of theme live side by side:
    `Shared/WidgetPreferences.swift`.
 2. Add one `…WidgetView.swift` under `widtget/Views/` exposing
    `init(entry:preferences:family:)` and switching on `WidgetLayoutFamily`. Paint the
-   theme's own `.background(...)`.
+   theme's own `.background(...)`, but read `@Environment(\.widgetRenderingMode)` and
+   fall back to `Color.clear` when it is not `.fullColor`: macOS renders desktop
+   widgets in vibrant (de-emphasized) mode when the desktop is unfocused, dropping
+   colour for luminance. A light theme must also render its content in bright semantic
+   colours (`.primary`/`.secondary`) in that mode or it whites out — see Broadsheet.
 3. Route it from the `switch entry.preferences.visualTheme` in `WidtgetWidgetView.body`,
    and give it a base colour in `WidgetVisualTheme.containerBackgroundColor`
    (`widtget/Views/ThemeMetrics.swift`) so the widget's bleed area matches.

@@ -15,9 +15,21 @@ enum BroadsheetPalette {
 }
 
 struct BroadsheetWidgetView: View {
+    // Broadsheet is the only light theme, so vibrant (de-emphasized) mode is where
+    // it breaks worst: a bright paper ground whites out and dark ink drops away.
+    // In vibrant mode clear the ground and render content as bright semantic
+    // colours so it reads as light-on-material like the dark themes do.
+    @Environment(\.widgetRenderingMode) private var renderingMode
     let entry: ActivityEntry
     let preferences: WidgetViewPreferences
     let family: WidgetLayoutFamily
+
+    private var vibrant: Bool { renderingMode != .fullColor }
+    private var paperC: Color { vibrant ? .clear : BroadsheetPalette.paper }
+    private var inkC: Color { vibrant ? .primary : BroadsheetPalette.ink }
+    private var redC: Color { vibrant ? .primary : BroadsheetPalette.red }
+    private var mutedC: Color { vibrant ? .secondary : BroadsheetPalette.muted }
+    private var hairC: Color { vibrant ? Color.secondary.opacity(0.4) : BroadsheetPalette.hair }
 
     var body: some View {
         Group {
@@ -30,8 +42,8 @@ struct BroadsheetWidgetView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(BroadsheetPalette.paper)
-        .foregroundStyle(BroadsheetPalette.ink)
+        .background(paperC)
+        .foregroundStyle(inkC)
     }
 
     private var loading: Bool { entry.snapshot.state == .loading }
@@ -40,10 +52,10 @@ struct BroadsheetWidgetView: View {
     private var small: some View {
         VStack(alignment: .leading, spacing: 0) {
             masthead
-            Rectangle().fill(BroadsheetPalette.ink).frame(height: 1).padding(.top, 2)
+            Rectangle().fill(inkC).frame(height: 1).padding(.top, 2)
             kicker("Lines set this week").padding(.top, 9)
             figure(entry.snapshot.additions, sign: "+", size: 44)
-            kicker("\(signedExact(entry.snapshot.deletions, sign: "−")) struck out", color: BroadsheetPalette.red)
+            kicker("\(signedExact(entry.snapshot.deletions, sign: "−")) struck out", color: redC)
                 .padding(.top, 4)
             Spacer(minLength: 0)
             engrave(height: 30)
@@ -53,25 +65,25 @@ struct BroadsheetWidgetView: View {
     private var medium: some View {
         VStack(alignment: .leading, spacing: 0) {
             masthead
-            Rectangle().fill(BroadsheetPalette.ink).frame(height: 1).padding(.top, 2)
+            Rectangle().fill(inkC).frame(height: 1).padding(.top, 2)
             HStack(alignment: .top, spacing: 14) {
                 VStack(alignment: .leading, spacing: 0) {
                     kicker("Lines set").padding(.top, 8)
                     figure(entry.snapshot.additions, sign: "+", size: 44)
                     kicker("\(signedExact(entry.snapshot.deletions, sign: "−")) struck · net \(signedExact(entry.snapshot.net, sign: netSign))",
-                           color: BroadsheetPalette.red).padding(.top, 5)
+                           color: redC).padding(.top, 5)
                     Spacer(minLength: 0)
                     engrave(height: 28)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Rectangle().fill(BroadsheetPalette.hair).frame(width: 1)
+                Rectangle().fill(hairC).frame(width: 1)
 
                 VStack(alignment: .leading, spacing: 0) {
                     kicker("The day book").padding(.vertical, 8)
                     dayBook(limit: 5)
                     Spacer(minLength: 0)
-                    Rectangle().fill(BroadsheetPalette.ink).frame(height: 1).padding(.bottom, 5)
+                    Rectangle().fill(inkC).frame(height: 1).padding(.bottom, 5)
                     kicker("\(entry.snapshot.commits) commits · \(entry.snapshot.averagePerCommit) avg")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -82,20 +94,20 @@ struct BroadsheetWidgetView: View {
     private var large: some View {
         VStack(alignment: .leading, spacing: 0) {
             masthead
-            Rectangle().fill(BroadsheetPalette.ink).frame(height: 1).padding(.top, 2)
+            Rectangle().fill(inkC).frame(height: 1).padding(.top, 2)
             kicker("Lines set this week").padding(.top, 9)
             figure(entry.snapshot.additions, sign: "+", size: 56)
             kicker("\(signedExact(entry.snapshot.deletions, sign: "−")) struck · net \(signedExact(entry.snapshot.net, sign: netSign))",
-                   color: BroadsheetPalette.red).padding(.top, 4)
+                   color: redC).padding(.top, 4)
             engrave(height: 42).padding(.vertical, 10)
-            Rectangle().fill(BroadsheetPalette.ink).frame(height: 1)
+            Rectangle().fill(inkC).frame(height: 1)
             HStack(alignment: .top, spacing: 16) {
                 VStack(alignment: .leading, spacing: 0) {
                     kicker("The day book").padding(.vertical, 8)
                     dayBook(limit: 6)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                Rectangle().fill(BroadsheetPalette.hair).frame(width: 1)
+                Rectangle().fill(hairC).frame(width: 1)
                 VStack(alignment: .leading, spacing: 0) {
                     kicker("Repositories").padding(.vertical, 8)
                     repoLedger(limit: preferences.repositoryDetail.largeLimit)
@@ -109,12 +121,12 @@ struct BroadsheetWidgetView: View {
     private var extraLarge: some View {
         VStack(alignment: .leading, spacing: 0) {
             masthead
-            Rectangle().fill(BroadsheetPalette.ink).frame(height: 1).padding(.top, 2)
+            Rectangle().fill(inkC).frame(height: 1).padding(.top, 2)
             HStack(alignment: .top, spacing: 18) {
                 VStack(alignment: .leading, spacing: 0) {
                     kicker("Lines set this week").padding(.top, 9)
                     figure(entry.snapshot.additions, sign: "+", size: 62)
-                    kicker("\(signedExact(entry.snapshot.deletions, sign: "−")) struck", color: BroadsheetPalette.red)
+                    kicker("\(signedExact(entry.snapshot.deletions, sign: "−")) struck", color: redC)
                         .padding(.top, 5)
                     kicker("net \(signedExact(entry.snapshot.net, sign: netSign)) · \(entry.snapshot.averagePerCommit) avg")
                         .padding(.top, 3)
@@ -123,7 +135,7 @@ struct BroadsheetWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Rectangle().fill(BroadsheetPalette.hair).frame(width: 1)
+                Rectangle().fill(hairC).frame(width: 1)
 
                 VStack(alignment: .leading, spacing: 0) {
                     kicker("The day book").padding(.bottom, 8)
@@ -132,7 +144,7 @@ struct BroadsheetWidgetView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                Rectangle().fill(BroadsheetPalette.hair).frame(width: 1)
+                Rectangle().fill(hairC).frame(width: 1)
 
                 VStack(alignment: .leading, spacing: 0) {
                     kicker("Repositories · \(entry.snapshot.repositories.count)").padding(.bottom, 8)
@@ -151,7 +163,7 @@ struct BroadsheetWidgetView: View {
             Spacer()
             Text(mastheadMeta)
                 .font(.system(size: 8, weight: .semibold, design: .monospaced))
-                .tracking(1).foregroundStyle(BroadsheetPalette.muted).lineLimit(1)
+                .tracking(1).foregroundStyle(mutedC).lineLimit(1)
         }
     }
 
@@ -170,10 +182,10 @@ struct BroadsheetWidgetView: View {
         .accessibilityLabel("\(value) lines set")
     }
 
-    private func kicker(_ text: String, color: Color = BroadsheetPalette.muted) -> some View {
+    private func kicker(_ text: String, color: Color? = nil) -> some View {
         Text(text)
             .font(.system(size: 8.5, weight: .semibold, design: .monospaced))
-            .tracking(1).foregroundStyle(color).lineLimit(1).minimumScaleFactor(0.7)
+            .tracking(1).foregroundStyle(color ?? mutedC).lineLimit(1).minimumScaleFactor(0.7)
     }
 
     private func dayBook(limit: Int) -> some View {
@@ -185,10 +197,10 @@ struct BroadsheetWidgetView: View {
                     Text(labels.indices.contains(index) ? labels[index] : "—")
                         .font(.system(size: 12, weight: .regular, design: .serif))
                     DottedLeader().stroke(style: StrokeStyle(lineWidth: 1, dash: [1, 3]))
-                        .foregroundStyle(BroadsheetPalette.hair).frame(height: 1)
+                        .foregroundStyle(hairC).frame(height: 1)
                     Text(loading ? "—" : "\(cell.totalChanged)")
                         .font(.system(size: 12, weight: .semibold, design: .serif))
-                        .foregroundStyle(index == entry.snapshot.peakIndex ? BroadsheetPalette.red : BroadsheetPalette.ink)
+                        .foregroundStyle(index == entry.snapshot.peakIndex ? redC : inkC)
                 }
                 .padding(.vertical, 2)
             }
@@ -205,7 +217,7 @@ struct BroadsheetWidgetView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text(repo.name).font(.system(size: 12, weight: .regular, design: .serif)).lineLimit(1)
                     DottedLeader().stroke(style: StrokeStyle(lineWidth: 1, dash: [1, 3]))
-                        .foregroundStyle(BroadsheetPalette.hair).frame(height: 1)
+                        .foregroundStyle(hairC).frame(height: 1)
                     Text(ActivityNumberFormat.compact(repo.additions, sign: "+"))
                         .font(.system(size: 12, weight: .semibold, design: .serif))
                 }
@@ -219,7 +231,7 @@ struct BroadsheetWidgetView: View {
         return HStack(alignment: .bottom, spacing: 3) {
             ForEach(Array(entry.snapshot.activity.enumerated()), id: \.offset) { index, cell in
                 Rectangle()
-                    .fill(index == entry.snapshot.peakIndex ? BroadsheetPalette.red : BroadsheetPalette.ink)
+                    .fill(index == entry.snapshot.peakIndex ? redC : inkC)
                     .frame(height: max(2, height * CGFloat(cell.totalChanged) / CGFloat(peak)))
                     .frame(maxWidth: .infinity, alignment: .bottom)
             }
