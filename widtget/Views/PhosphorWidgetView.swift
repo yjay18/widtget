@@ -118,7 +118,7 @@ struct PhosphorWidgetView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     dim("activity")
                     Spacer(minLength: 0)
-                    Text(sparkline(entry.snapshot.activity)).font(.system(size: 26, design: .monospaced))
+                    phosphorBars(cells: entry.snapshot.activity, height: 46)
                     dim(axisString)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -146,6 +146,21 @@ struct PhosphorWidgetView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    // Blocky full-width bars for large/XL, so a 4-5 week month fills the box instead
+    // of a short glyph sparkline. Keeps the terminal look with hard-edged rectangles.
+    private func phosphorBars(cells: [ActivityCell], height: CGFloat) -> some View {
+        let peak = max(cells.map(\.totalChanged).max() ?? 0, 1)
+        return HStack(alignment: .bottom, spacing: 3) {
+            ForEach(cells) { cell in
+                Rectangle()
+                    .fill(cell.totalChanged > 0 ? PhosphorPalette.green : PhosphorPalette.dim.opacity(0.4))
+                    .frame(height: max(2, height * CGFloat(cell.totalChanged) / CGFloat(peak)))
+                    .frame(maxWidth: .infinity, alignment: .bottom)
+            }
+        }
+        .frame(height: height, alignment: .bottom)
+    }
+
     private func phosphorStat(_ label: String, _ value: String, emphasis: Bool = false) -> some View {
         HStack {
             dim(label)
@@ -158,44 +173,49 @@ struct PhosphorWidgetView: View {
     private var extraLarge: some View {
         VStack(alignment: .leading, spacing: 10) {
             PhosphorHeader(entry: entry, user: user)
-            HStack(alignment: .top, spacing: 18) {
-                VStack(alignment: .leading, spacing: 6) {
-                    dim("$ git log --numstat")
-                    Text(value(entry.snapshot.additions, sign: "+"))
-                        .font(.system(size: 46, weight: .bold, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.5)
-                    Text(value(entry.snapshot.deletions, sign: "−"))
-                        .font(.system(size: 22, weight: .semibold, design: .monospaced)).foregroundStyle(PhosphorPalette.amber)
-                    Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 6)
-                    phosphorStat("net", value(entry.snapshot.net, sign: netSign))
-                    phosphorStat("avg/commit", "\(entry.snapshot.averagePerCommit)")
-                    phosphorStat("peak", entry.peakLabel.lowercased())
-                    phosphorStat("active", "\(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1))")
-                    Spacer(minLength: 0)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                VStack(spacing: 0) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        dim("activity")
-                        Text(sparkline(entry.snapshot.activity)).font(.system(size: 40, design: .monospaced))
-                        dim(axisString)
-                        dim("peak \(entry.peakLabel.lowercased()) · \(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1)) active")
+            GeometryReader { proxy in
+                let gap: CGFloat = 18
+                let usable = max(proxy.size.width - gap * 2, 1)
+                HStack(alignment: .top, spacing: gap) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        dim("$ git log --numstat")
+                        Text(value(entry.snapshot.additions, sign: "+"))
+                            .font(.system(size: 52, weight: .bold, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.5)
+                        Text(value(entry.snapshot.deletions, sign: "−"))
+                            .font(.system(size: 26, weight: .semibold, design: .monospaced)).foregroundStyle(PhosphorPalette.amber)
+                        Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 8)
+                        phosphorStat("net", value(entry.snapshot.net, sign: netSign))
+                        phosphorStat("avg/commit", "\(entry.snapshot.averagePerCommit)")
+                        phosphorStat("peak", entry.peakLabel.lowercased())
+                        phosphorStat("active", "\(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1))")
+                        Spacer(minLength: 0)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1)
-                    pet
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .overlay(alignment: .leading) {
-                    Rectangle().fill(PhosphorPalette.dim.opacity(0.5)).frame(width: 1).offset(x: -9)
-                }
+                    .frame(width: usable * 0.40, alignment: .topLeading)
 
-                repoColumn(limit: preferences.repositoryDetail.extraLargeLimit)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(spacing: 0) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            dim("activity")
+                            phosphorBars(cells: entry.snapshot.activity, height: 64)
+                            dim(axisString)
+                            dim("peak \(entry.peakLabel.lowercased()) · \(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1)) active")
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1)
+                        pet
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    .frame(width: usable * 0.33)
                     .overlay(alignment: .leading) {
                         Rectangle().fill(PhosphorPalette.dim.opacity(0.5)).frame(width: 1).offset(x: -9)
                     }
+
+                    repoColumn(limit: preferences.repositoryDetail.extraLargeLimit)
+                        .frame(width: usable * 0.27, alignment: .leading)
+                        .overlay(alignment: .leading) {
+                            Rectangle().fill(PhosphorPalette.dim.opacity(0.5)).frame(width: 1).offset(x: -9)
+                        }
+                }
+                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
             }
         }
     }

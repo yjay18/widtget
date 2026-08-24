@@ -40,13 +40,21 @@ struct ArcadeWidgetView: View {
 
     private var loading: Bool { entry.snapshot.state == .loading }
 
-    // Same mapping the snek pane uses: one block per N commits, capped at 20.
+    // Larger widgets get a taller playfield so the snek fills the extra room.
+    private var maxBlocks: Int {
+        switch family {
+        case .small, .extraLarge: 20
+        case .medium: 40
+        case .large: 60
+        }
+    }
+
+    // One block per N commits, capped at the family's playfield size.
     private var blocks: Int {
         let perBlock = min(max(preferences.snakeCommitsPerBlock,
                                CommitSnakeLimits.commitsPerBlockRange.lowerBound),
                            CommitSnakeLimits.commitsPerBlockRange.upperBound)
-        return min(max(Int(ceil(Double(entry.snapshot.commits) / Double(perBlock))), 0),
-                   CommitSnakeLimits.visualBlockCount)
+        return min(max(Int(ceil(Double(entry.snapshot.commits) / Double(perBlock))), 0), maxBlocks)
     }
 
     private func score(_ value: Int, sign: Character) -> String {
@@ -84,7 +92,7 @@ struct ArcadeWidgetView: View {
                     tag("SNEK · 1 BLOCK = \(preferences.snakeCommitsPerBlock) COMMITS")
                     playfield(cols: 10)
                     Spacer(minLength: 0)
-                    HStack { tag("\(blocks)/\(CommitSnakeLimits.visualBlockCount) BLOCKS"); Spacer(); tag("\(entry.snapshot.averagePerCommit) AVG") }
+                    HStack { tag("\(blocks)/\(maxBlocks) BLOCKS"); Spacer(); tag("\(entry.snapshot.averagePerCommit) AVG") }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -102,7 +110,7 @@ struct ArcadeWidgetView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     tag("SNEK · 1 = \(preferences.snakeCommitsPerBlock) COMMITS")
                     playfield(cols: 10)
-                    HStack { tag("\(blocks)/\(CommitSnakeLimits.visualBlockCount)"); Spacer(); tag("LV.\(blocks)") }
+                    HStack { tag("\(blocks)/\(maxBlocks)"); Spacer(); tag("LV.\(blocks)") }
                 }
                 .frame(width: 150)
 
@@ -134,7 +142,7 @@ struct ArcadeWidgetView: View {
                     }
                     tag("SNEK · 1 = \(preferences.snakeCommitsPerBlock) COMMITS")
                     playfield(cols: 10)
-                    tag("\(blocks)/\(CommitSnakeLimits.visualBlockCount) BLOCKS")
+                    tag("\(blocks)/\(maxBlocks) BLOCKS")
                     Spacer(minLength: 0)
                 }
                 .frame(width: 220)
@@ -165,7 +173,7 @@ struct ArcadeWidgetView: View {
     // snake instead of filling a plain rectangle: rounded body segments, a head with
     // eyes, and the food drawn as a pellet.
     private func playfield(cols: Int) -> some View {
-        let total = CommitSnakeLimits.visualBlockCount
+        let total = maxBlocks
         let rows = (total + cols - 1) / cols
         return VStack(spacing: 3) {
             ForEach(0..<rows, id: \.self) { row in
@@ -181,7 +189,7 @@ struct ArcadeWidgetView: View {
     }
 
     private var snakeHead: Int { blocks - 1 }
-    private var snakeFood: Int { blocks < CommitSnakeLimits.visualBlockCount ? blocks : -1 }
+    private var snakeFood: Int { blocks < maxBlocks ? blocks : -1 }
 
     @ViewBuilder
     private func snekCell(position: Int, valid: Bool) -> some View {
