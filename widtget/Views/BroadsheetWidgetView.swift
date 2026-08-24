@@ -130,6 +130,12 @@ struct BroadsheetWidgetView: View {
                         .padding(.top, 5)
                     kicker("net \(signedExact(entry.snapshot.net, sign: netSign)) · \(entry.snapshot.averagePerCommit) avg")
                         .padding(.top, 3)
+
+                    kicker("The reading").padding(.top, 16).padding(.bottom, 2)
+                    leader("Peak", entry.peakLabel, emphasis: true)
+                    leader("Active", "\(entry.snapshot.activeIntervals) of \(max(entry.snapshot.activity.count, 1))")
+                    leader("Busiest", entry.snapshot.repositories.first?.name ?? "—")
+
                     Spacer(minLength: 0)
                     engrave(height: 60)
                 }
@@ -140,6 +146,10 @@ struct BroadsheetWidgetView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     kicker(entry.ledgerCaption).padding(.bottom, 8)
                     dayBook(limit: 8)
+                    Rectangle().fill(inkC).frame(height: 1).padding(.vertical, 8)
+                    leader("Commits", "\(entry.snapshot.commits)")
+                    leader("Repositories", "\(entry.snapshot.repositories.count)")
+                    leader("Per commit", "\(entry.snapshot.averagePerCommit)")
                     Spacer(minLength: 0)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -186,6 +196,19 @@ struct BroadsheetWidgetView: View {
         Text(text)
             .font(.system(size: 8.5, weight: .semibold, design: .monospaced))
             .tracking(1).foregroundStyle(color ?? mutedC).lineLimit(1).minimumScaleFactor(0.7)
+    }
+
+    // A dotted-leader row (label … value), the newsprint idiom reused for insights.
+    private func leader(_ label: String, _ value: String, emphasis: Bool = false) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 5) {
+            Text(label).font(.system(size: 12, weight: .regular, design: .serif))
+            DottedLeader().stroke(style: StrokeStyle(lineWidth: 1, dash: [1, 3]))
+                .foregroundStyle(hairC).frame(height: 1)
+            Text(loading ? "—" : value)
+                .font(.system(size: 12, weight: .semibold, design: .serif))
+                .foregroundStyle(emphasis ? redC : inkC)
+        }
+        .padding(.vertical, 2)
     }
 
     private func dayBook(limit: Int) -> some View {
