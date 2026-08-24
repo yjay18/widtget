@@ -7,6 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A20000000000000000000001 /* WidtgetConfigurationIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* WidtgetConfigurationIntent.swift */; };
+		A20000000000000000000002 /* ActivityProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* ActivityProvider.swift */; };
+		A20000000000000000000003 /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* Palette.swift */; };
+		A20000000000000000000004 /* MetricViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* MetricViews.swift */; };
+		A20000000000000000000005 /* ActivityVisualization.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* ActivityVisualization.swift */; };
+		A20000000000000000000006 /* RepositoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* RepositoryViews.swift */; };
+		A20000000000000000000007 /* WidtgetWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* WidtgetWidgetView.swift */; };
+		A20000000000000000000008 /* DefaultWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001D /* DefaultWidgetView.swift */; };
+		A20000000000000000000009 /* ThemeMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001E /* ThemeMetrics.swift */; };
+		A2000000000000000000000A /* GlasshouseWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000001F /* GlasshouseWidgetView.swift */; };
+		A2000000000000000000000B /* PhosphorWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* PhosphorWidgetView.swift */; };
+		A2000000000000000000000C /* BroadsheetWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* BroadsheetWidgetView.swift */; };
+		A2000000000000000000000D /* ArcadeWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000022 /* ArcadeWidgetView.swift */; };
 		A10000000000000000000001 /* ActivityModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* ActivityModels.swift */; };
 		A10000000000000000000002 /* WidtgetConfigurationIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* WidtgetConfigurationIntent.swift */; };
 		A10000000000000000000003 /* ActivityProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* ActivityProvider.swift */; };
@@ -378,6 +391,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A20000000000000000000001 /* WidtgetConfigurationIntent.swift in Sources */,
+				A20000000000000000000002 /* ActivityProvider.swift in Sources */,
+				A20000000000000000000003 /* Palette.swift in Sources */,
+				A20000000000000000000004 /* MetricViews.swift in Sources */,
+				A20000000000000000000005 /* ActivityVisualization.swift in Sources */,
+				A20000000000000000000006 /* RepositoryViews.swift in Sources */,
+				A20000000000000000000007 /* WidtgetWidgetView.swift in Sources */,
+				A20000000000000000000008 /* DefaultWidgetView.swift in Sources */,
+				A20000000000000000000009 /* ThemeMetrics.swift in Sources */,
+				A2000000000000000000000A /* GlasshouseWidgetView.swift in Sources */,
+				A2000000000000000000000B /* PhosphorWidgetView.swift in Sources */,
+				A2000000000000000000000C /* BroadsheetWidgetView.swift in Sources */,
+				A2000000000000000000000D /* ArcadeWidgetView.swift in Sources */,
 				A10000000000000000000015 /* ActivityModels.swift in Sources */,
 				A10000000000000000000017 /* ActivitySnapshotStore.swift in Sources */,
 				A10000000000000000000019 /* GitHubAccountModel.swift in Sources */,
