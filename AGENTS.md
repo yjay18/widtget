@@ -5,7 +5,7 @@
 - `widtget` is a native macOS WidgetKit product with a deliberately small host app.
 - Keep the widget as the primary product. The host app only manages shared widget preferences and credentials/data refresh when live GitHub data is added.
 - The misspelling `widtget` is the intentional product and target name. Do not rename it to `widget` or `GitPulse`.
-- Preserve the dark, number-first visual hierarchy and native Daily/Weekly App Intent configuration.
+- Preserve the dark, number-first visual hierarchy and native Daily/Weekly/Monthly App Intent configuration. The widget period pill cycles daily → weekly → monthly; monthly activity is bucketed week by week (five cells, labelled W1–W5) and its peak/active/average analytics read from those week cells. Every theme renders periods through the shared `ActivityIntervalLabels`, so new periods flow to all themes and sizes automatically.
 
 ## Xcode project
 
