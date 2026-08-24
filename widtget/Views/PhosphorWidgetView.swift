@@ -108,12 +108,21 @@ struct PhosphorWidgetView: View {
         VStack(alignment: .leading, spacing: 8) {
             PhosphorHeader(entry: entry, user: user)
             dim("$ git log --numstat --since=1.week")
-            Text(value(entry.snapshot.additions, sign: "+"))
-                .font(.system(size: 38, weight: .bold, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.5)
-            Text(value(entry.snapshot.deletions, sign: "−"))
-                .font(.system(size: 18, weight: .semibold, design: .monospaced)).foregroundStyle(PhosphorPalette.amber)
-            Text(sparkline(entry.snapshot.activity)).font(.system(size: 22, design: .monospaced))
-            dim(axisString)
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(value(entry.snapshot.additions, sign: "+"))
+                        .font(.system(size: 38, weight: .bold, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.5)
+                    Text(value(entry.snapshot.deletions, sign: "−"))
+                        .font(.system(size: 18, weight: .semibold, design: .monospaced)).foregroundStyle(PhosphorPalette.amber)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    dim("activity")
+                    Spacer(minLength: 0)
+                    Text(sparkline(entry.snapshot.activity)).font(.system(size: 26, design: .monospaced))
+                    dim(axisString)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
             statsLine
             Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 2)
             repoColumn(limit: preferences.repositoryDetail.largeLimit)
@@ -146,17 +155,18 @@ struct PhosphorWidgetView: View {
                         .font(.system(size: 46, weight: .bold, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.5)
                     Text(value(entry.snapshot.deletions, sign: "−"))
                         .font(.system(size: 22, weight: .semibold, design: .monospaced)).foregroundStyle(PhosphorPalette.amber)
-                    pet
+                    Spacer(minLength: 0)
                     statsLine
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 8) {
                     dim("activity")
-                    Text(sparkline(entry.snapshot.activity)).font(.system(size: 30, design: .monospaced))
+                    Text(sparkline(entry.snapshot.activity)).font(.system(size: 40, design: .monospaced))
                     dim(axisString)
-                    Spacer(minLength: 0)
                     dim("peak \(entry.peakLabel.lowercased()) · \(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1)) active")
+                    Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 4)
+                    pet
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .overlay(alignment: .leading) {
