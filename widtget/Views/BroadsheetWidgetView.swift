@@ -53,7 +53,7 @@ struct BroadsheetWidgetView: View {
         VStack(alignment: .leading, spacing: 0) {
             masthead
             Rectangle().fill(inkC).frame(height: 1).padding(.top, 2)
-            kicker("Lines set this week").padding(.top, 9)
+            kicker("Lines set \(entry.spanLabel)").padding(.top, 9)
             figure(entry.snapshot.additions, sign: "+", size: 44)
             kicker("\(signedExact(entry.snapshot.deletions, sign: "−")) struck out", color: redC)
                 .padding(.top, 4)
@@ -80,7 +80,7 @@ struct BroadsheetWidgetView: View {
                 Rectangle().fill(hairC).frame(width: 1)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    kicker("The day book").padding(.vertical, 8)
+                    kicker(entry.ledgerCaption).padding(.vertical, 8)
                     dayBook(limit: 5)
                     Spacer(minLength: 0)
                     Rectangle().fill(inkC).frame(height: 1).padding(.bottom, 5)
@@ -95,7 +95,7 @@ struct BroadsheetWidgetView: View {
         VStack(alignment: .leading, spacing: 0) {
             masthead
             Rectangle().fill(inkC).frame(height: 1).padding(.top, 2)
-            kicker("Lines set this week").padding(.top, 9)
+            kicker("Lines set \(entry.spanLabel)").padding(.top, 9)
             figure(entry.snapshot.additions, sign: "+", size: 56)
             kicker("\(signedExact(entry.snapshot.deletions, sign: "−")) struck · net \(signedExact(entry.snapshot.net, sign: netSign))",
                    color: redC).padding(.top, 4)
@@ -103,7 +103,7 @@ struct BroadsheetWidgetView: View {
             Rectangle().fill(inkC).frame(height: 1)
             HStack(alignment: .top, spacing: 16) {
                 VStack(alignment: .leading, spacing: 0) {
-                    kicker("The day book").padding(.vertical, 8)
+                    kicker(entry.ledgerCaption).padding(.vertical, 8)
                     dayBook(limit: 6)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -140,7 +140,7 @@ struct BroadsheetWidgetView: View {
             Rectangle().fill(inkC).frame(height: 1).padding(.top, 2)
             HStack(alignment: .top, spacing: 18) {
                 VStack(alignment: .leading, spacing: 0) {
-                    kicker("Lines set this week").padding(.top, 9)
+                    kicker("Lines set \(entry.spanLabel)").padding(.top, 9)
                     figure(entry.snapshot.additions, sign: "+", size: 62)
                     kicker("\(signedExact(entry.snapshot.deletions, sign: "−")) struck", color: redC)
                         .padding(.top, 5)
@@ -154,7 +154,7 @@ struct BroadsheetWidgetView: View {
                 Rectangle().fill(hairC).frame(width: 1)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    kicker("The day book").padding(.bottom, 8)
+                    kicker(entry.ledgerCaption).padding(.bottom, 8)
                     dayBook(limit: 8)
                     Spacer(minLength: 0)
                 }

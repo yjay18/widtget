@@ -37,6 +37,33 @@ extension ActivityEntry {
         let labels = intervalLabels()
         return labels.indices.contains(index) ? labels[index] : "—"
     }
+
+    // Period-aware caption for the activity chart, so a monthly widget doesn't read
+    // "seven day rhythm" over week buckets.
+    var rhythmCaption: String {
+        switch period {
+        case .daily: "hourly rhythm"
+        case .weekly: "seven day rhythm"
+        case .monthly: "weekly rhythm"
+        }
+    }
+
+    // Title for the per-interval ledger (Broadsheet's day book).
+    var ledgerCaption: String {
+        period == .monthly ? "The week book" : "The day book"
+    }
+
+    // Human phrase for the active window, e.g. "this month" or "last 30 days".
+    var spanLabel: String {
+        switch (period, preferences.periodWindowMode) {
+        case (.daily, .fixed): "today"
+        case (.daily, .rolling): "last 24 hours"
+        case (.weekly, .fixed): "this week"
+        case (.weekly, .rolling): "last 7 days"
+        case (.monthly, .fixed): "this month"
+        case (.monthly, .rolling): "last 30 days"
+        }
+    }
 }
 
 // The commit-snek pet, themeable so any fixed theme can drop it into the roomy

@@ -68,7 +68,7 @@ struct GlasshouseWidgetView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 6) {
-                    caption("seven day rhythm")
+                    caption(entry.rhythmCaption)
                     Spacer(minLength: 0)
                     glassBars(cells: entry.snapshot.activity, height: 44)
                     glassAxis()
@@ -99,7 +99,7 @@ struct GlasshouseWidgetView: View {
             statsRow
             GlassDivider()
             VStack(alignment: .leading, spacing: 6) {
-                caption("seven day rhythm")
+                caption(entry.rhythmCaption)
                 glassBars(cells: entry.snapshot.activity, height: 40)
                 glassAxis()
             }
@@ -140,7 +140,7 @@ struct GlasshouseWidgetView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    caption("seven day rhythm")
+                    caption(entry.rhythmCaption)
                     glassBars(cells: entry.snapshot.activity, height: 100)
                     glassAxis()
                     GlassDivider()
