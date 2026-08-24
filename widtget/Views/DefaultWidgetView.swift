@@ -188,18 +188,12 @@ private struct DefaultLargeWidgetView: View {
                         VStack(alignment: .leading, spacing: 5) {
                             sectionLabel("ACTIVITY")
                             if preferences.showActivity {
-                                defaultActivityStrip(cells: entry.snapshot.activity, height: 36)
-                                ActivityGrid(
-                                    cells: entry.snapshot.activity,
+                                defaultActivityStrip(cells: entry.snapshot.activity, height: 40)
+                                ActivityAxisLabels(
                                     labels: compactActivityLabels,
-                                    labelFontSize: 6.5,
-                                    additionColor: DefaultWidgetPalette.green,
-                                    deletionColor: DefaultWidgetPalette.coral,
-                                    neutralColor: DefaultWidgetPalette.neutral,
-                                    labelColor: DefaultWidgetPalette.secondaryText
+                                    fontSize: 6.5,
+                                    color: DefaultWidgetPalette.secondaryText
                                 )
-                                .frame(height: 34)
-                                .clipped()
                                 Rectangle()
                                     .fill(DefaultWidgetPalette.border)
                                     .frame(height: 1)
