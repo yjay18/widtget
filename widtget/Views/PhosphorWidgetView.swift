@@ -117,8 +117,7 @@ struct PhosphorWidgetView: View {
             statsLine
             Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 2)
             repoColumn(limit: preferences.repositoryDetail.largeLimit)
-            Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 2)
-            pet
+            Spacer(minLength: 0)
         }
     }
 

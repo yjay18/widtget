@@ -104,8 +104,7 @@ struct GlasshouseWidgetView: View {
                 glassAxis()
             }
             reposList(limit: preferences.repositoryDetail.largeLimit)
-            GlassDivider()
-            pet
+            Spacer(minLength: 0)
         }
     }
 
