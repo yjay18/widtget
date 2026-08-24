@@ -620,6 +620,8 @@ private struct WidgetBlockView: View {
                     Text(repository.name)
                         .font(.system(size: family == .extraLarge ? 10.5 : 9.5, weight: .black, design: .rounded))
                         .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        .truncationMode(.tail)
 
                     Spacer(minLength: 3)
 
@@ -655,6 +657,8 @@ private struct WidgetBlockView: View {
                     Text(repository.name)
                         .font(.system(size: 8, weight: .black, design: .rounded))
                         .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        .truncationMode(.tail)
                     Spacer(minLength: 3)
                     Text(ActivityNumberFormat.compact(repository.additions, sign: "+"))
                     Text(ActivityNumberFormat.compact(repository.deletions, sign: "−"))

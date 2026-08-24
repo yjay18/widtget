@@ -161,33 +161,53 @@ struct ArcadeWidgetView: View {
             .overlay { Rectangle().stroke(ArcadePalette.dark, lineWidth: 2) }
     }
 
-    // Exactly the 20-block cap so "N/20 blocks" is literal: fills `blocks` cells as
-    // the snake (head lightest), one food cell after the head, the rest empty.
+    // Exactly the 20-block cap, laid out as a serpentine so the lit cells wind like a
+    // snake instead of filling a plain rectangle: rounded body segments, a head with
+    // eyes, and the food drawn as a pellet.
     private func playfield(cols: Int) -> some View {
         let total = CommitSnakeLimits.visualBlockCount
         let rows = (total + cols - 1) / cols
-        let head = blocks - 1
-        let food = blocks < total ? blocks : -1
         return VStack(spacing: 3) {
             ForEach(0..<rows, id: \.self) { row in
                 HStack(spacing: 3) {
                     ForEach(0..<cols, id: \.self) { col in
-                        let i = row * cols + col
-                        Rectangle()
-                            .fill(i < total ? cellColor(index: i, head: head, food: food) : Color.clear)
-                            .aspectRatio(1, contentMode: .fit)
-                            .frame(maxWidth: .infinity)
+                        // Boustrophedon: even rows run left→right, odd rows right→left.
+                        let position = row * cols + (row % 2 == 0 ? col : cols - 1 - col)
+                        snekCell(position: position, valid: position < total)
                     }
                 }
             }
         }
     }
 
-    private func cellColor(index: Int, head: Int, food: Int) -> Color {
-        if index == food { return ArcadePalette.food }
-        if index == head && head >= 0 { return ArcadePalette.lightest }
-        if index < blocks { return ArcadePalette.light }
-        return ArcadePalette.empty
+    private var snakeHead: Int { blocks - 1 }
+    private var snakeFood: Int { blocks < CommitSnakeLimits.visualBlockCount ? blocks : -1 }
+
+    @ViewBuilder
+    private func snekCell(position: Int, valid: Bool) -> some View {
+        let cell = Rectangle().fill(Color.clear)
+        if !valid {
+            cell.aspectRatio(1, contentMode: .fit).frame(maxWidth: .infinity)
+        } else if position == snakeFood {
+            ZStack {
+                RoundedRectangle(cornerRadius: 3, style: .continuous).fill(ArcadePalette.empty)
+                Circle().fill(ArcadePalette.food).padding(4)
+            }
+            .aspectRatio(1, contentMode: .fit).frame(maxWidth: .infinity)
+        } else if position == snakeHead {
+            ZStack(alignment: .center) {
+                RoundedRectangle(cornerRadius: 4, style: .continuous).fill(ArcadePalette.lightest)
+                HStack(spacing: 3) {
+                    Circle().fill(ArcadePalette.darkest).frame(width: 3, height: 3)
+                    Circle().fill(ArcadePalette.darkest).frame(width: 3, height: 3)
+                }
+            }
+            .aspectRatio(1, contentMode: .fit).frame(maxWidth: .infinity)
+        } else {
+            RoundedRectangle(cornerRadius: 3, style: .continuous)
+                .fill(position < blocks ? ArcadePalette.light : ArcadePalette.empty)
+                .aspectRatio(1, contentMode: .fit).frame(maxWidth: .infinity)
+        }
     }
 
     private func arcadeRepos(limit: Int) -> some View {
