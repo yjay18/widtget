@@ -286,6 +286,7 @@ private struct WidgetBlockView: View {
                 CommitSnakeView(
                     snapshot: entry.snapshot,
                     commitsPerBlock: preferences.snakeCommitsPerBlock,
+                    basis: preferences.snakeBlockBasis,
                     expanded: isExpandedFamily
                 )
                 .background(fill)
@@ -1384,7 +1385,8 @@ private struct ExtraLargeWidgetView: View {
 
                         CommitSnakeView(
                             snapshot: entry.snapshot,
-                            commitsPerBlock: preferences.snakeCommitsPerBlock
+                            commitsPerBlock: preferences.snakeCommitsPerBlock,
+                        basis: preferences.snakeBlockBasis
                         )
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(WidtgetPalette.ink)
@@ -1402,7 +1404,8 @@ private struct ExtraLargeWidgetView: View {
             } else if preferences.shows(.snake) {
                 CommitSnakeView(
                     snapshot: entry.snapshot,
-                    commitsPerBlock: preferences.snakeCommitsPerBlock
+                    commitsPerBlock: preferences.snakeCommitsPerBlock,
+                basis: preferences.snakeBlockBasis
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(WidtgetPalette.ink)

@@ -88,16 +88,12 @@ struct WidtgetConfigurationIntent: WidgetConfigurationIntent {
     @Parameter(title: "Repository detail", default: .expanded)
     var repositoryDetail: RepositoryDetail
 
-    @Parameter(title: "Snake commits per block", default: 8, inclusiveRange: (1, 20))
-    var snakeCommitsPerBlock: Int
-
     init() {
         period = .daily
         showRepositories = true
         showActivity = true
         showUpdateTime = true
         repositoryDetail = .expanded
-        snakeCommitsPerBlock = CommitSnakeLimits.defaultCommitsPerBlock
     }
 
     init(period: ActivityPeriod) {

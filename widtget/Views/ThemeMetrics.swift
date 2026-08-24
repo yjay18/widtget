@@ -18,6 +18,16 @@ extension ActivitySnapshot {
     var peakIndex: Int? {
         activity.enumerated().max { $0.element.totalChanged < $1.element.totalChanged }?.offset
     }
+
+    // The quantity one snek block counts, per the chosen basis.
+    func snakeUnits(_ basis: SnakeBlockBasis) -> Int {
+        switch basis {
+        case .commits: commits
+        case .additions: additions
+        case .deletions: deletions
+        case .net: abs(net)
+        }
+    }
 }
 
 extension ActivityEntry {
@@ -71,8 +81,10 @@ extension ActivityEntry {
 // the Blockwork snek pane uses. Wrap it in a `.frame(maxHeight: .infinity)` to fill
 // leftover vertical space.
 struct CommitPetView: View {
-    let commits: Int
+    let units: Int
     let perBlock: Int
+    let unitNoun: String
+    let commits: Int
     let net: Int
     let bodyColor: Color
     let headColor: Color
@@ -84,9 +96,7 @@ struct CommitPetView: View {
     var rows: Int = 1
 
     private var segments: Int {
-        let per = min(max(perBlock, CommitSnakeLimits.commitsPerBlockRange.lowerBound),
-                      CommitSnakeLimits.commitsPerBlockRange.upperBound)
-        return min(max(Int(ceil(Double(commits) / Double(per))), 0), CommitSnakeLimits.visualBlockCount)
+        CommitSnakeLimits.blocks(units: units, per: perBlock, cap: CommitSnakeLimits.visualBlockCount)
     }
 
     private var perRow: Int {
@@ -121,7 +131,7 @@ struct CommitPetView: View {
                     }
                 }
             }
-            Text("1 block = \(perBlock) commits")
+            Text("1 block = \(perBlock) \(unitNoun)")
                 .font(.system(size: 8, weight: .medium, design: design)).foregroundStyle(textColor.opacity(0.5))
             Spacer(minLength: 0)
         }

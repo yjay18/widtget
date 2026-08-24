@@ -49,12 +49,18 @@ struct ArcadeWidgetView: View {
         }
     }
 
-    // One block per N commits, capped at the family's playfield size.
+    // One block per N units (commits or lines, per the chosen basis), capped at the
+    // family's playfield size.
     private var blocks: Int {
-        let perBlock = min(max(preferences.snakeCommitsPerBlock,
-                               CommitSnakeLimits.commitsPerBlockRange.lowerBound),
-                           CommitSnakeLimits.commitsPerBlockRange.upperBound)
-        return min(max(Int(ceil(Double(entry.snapshot.commits) / Double(perBlock))), 0), maxBlocks)
+        CommitSnakeLimits.blocks(
+            units: entry.snapshot.snakeUnits(preferences.snakeBlockBasis),
+            per: preferences.snakeCommitsPerBlock,
+            cap: maxBlocks
+        )
+    }
+
+    private var snekLabel: String {
+        "SNEK · 1 = \(preferences.snakeCommitsPerBlock) \(preferences.snakeBlockBasis.unitNoun.uppercased())"
     }
 
     private func score(_ value: Int, sign: Character) -> String {
@@ -89,7 +95,7 @@ struct ArcadeWidgetView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 6) {
-                    tag("SNEK · 1 BLOCK = \(preferences.snakeCommitsPerBlock) COMMITS")
+                    tag(snekLabel)
                     playfield(cols: 10)
                     Spacer(minLength: 0)
                     HStack { tag("\(blocks)/\(maxBlocks) BLOCKS"); Spacer(); tag("\(entry.snapshot.averagePerCommit) AVG") }
@@ -108,7 +114,7 @@ struct ArcadeWidgetView: View {
             }
             HStack(alignment: .top, spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
-                    tag("SNEK · 1 = \(preferences.snakeCommitsPerBlock) COMMITS")
+                    tag(snekLabel)
                     playfield(cols: 10)
                     HStack { tag("\(blocks)/\(maxBlocks)"); Spacer(); tag("LV.\(blocks)") }
                 }
@@ -140,7 +146,7 @@ struct ArcadeWidgetView: View {
                         HStack { tag("LV.\(blocks)"); Spacer(); tag("HI \(entry.peakLabel.uppercased())") }
                         HStack { tag("\(entry.snapshot.commits) COMMITS"); Spacer(); tag("\(entry.snapshot.averagePerCommit) AVG") }
                     }
-                    tag("SNEK · 1 = \(preferences.snakeCommitsPerBlock) COMMITS")
+                    tag(snekLabel)
                     playfield(cols: 10)
                     tag("\(blocks)/\(maxBlocks) BLOCKS")
                     Spacer(minLength: 0)

@@ -132,8 +132,10 @@ struct PhosphorWidgetView: View {
 
     private var pet: some View {
         CommitPetView(
-            commits: entry.snapshot.commits,
+            units: entry.snapshot.snakeUnits(preferences.snakeBlockBasis),
             perBlock: preferences.snakeCommitsPerBlock,
+            unitNoun: preferences.snakeBlockBasis.unitNoun,
+            commits: entry.snapshot.commits,
             net: entry.snapshot.net,
             bodyColor: PhosphorPalette.green,
             headColor: PhosphorPalette.light,

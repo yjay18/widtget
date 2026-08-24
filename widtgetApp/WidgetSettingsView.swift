@@ -43,6 +43,8 @@ struct WidgetSettingsView: View {
     @State private var familyLayouts = SharedPreferences.modularPreferences.familyLayouts
     @State private var blockColors = SharedPreferences.modularPreferences.blockColors
     @State private var refreshInterval = SharedPreferences.refreshInterval
+    @State private var snakeBlockBasis = SharedPreferences.snakeBlockBasis
+    @State private var snakeUnitsPerBlock = SharedPreferences.snakeUnitsPerBlock
     @State private var themeOverrides: [WidgetLayoutFamily: WidgetVisualTheme] = Dictionary(
         uniqueKeysWithValues: WidgetLayoutFamily.allCases.compactMap { family in
             SharedPreferences.themeOverride(for: family).map { (family, $0) }
@@ -1498,6 +1500,7 @@ struct WidgetSettingsView: View {
                     }
                 }
                 refreshIntervalSection
+                snekBlockSection
                 widgetConfigurationGuide
             }
             .padding(28)
@@ -1527,6 +1530,45 @@ struct WidgetSettingsView: View {
         }
         .onChange(of: refreshInterval) { _, newValue in
             SharedPreferences.refreshInterval = newValue
+            reloadWidgets()
+        }
+    }
+
+    private var snekBlockSection: some View {
+        GroupBox("Commit snek blocks") {
+            VStack(alignment: .leading, spacing: 10) {
+                Picker("Each block counts", selection: $snakeBlockBasis) {
+                    ForEach(SnakeBlockBasis.allCases) { basis in
+                        Text(basis.displayName).tag(basis)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                HStack {
+                    Text("\(snakeBlockBasis.unitNoun.capitalized) per block")
+                    Spacer()
+                    TextField("", value: $snakeUnitsPerBlock, format: .number)
+                        .textFieldStyle(.roundedBorder)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 100)
+                }
+
+                Text("The commit snek grows one block per \(snakeUnitsPerBlock) \(snakeBlockBasis.unitNoun), across every theme. Line-based options want a larger number than commits.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .onChange(of: snakeBlockBasis) { _, newValue in
+            SharedPreferences.snakeBlockBasis = newValue
+            snakeUnitsPerBlock = newValue.defaultPerBlock
+            SharedPreferences.snakeUnitsPerBlock = snakeUnitsPerBlock
+            reloadWidgets()
+        }
+        .onChange(of: snakeUnitsPerBlock) { _, newValue in
+            SharedPreferences.snakeUnitsPerBlock = max(1, newValue)
             reloadWidgets()
         }
     }

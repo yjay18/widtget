@@ -47,6 +47,43 @@ enum CommitSnakeLimits {
     static let commitsPerBlockRange = 1...20
     static let defaultCommitsPerBlock = 8
     static let visualBlockCount = 20
+
+    static func blocks(units: Int, per: Int, cap: Int) -> Int {
+        min(max(Int(ceil(Double(units) / Double(max(per, 1)))), 0), cap)
+    }
+}
+
+// What one snek block represents.
+enum SnakeBlockBasis: String, CaseIterable, Identifiable, Codable, Sendable {
+    case commits
+    case additions
+    case deletions
+    case net
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .commits: "Commits"
+        case .additions: "Lines added"
+        case .deletions: "Lines removed"
+        case .net: "Net lines"
+        }
+    }
+
+    // Short noun for the "1 block = N …" caption.
+    var unitNoun: String {
+        switch self {
+        case .commits: "commits"
+        case .additions: "added"
+        case .deletions: "removed"
+        case .net: "net"
+        }
+    }
+
+    var defaultPerBlock: Int {
+        self == .commits ? CommitSnakeLimits.defaultCommitsPerBlock : 5000
+    }
 }
 
 enum WidgetPane: String, CaseIterable, Identifiable, Codable, Sendable {
@@ -253,6 +290,8 @@ enum SharedPreferences {
         static let themeOverridePrefix = "appearance.widget.themeOverride"
         static let refreshInterval = "appearance.widget.refreshInterval"
         static let windowMode = "appearance.widget.windowMode"
+        static let snakeBlockBasis = "appearance.widget.snakeBlockBasis"
+        static let snakeUnitsPerBlock = "appearance.widget.snakeUnitsPerBlock"
         static let githubUsername = "github.username"
         static let lastSuccessfulRefresh = "github.lastSuccessfulRefresh"
         static let githubRefreshRequested = "github.refreshRequested"
@@ -298,6 +337,22 @@ enum SharedPreferences {
     // The theme a given widget size actually renders: its override, else the global.
     static func resolvedTheme(for family: WidgetLayoutFamily) -> WidgetVisualTheme {
         themeOverride(for: family) ?? modularPreferences.visualTheme
+    }
+
+    static var snakeBlockBasis: SnakeBlockBasis {
+        get {
+            defaults.string(forKey: Key.snakeBlockBasis)
+                .flatMap(SnakeBlockBasis.init(rawValue:)) ?? .commits
+        }
+        set { defaults.set(newValue.rawValue, forKey: Key.snakeBlockBasis) }
+    }
+
+    static var snakeUnitsPerBlock: Int {
+        get {
+            let stored = defaults.integer(forKey: Key.snakeUnitsPerBlock)
+            return stored > 0 ? stored : snakeBlockBasis.defaultPerBlock
+        }
+        set { defaults.set(max(1, newValue), forKey: Key.snakeUnitsPerBlock) }
     }
 
     static var modularPreferences: WidgetModularPreferences {
@@ -405,6 +460,7 @@ struct WidgetViewPreferences: Sendable {
     var repositoryDetail: RepositoryDetail
     var periodWindowMode: PeriodWindowMode
     var snakeCommitsPerBlock: Int
+    var snakeBlockBasis: SnakeBlockBasis = .commits
     var paneOrder: [WidgetPane]
     var enabledPanes: Set<WidgetPane>
     var colorway: BlockworkColorway

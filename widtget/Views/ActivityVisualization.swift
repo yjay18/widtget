@@ -300,6 +300,7 @@ private enum CommitSnakeMood {
 struct CommitSnakeView: View {
     let snapshot: ActivitySnapshot
     let commitsPerBlock: Int
+    var basis: SnakeBlockBasis = .commits
     var expanded = false
 
     private var mood: CommitSnakeMood {
@@ -307,13 +308,10 @@ struct CommitSnakeView: View {
     }
 
     private var bodySegments: Int {
-        let commitsPerBlock = min(
-            max(commitsPerBlock, CommitSnakeLimits.commitsPerBlockRange.lowerBound),
-            CommitSnakeLimits.commitsPerBlockRange.upperBound
-        )
-        return min(
-            max(Int(ceil(Double(snapshot.commits) / Double(commitsPerBlock))), 0),
-            CommitSnakeLimits.visualBlockCount
+        CommitSnakeLimits.blocks(
+            units: snapshot.snakeUnits(basis),
+            per: commitsPerBlock,
+            cap: CommitSnakeLimits.visualBlockCount
         )
     }
 
@@ -393,7 +391,7 @@ struct CommitSnakeView: View {
 
             HStack(spacing: 7) {
                 Text("\(bodySegments)/\(CommitSnakeLimits.visualBlockCount) BLOCKS")
-                Text("1 = \(commitsPerBlock) COMMITS")
+                Text("1 = \(commitsPerBlock) \(basis.unitNoun.uppercased())")
             }
             .font(.system(size: 5.8, weight: .black, design: .monospaced))
             .foregroundStyle(WidtgetPalette.paper.opacity(0.58))
