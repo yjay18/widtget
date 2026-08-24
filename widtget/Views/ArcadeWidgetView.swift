@@ -59,7 +59,7 @@ struct ArcadeWidgetView: View {
             tag("LINES")
             PixelScore(text: score(entry.snapshot.additions, sign: "+"), size: 22, color: ArcadePalette.lightest)
             PixelScore(text: score(entry.snapshot.deletions, sign: "-"), size: 13, color: ArcadePalette.food)
-            playfield(cols: 10, rows: 2)
+            playfield(cols: 10)
             Spacer(minLength: 0)
             HStack {
                 tag("LV.\(blocks)")
@@ -82,7 +82,7 @@ struct ArcadeWidgetView: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     tag("SNEK · 1 BLOCK = \(preferences.snakeCommitsPerBlock) COMMITS")
-                    playfield(cols: 12, rows: 3)
+                    playfield(cols: 10)
                     Spacer(minLength: 0)
                     HStack { tag("\(blocks)/\(CommitSnakeLimits.visualBlockCount) BLOCKS"); Spacer(); tag("\(entry.snapshot.averagePerCommit) AVG") }
                 }
@@ -98,13 +98,23 @@ struct ArcadeWidgetView: View {
                 panel { tag("LINES MADE"); PixelScore(text: score(entry.snapshot.additions, sign: "+"), size: 26, color: ArcadePalette.lightest) }
                 panel { tag("REMOVED"); PixelScore(text: score(entry.snapshot.deletions, sign: "-"), size: 18, color: ArcadePalette.food) }
             }
-            tag("SNEK · 1 BLOCK = \(preferences.snakeCommitsPerBlock) COMMITS")
-            playfield(cols: 16, rows: 5)
+            HStack(alignment: .top, spacing: 14) {
+                VStack(alignment: .leading, spacing: 6) {
+                    tag("SNEK · 1 = \(preferences.snakeCommitsPerBlock) COMMITS")
+                    playfield(cols: 10)
+                    HStack { tag("\(blocks)/\(CommitSnakeLimits.visualBlockCount)"); Spacer(); tag("LV.\(blocks)") }
+                }
+                .frame(width: 150)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    tag("REPOSITORIES · \(entry.snapshot.repositories.count)")
+                    arcadeRepos(limit: preferences.repositoryDetail.largeLimit)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
             Spacer(minLength: 0)
             HStack(spacing: 14) {
-                tag("LV.\(blocks)")
                 tag("HI \(entry.peakLabel.uppercased())")
-                tag("\(blocks)/\(CommitSnakeLimits.visualBlockCount) BLOCKS")
                 Spacer()
                 tag("\(entry.snapshot.averagePerCommit) AVG")
             }
@@ -116,20 +126,23 @@ struct ArcadeWidgetView: View {
             ArcadeHUD(entry: entry)
             HStack(alignment: .top, spacing: 14) {
                 VStack(alignment: .leading, spacing: 9) {
-                    panel { tag("LINES MADE"); PixelScore(text: score(entry.snapshot.additions, sign: "+"), size: 30, color: ArcadePalette.lightest) }
+                    panel { tag("LINES MADE"); PixelScore(text: score(entry.snapshot.additions, sign: "+"), size: 28, color: ArcadePalette.lightest) }
                     panel { tag("REMOVED"); PixelScore(text: score(entry.snapshot.deletions, sign: "-"), size: 20, color: ArcadePalette.food) }
                     panel {
                         HStack { tag("LV.\(blocks)"); Spacer(); tag("HI \(entry.peakLabel.uppercased())") }
                         HStack { tag("\(entry.snapshot.commits) COMMITS"); Spacer(); tag("\(entry.snapshot.averagePerCommit) AVG") }
                     }
+                    tag("SNEK · 1 = \(preferences.snakeCommitsPerBlock) COMMITS")
+                    playfield(cols: 10)
+                    tag("\(blocks)/\(CommitSnakeLimits.visualBlockCount) BLOCKS")
                     Spacer(minLength: 0)
                 }
-                .frame(width: 190)
+                .frame(width: 220)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    tag("SNEK · 1 BLOCK = \(preferences.snakeCommitsPerBlock) COMMITS")
-                    playfield(cols: 20, rows: 8)
-                    HStack { tag("\(blocks)/\(CommitSnakeLimits.visualBlockCount) BLOCKS"); Spacer(); tag("\(entry.snapshot.repositories.count) REPOS") }
+                    tag("REPOSITORIES · \(entry.snapshot.repositories.count)")
+                    arcadeRepos(limit: preferences.repositoryDetail.extraLargeLimit)
+                    Spacer(minLength: 0)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -148,9 +161,11 @@ struct ArcadeWidgetView: View {
             .overlay { Rectangle().stroke(ArcadePalette.dark, lineWidth: 2) }
     }
 
-    // Fills `blocks` cells as the snake (head lightest), one food cell after the head.
-    private func playfield(cols: Int, rows: Int) -> some View {
-        let total = cols * rows
+    // Exactly the 20-block cap so "N/20 blocks" is literal: fills `blocks` cells as
+    // the snake (head lightest), one food cell after the head, the rest empty.
+    private func playfield(cols: Int) -> some View {
+        let total = CommitSnakeLimits.visualBlockCount
+        let rows = (total + cols - 1) / cols
         let head = blocks - 1
         let food = blocks < total ? blocks : -1
         return VStack(spacing: 3) {
@@ -158,7 +173,8 @@ struct ArcadeWidgetView: View {
                 HStack(spacing: 3) {
                     ForEach(0..<cols, id: \.self) { col in
                         let i = row * cols + col
-                        Rectangle().fill(cellColor(index: i, head: head, food: food))
+                        Rectangle()
+                            .fill(i < total ? cellColor(index: i, head: head, food: food) : Color.clear)
                             .aspectRatio(1, contentMode: .fit)
                             .frame(maxWidth: .infinity)
                     }
@@ -172,6 +188,38 @@ struct ArcadeWidgetView: View {
         if index == head && head >= 0 { return ArcadePalette.lightest }
         if index < blocks { return ArcadePalette.light }
         return ArcadePalette.empty
+    }
+
+    private func arcadeRepos(limit: Int) -> some View {
+        let peak = max(entry.snapshot.repositories.map(\.additions).max() ?? 0, 1)
+        return VStack(alignment: .leading, spacing: 6) {
+            if entry.snapshot.repositories.isEmpty {
+                tag("NO REPO ACTIVITY")
+            }
+            ForEach(entry.snapshot.visibleRepositories(limit: limit)) { repo in
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 6) {
+                        Text(repo.name.uppercased()).lineLimit(1).minimumScaleFactor(0.6)
+                            .foregroundStyle(ArcadePalette.light)
+                        Spacer(minLength: 4)
+                        Text(ActivityNumberFormat.compact(repo.additions, sign: "+"))
+                            .foregroundStyle(ArcadePalette.lightest)
+                    }
+                    .font(.system(size: 9, weight: .heavy, design: .monospaced))
+                    arcadeBar(fraction: Double(repo.additions) / Double(peak))
+                }
+            }
+        }
+    }
+
+    private func arcadeBar(fraction: Double) -> some View {
+        let cells = 14
+        let filled = min(max(Int((Double(cells) * fraction).rounded()), 0), cells)
+        return HStack(spacing: 2) {
+            ForEach(0..<cells, id: \.self) { i in
+                Rectangle().fill(i < filled ? ArcadePalette.light : ArcadePalette.empty).frame(height: 5)
+            }
+        }
     }
 }
 
