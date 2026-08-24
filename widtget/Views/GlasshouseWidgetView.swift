@@ -133,8 +133,7 @@ struct GlasshouseWidgetView: View {
                     GlassMetric(value: entry.snapshot.deletions, sign: "−", label: "lines deleted",
                                 color: GlasshousePalette.rose, size: 34, loading: loading, caption: "lines deleted")
                     statsRow
-                    GlassDivider()
-                    pet
+                    Spacer(minLength: 0)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -150,6 +149,8 @@ struct GlasshouseWidgetView: View {
                             .foregroundStyle(.white.opacity(0.5))
                     }
                     .font(.system(size: 12, weight: .medium))
+                    GlassDivider()
+                    pet
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .overlay(alignment: .leading) { GlassDivider(vertical: true).offset(x: -12) }
