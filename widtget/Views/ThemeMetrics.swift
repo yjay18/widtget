@@ -81,11 +81,16 @@ struct CommitPetView: View {
     let textColor: Color
     var mono: Bool = false
     var caption: String? = nil
+    var rows: Int = 1
 
     private var segments: Int {
         let per = min(max(perBlock, CommitSnakeLimits.commitsPerBlockRange.lowerBound),
                       CommitSnakeLimits.commitsPerBlockRange.upperBound)
         return min(max(Int(ceil(Double(commits) / Double(per))), 0), CommitSnakeLimits.visualBlockCount)
+    }
+
+    private var perRow: Int {
+        (CommitSnakeLimits.visualBlockCount + rows - 1) / rows
     }
 
     private var mood: String {
@@ -107,17 +112,30 @@ struct CommitPetView: View {
                 Text("\(commits) commits")
                     .font(.system(size: 9, weight: .medium, design: design)).foregroundStyle(textColor.opacity(0.6))
             }
-            HStack(spacing: 3) {
-                ForEach(0..<CommitSnakeLimits.visualBlockCount, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 2, style: .continuous)
-                        .fill(cell(index))
-                        .frame(height: 12)
-                        .frame(maxWidth: .infinity)
+            VStack(spacing: 3) {
+                ForEach(0..<rows, id: \.self) { row in
+                    HStack(spacing: 3) {
+                        ForEach(0..<perRow, id: \.self) { column in
+                            cellView(index: row * perRow + column)
+                        }
+                    }
                 }
             }
             Text("1 block = \(perBlock) commits")
                 .font(.system(size: 8, weight: .medium, design: design)).foregroundStyle(textColor.opacity(0.5))
             Spacer(minLength: 0)
+        }
+    }
+
+    @ViewBuilder
+    private func cellView(index: Int) -> some View {
+        let fill = index < CommitSnakeLimits.visualBlockCount ? cell(index) : Color.clear
+        if rows == 1 {
+            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                .fill(fill).frame(height: 12).frame(maxWidth: .infinity)
+        } else {
+            RoundedRectangle(cornerRadius: 2, style: .continuous)
+                .fill(fill).aspectRatio(1, contentMode: .fit).frame(maxWidth: .infinity)
         }
     }
 

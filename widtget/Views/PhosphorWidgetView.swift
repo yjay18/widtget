@@ -140,9 +140,19 @@ struct PhosphorWidgetView: View {
             foodColor: PhosphorPalette.amber,
             trackColor: PhosphorPalette.dim.opacity(0.35),
             textColor: PhosphorPalette.green,
-            mono: true
+            mono: true,
+            rows: 2
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func phosphorStat(_ label: String, _ value: String, emphasis: Bool = false) -> some View {
+        HStack {
+            dim(label)
+            Spacer(minLength: 4)
+            Text(value).foregroundStyle(emphasis ? PhosphorPalette.amber : PhosphorPalette.green)
+        }
+        .font(.system(size: 11, weight: .medium, design: .monospaced))
     }
 
     private var extraLarge: some View {
@@ -155,18 +165,26 @@ struct PhosphorWidgetView: View {
                         .font(.system(size: 46, weight: .bold, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.5)
                     Text(value(entry.snapshot.deletions, sign: "−"))
                         .font(.system(size: 22, weight: .semibold, design: .monospaced)).foregroundStyle(PhosphorPalette.amber)
+                    Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 6)
+                    phosphorStat("net", value(entry.snapshot.net, sign: netSign))
+                    phosphorStat("avg/commit", "\(entry.snapshot.averagePerCommit)")
+                    phosphorStat("peak", entry.peakLabel.lowercased())
+                    phosphorStat("active", "\(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1))")
                     Spacer(minLength: 0)
-                    statsLine
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                VStack(alignment: .leading, spacing: 8) {
-                    dim("activity")
-                    Text(sparkline(entry.snapshot.activity)).font(.system(size: 40, design: .monospaced))
-                    dim(axisString)
-                    dim("peak \(entry.peakLabel.lowercased()) · \(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1)) active")
-                    Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 4)
+                VStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        dim("activity")
+                        Text(sparkline(entry.snapshot.activity)).font(.system(size: 40, design: .monospaced))
+                        dim(axisString)
+                        dim("peak \(entry.peakLabel.lowercased()) · \(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1)) active")
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1)
                     pet
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .overlay(alignment: .leading) {

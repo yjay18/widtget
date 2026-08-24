@@ -87,23 +87,23 @@ struct GlasshouseWidgetView: View {
     }
 
     private var large: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             GlassHeader(entry: entry)
             GlassDivider()
             HStack(alignment: .top, spacing: 20) {
                 GlassMetric(value: entry.snapshot.additions, sign: "+", label: "lines added",
-                            color: GlasshousePalette.mint, size: 40, loading: loading, caption: "lines added")
+                            color: GlasshousePalette.mint, size: 38, loading: loading, caption: "lines added")
                 GlassMetric(value: entry.snapshot.deletions, sign: "−", label: "lines deleted",
-                            color: GlasshousePalette.rose, size: 30, loading: loading, caption: "lines deleted")
+                            color: GlasshousePalette.rose, size: 28, loading: loading, caption: "lines deleted")
             }
             statsRow
             GlassDivider()
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 5) {
                 caption(entry.rhythmCaption)
-                glassBars(cells: entry.snapshot.activity, height: 40)
+                glassBars(cells: entry.snapshot.activity, height: 32)
                 glassAxis()
             }
-            reposList(limit: preferences.repositoryDetail.largeLimit)
+            reposList(limit: min(preferences.repositoryDetail.largeLimit, 3))
             Spacer(minLength: 0)
         }
     }

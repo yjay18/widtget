@@ -122,7 +122,7 @@ struct BroadsheetWidgetView: View {
     private var extraLarge: some View {
         VStack(alignment: .leading, spacing: 0) {
             masthead
-            Rectangle().fill(inkC).frame(height: 1).padding(.top, 2)
+            Rectangle().fill(inkC).frame(height: 1).padding(.top, 2).padding(.bottom, 10)
             HStack(alignment: .top, spacing: 18) {
                 VStack(alignment: .leading, spacing: 0) {
                     kicker("Lines set \(entry.spanLabel)").padding(.top, 9)
