@@ -33,6 +33,8 @@ enum ActivityIntervalLabels {
                 return hourLabel(start: start, end: end, style: style, calendar: calendar)
             case .weekly:
                 return weekdayLabel(start, style: style)
+            case .monthly:
+                return weekLabel(index: index, style: style)
             }
         }
     }
@@ -65,6 +67,17 @@ enum ActivityIntervalLabels {
                 start: referenceDate.addingTimeInterval(-7 * 24 * 60 * 60),
                 end: referenceDate
             )
+        case (.monthly, .fixed):
+            let start = calendar.dateInterval(of: .month, for: referenceDate)?.start
+                ?? calendar.startOfDay(for: referenceDate)
+            let end = calendar.date(byAdding: .month, value: 1, to: start)
+                ?? start.addingTimeInterval(30 * 24 * 60 * 60)
+            return DateInterval(start: start, end: end)
+        case (.monthly, .rolling):
+            return DateInterval(
+                start: referenceDate.addingTimeInterval(-30 * 24 * 60 * 60),
+                end: referenceDate
+            )
         }
     }
 
@@ -91,6 +104,13 @@ enum ActivityIntervalLabels {
             date.formatted(.dateTime.weekday(.abbreviated))
         case .compact:
             date.formatted(.dateTime.weekday(.narrow))
+        }
+    }
+
+    private static func weekLabel(index: Int, style: ActivityIntervalLabelStyle) -> String {
+        switch style {
+        case .expanded: "Week \(index + 1)"
+        case .compact: "W\(index + 1)"
         }
     }
 }

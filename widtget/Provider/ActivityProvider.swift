@@ -132,6 +132,7 @@ private extension ActivityPeriod {
         switch self {
         case .daily: .daily
         case .weekly: .weekly
+        case .monthly: .monthly
         }
     }
 }

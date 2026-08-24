@@ -3,6 +3,7 @@ import Foundation
 enum StoredActivityPeriod: String, Codable, Sendable {
     case daily
     case weekly
+    case monthly
 }
 
 struct ActivitySnapshotArchive: Codable, Sendable {
@@ -14,6 +15,10 @@ struct ActivitySnapshotArchive: Codable, Sendable {
     let weekly: ActivitySnapshot
     let rollingDaily: ActivitySnapshot?
     let rollingWeekly: ActivitySnapshot?
+    // Optional so archives written before monthly existed still decode; they fall
+    // back to weekly until the next refresh rebuilds the archive with monthly data.
+    let monthly: ActivitySnapshot?
+    let rollingMonthly: ActivitySnapshot?
     let savedAt: Date
 
     init(
@@ -22,6 +27,8 @@ struct ActivitySnapshotArchive: Codable, Sendable {
         weekly: ActivitySnapshot,
         rollingDaily: ActivitySnapshot? = nil,
         rollingWeekly: ActivitySnapshot? = nil,
+        monthly: ActivitySnapshot? = nil,
+        rollingMonthly: ActivitySnapshot? = nil,
         savedAt: Date = .now
     ) {
         schemaVersion = Self.currentSchemaVersion
@@ -30,6 +37,8 @@ struct ActivitySnapshotArchive: Codable, Sendable {
         self.weekly = weekly
         self.rollingDaily = rollingDaily
         self.rollingWeekly = rollingWeekly
+        self.monthly = monthly
+        self.rollingMonthly = rollingMonthly
         self.savedAt = savedAt
     }
 
@@ -37,8 +46,10 @@ struct ActivitySnapshotArchive: Codable, Sendable {
         switch (period, windowMode) {
         case (.daily, .fixed): daily
         case (.weekly, .fixed): weekly
+        case (.monthly, .fixed): monthly ?? weekly
         case (.daily, .rolling): rollingDaily ?? daily
         case (.weekly, .rolling): rollingWeekly ?? weekly
+        case (.monthly, .rolling): rollingMonthly ?? monthly ?? weekly
         }
     }
 
@@ -49,6 +60,8 @@ struct ActivitySnapshotArchive: Codable, Sendable {
             weekly: weekly.markingRefreshError(message),
             rollingDaily: rollingDaily?.markingRefreshError(message),
             rollingWeekly: rollingWeekly?.markingRefreshError(message),
+            monthly: monthly?.markingRefreshError(message),
+            rollingMonthly: rollingMonthly?.markingRefreshError(message),
             savedAt: savedAt
         )
     }

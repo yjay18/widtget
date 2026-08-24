@@ -353,9 +353,12 @@ struct GitHubActivityService: Sendable {
 
         let weekStart = calendar.dateInterval(of: .weekOfYear, for: now)?.start
             ?? calendar.startOfDay(for: now)
+        let monthStart = calendar.dateInterval(of: .month, for: now)?.start
+            ?? calendar.startOfDay(for: now)
         let rollingDayStart = now.addingTimeInterval(-24 * 60 * 60)
         let rollingWeekStart = now.addingTimeInterval(-7 * 24 * 60 * 60)
-        let fetchStart = min(weekStart, rollingWeekStart)
+        let rollingMonthStart = now.addingTimeInterval(-30 * 24 * 60 * 60)
+        let fetchStart = min(weekStart, rollingWeekStart, monthStart, rollingMonthStart)
         var username: String?
         var authorizedByRepository: [String: AuthorizedRepository] = [:]
 
@@ -414,6 +417,10 @@ struct GitHubActivityService: Sendable {
         let rollingWeeklyCommits = commits.filter {
             $0.authoredAt >= rollingWeekStart && $0.authoredAt <= now
         }
+        let monthlyCommits = commits.filter { $0.authoredAt >= monthStart && $0.authoredAt <= now }
+        let rollingMonthlyCommits = commits.filter {
+            $0.authoredAt >= rollingMonthStart && $0.authoredAt <= now
+        }
 
         return ActivitySnapshotArchive(
             username: username,
@@ -443,6 +450,20 @@ struct GitHubActivityService: Sendable {
                 intervalStart: rollingWeekStart,
                 intervalEnd: now,
                 cellCount: 7,
+                now: now
+            ),
+            monthly: snapshot(
+                commits: monthlyCommits,
+                intervalStart: monthStart,
+                intervalEnd: calendar.date(byAdding: .month, value: 1, to: monthStart) ?? now,
+                cellCount: 5,
+                now: now
+            ),
+            rollingMonthly: snapshot(
+                commits: rollingMonthlyCommits,
+                intervalStart: rollingMonthStart,
+                intervalEnd: now,
+                cellCount: 5,
                 now: now
             ),
             savedAt: now

@@ -4,17 +4,24 @@ import WidgetKit
 enum ActivityPeriod: String, AppEnum, CaseIterable, Sendable {
     case daily
     case weekly
+    case monthly
 
     static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Period")
     static let caseDisplayRepresentations: [ActivityPeriod: DisplayRepresentation] = [
         .daily: "Daily",
-        .weekly: "Weekly"
+        .weekly: "Weekly",
+        .monthly: "Monthly"
     ]
 
     var displayName: String { rawValue.uppercased() }
 
+    // The widget's period pill cycles through the three periods in order.
     var toggled: ActivityPeriod {
-        self == .daily ? .weekly : .daily
+        switch self {
+        case .daily: .weekly
+        case .weekly: .monthly
+        case .monthly: .daily
+        }
     }
 }
 
