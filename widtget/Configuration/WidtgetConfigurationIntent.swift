@@ -69,9 +69,6 @@ struct WidtgetConfigurationIntent: WidgetConfigurationIntent {
     @Parameter(title: "Period", default: .daily)
     var period: ActivityPeriod
 
-    @Parameter(title: "Activity window", default: .fixed)
-    var windowMode: PeriodWindowMode
-
     @Parameter(title: "Show repositories", default: true)
     var showRepositories: Bool
 
@@ -89,7 +86,6 @@ struct WidtgetConfigurationIntent: WidgetConfigurationIntent {
 
     init() {
         period = .daily
-        windowMode = .fixed
         showRepositories = true
         showActivity = true
         showUpdateTime = true

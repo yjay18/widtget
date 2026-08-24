@@ -51,7 +51,7 @@ struct ActivityProvider: AppIntentTimelineProvider {
         )
         let period = SharedPreferences.defaults.string(forKey: key)
             .flatMap(ActivityPeriod.init(rawValue:)) ?? configuredPeriod
-        let windowMode = configuration.windowMode
+        let windowMode = SharedPreferences.windowMode
         let content = ActivityDataSource.content(for: period, windowMode: windowMode)
         let modularPreferences = SharedPreferences.modularPreferences
 
@@ -68,7 +68,7 @@ struct ActivityProvider: AppIntentTimelineProvider {
                     && modularPreferences.enabledPanes.contains(.activity),
                 showUpdateTime: configuration.showUpdateTime,
                 repositoryDetail: configuration.repositoryDetail,
-                periodWindowMode: configuration.windowMode,
+                periodWindowMode: windowMode,
                 snakeCommitsPerBlock: configuration.snakeCommitsPerBlock,
                 paneOrder: modularPreferences.paneOrder,
                 enabledPanes: modularPreferences.enabledPanes,

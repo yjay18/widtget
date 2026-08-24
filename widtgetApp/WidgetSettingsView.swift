@@ -35,7 +35,7 @@ struct WidgetSettingsView: View {
     @State private var isReplacingAccountToken = false
     @State private var isAddingOrganization = false
     @State private var selectedSection: HostSection = .dashboard
-    @State private var dashboardWindowMode = PeriodWindowMode.fixed
+    @State private var dashboardWindowMode = SharedPreferences.windowMode
     @State private var paneOrder = SharedPreferences.modularPreferences.paneOrder
     @State private var enabledPanes = SharedPreferences.modularPreferences.enabledPanes
     @State private var blockworkColorway = SharedPreferences.modularPreferences.colorway
@@ -98,6 +98,10 @@ struct WidgetSettingsView: View {
         }
         .onChange(of: visualTheme) { _, _ in
             saveWidgetStudio()
+        }
+        .onChange(of: dashboardWindowMode) { _, newValue in
+            SharedPreferences.windowMode = newValue
+            reloadWidgets()
         }
         .onChange(of: familyLayouts) { _, _ in
             saveWidgetStudio()

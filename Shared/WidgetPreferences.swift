@@ -251,6 +251,7 @@ enum SharedPreferences {
         static let blockColorPrefix = "appearance.widget.blockColor"
         static let themeScopeVersion = "appearance.widget.themeScopeVersion"
         static let refreshInterval = "appearance.widget.refreshInterval"
+        static let windowMode = "appearance.widget.windowMode"
         static let githubUsername = "github.username"
         static let lastSuccessfulRefresh = "github.lastSuccessfulRefresh"
         static let githubRefreshRequested = "github.refreshRequested"
@@ -266,6 +267,16 @@ enum SharedPreferences {
                 .flatMap(WidgetRefreshInterval.init(rawValue:)) ?? .automatic
         }
         set { defaults.set(newValue.rawValue, forKey: Key.refreshInterval) }
+    }
+
+    // Fixed (this calendar day/week) vs rolling (last 24h / 7 days), shared by the
+    // dashboard toggle and every widget so one control moves both.
+    static var windowMode: PeriodWindowMode {
+        get {
+            defaults.string(forKey: Key.windowMode)
+                .flatMap(PeriodWindowMode.init(rawValue:)) ?? .fixed
+        }
+        set { defaults.set(newValue.rawValue, forKey: Key.windowMode) }
     }
 
     static var modularPreferences: WidgetModularPreferences {
