@@ -43,6 +43,11 @@ struct WidgetSettingsView: View {
     @State private var familyLayouts = SharedPreferences.modularPreferences.familyLayouts
     @State private var blockColors = SharedPreferences.modularPreferences.blockColors
     @State private var refreshInterval = SharedPreferences.refreshInterval
+    @State private var themeOverrides: [WidgetLayoutFamily: WidgetVisualTheme] = Dictionary(
+        uniqueKeysWithValues: WidgetLayoutFamily.allCases.compactMap { family in
+            SharedPreferences.themeOverride(for: family).map { (family, $0) }
+        }
+    )
     @State private var selectedBlock: WidgetPane = .additions
     @State private var draggedPane: WidgetPane?
     @State private var draggedOrigin: WidgetSlotOrigin?
@@ -242,19 +247,33 @@ struct WidgetSettingsView: View {
 
                 Spacer()
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("THEME · APPLIES TO WIDGETS + DASHBOARD")
-                        .font(.system(size: 8, weight: .black, design: .monospaced))
-                        .tracking(0.9)
-                        .foregroundStyle(studioMuted)
-                    Picker("Theme", selection: $visualTheme) {
-                        ForEach(WidgetVisualTheme.allCases) { theme in
-                            Text(theme.displayName).tag(theme)
+                VStack(alignment: .trailing, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("DEFAULT THEME · DASHBOARD + WIDGETS")
+                            .font(.system(size: 8, weight: .black, design: .monospaced))
+                            .tracking(0.9)
+                            .foregroundStyle(studioMuted)
+                        Picker("Theme", selection: $visualTheme) {
+                            ForEach(WidgetVisualTheme.allCases) { theme in
+                                Text(theme.displayName).tag(theme)
+                            }
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.menu)
+                        .frame(width: 260)
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("PER-SIZE OVERRIDE")
+                            .font(.system(size: 8, weight: .black, design: .monospaced))
+                            .tracking(0.9)
+                            .foregroundStyle(studioMuted)
+                        HStack(spacing: 6) {
+                            ForEach(WidgetLayoutFamily.allCases) { family in
+                                perSizeThemePicker(family)
+                            }
                         }
                     }
-                    .labelsHidden()
-                    .pickerStyle(.menu)
-                    .frame(width: 230)
                 }
             }
             .padding(.horizontal, 28)
@@ -262,7 +281,7 @@ struct WidgetSettingsView: View {
             .foregroundStyle(studioPaper)
             .background(studioInk)
 
-            if visualTheme == .blockwork {
+            if isAnyBlockwork {
                 HStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
@@ -1818,6 +1837,51 @@ struct WidgetSettingsView: View {
                 content()
             }
         }
+    }
+
+    private var isAnyBlockwork: Bool {
+        visualTheme == .blockwork || themeOverrides.values.contains(.blockwork)
+    }
+
+    private func perSizeThemePicker(_ family: WidgetLayoutFamily) -> some View {
+        VStack(spacing: 3) {
+            Text(sizeAbbrev(family))
+                .font(.system(size: 8, weight: .black, design: .monospaced))
+                .foregroundStyle(studioMuted)
+            Picker("", selection: themeOverrideBinding(family)) {
+                Text("Auto").tag(WidgetVisualTheme?.none)
+                ForEach(WidgetVisualTheme.allCases) { theme in
+                    Text(theme.displayName).tag(WidgetVisualTheme?.some(theme))
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .frame(width: 96)
+        }
+    }
+
+    private func sizeAbbrev(_ family: WidgetLayoutFamily) -> String {
+        switch family {
+        case .small: "S"
+        case .medium: "M"
+        case .large: "L"
+        case .extraLarge: "XL"
+        }
+    }
+
+    private func themeOverrideBinding(_ family: WidgetLayoutFamily) -> Binding<WidgetVisualTheme?> {
+        Binding(
+            get: { themeOverrides[family] },
+            set: { newValue in
+                if let newValue {
+                    themeOverrides[family] = newValue
+                } else {
+                    themeOverrides.removeValue(forKey: family)
+                }
+                SharedPreferences.setThemeOverride(newValue, for: family)
+                reloadWidgets()
+            }
+        )
     }
 
     private func reloadWidgets() {

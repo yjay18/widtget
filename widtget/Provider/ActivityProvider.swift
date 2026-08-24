@@ -54,6 +54,8 @@ struct ActivityProvider: AppIntentTimelineProvider {
         let windowMode = SharedPreferences.windowMode
         let content = ActivityDataSource.content(for: period, windowMode: windowMode)
         let modularPreferences = SharedPreferences.modularPreferences
+        let layoutFamily = WidgetLayoutFamily(rawValue: family.rawValue) ?? .large
+        let resolvedTheme = SharedPreferences.resolvedTheme(for: layoutFamily)
 
         return ActivityEntry(
             date: date,
@@ -73,7 +75,7 @@ struct ActivityProvider: AppIntentTimelineProvider {
                 paneOrder: modularPreferences.paneOrder,
                 enabledPanes: modularPreferences.enabledPanes,
                 colorway: modularPreferences.colorway,
-                visualTheme: modularPreferences.visualTheme,
+                visualTheme: resolvedTheme,
                 familyLayouts: modularPreferences.familyLayouts,
                 blockColors: modularPreferences.blockColors
             )

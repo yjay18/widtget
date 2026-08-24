@@ -250,6 +250,7 @@ enum SharedPreferences {
         static let layoutPrefix = "appearance.widget.layout"
         static let blockColorPrefix = "appearance.widget.blockColor"
         static let themeScopeVersion = "appearance.widget.themeScopeVersion"
+        static let themeOverridePrefix = "appearance.widget.themeOverride"
         static let refreshInterval = "appearance.widget.refreshInterval"
         static let windowMode = "appearance.widget.windowMode"
         static let githubUsername = "github.username"
@@ -277,6 +278,26 @@ enum SharedPreferences {
                 .flatMap(PeriodWindowMode.init(rawValue:)) ?? .fixed
         }
         set { defaults.set(newValue.rawValue, forKey: Key.windowMode) }
+    }
+
+    // Optional per-widget-size theme; nil means "use the global theme".
+    static func themeOverride(for family: WidgetLayoutFamily) -> WidgetVisualTheme? {
+        defaults.string(forKey: "\(Key.themeOverridePrefix).\(family.rawValue)")
+            .flatMap(WidgetVisualTheme.init(rawValue:))
+    }
+
+    static func setThemeOverride(_ theme: WidgetVisualTheme?, for family: WidgetLayoutFamily) {
+        let key = "\(Key.themeOverridePrefix).\(family.rawValue)"
+        if let theme {
+            defaults.set(theme.rawValue, forKey: key)
+        } else {
+            defaults.removeObject(forKey: key)
+        }
+    }
+
+    // The theme a given widget size actually renders: its override, else the global.
+    static func resolvedTheme(for family: WidgetLayoutFamily) -> WidgetVisualTheme {
+        themeOverride(for: family) ?? modularPreferences.visualTheme
     }
 
     static var modularPreferences: WidgetModularPreferences {
