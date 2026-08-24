@@ -230,231 +230,132 @@ struct WidgetSettingsView: View {
         .foregroundStyle(DashboardPalette.text)
     }
 
+    private func resolvedStudioTheme(_ family: WidgetLayoutFamily) -> WidgetVisualTheme {
+        themeOverrides[family] ?? visualTheme
+    }
+
     private var widgetStudioContent: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .bottom, spacing: 24) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(
-                        visualTheme == .blockwork
-                            ? "BLOCKWORK / WIDGET SYSTEM"
-                            : "\(visualTheme.displayName.uppercased()) / FIXED LAYOUT"
-                    )
-                        .font(.system(size: 9, weight: .black, design: .monospaced))
-                        .tracking(1.2)
-                        .foregroundStyle(studioOrange)
-                    Text(visualTheme == .blockwork ? "Build your widtget" : visualTheme.displayName)
-                        .font(.system(size: 30, weight: .black, design: .rounded))
-                        .tracking(-1.2)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 8) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("DEFAULT THEME · DASHBOARD + WIDGETS")
-                            .font(.system(size: 8, weight: .black, design: .monospaced))
-                            .tracking(0.9)
-                            .foregroundStyle(studioMuted)
-                        Picker("Theme", selection: $visualTheme) {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("WIDGET STUDIO")
+                            .font(.system(size: 10, weight: .black, design: .monospaced)).tracking(1)
+                            .foregroundStyle(DashboardPalette.green)
+                        Text("A theme for every size")
+                            .font(.system(size: 24, weight: .black, design: .rounded)).tracking(-0.6)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text("DASHBOARD THEME")
+                            .font(.system(size: 8, weight: .black, design: .monospaced)).tracking(0.9)
+                            .foregroundStyle(DashboardPalette.muted)
+                        Picker("", selection: $visualTheme) {
                             ForEach(WidgetVisualTheme.allCases) { theme in
                                 Text(theme.displayName).tag(theme)
                             }
                         }
-                        .labelsHidden()
-                        .pickerStyle(.menu)
-                        .frame(width: 260)
-                    }
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("PER-SIZE OVERRIDE")
-                            .font(.system(size: 8, weight: .black, design: .monospaced))
-                            .tracking(0.9)
-                            .foregroundStyle(studioMuted)
-                        HStack(spacing: 6) {
-                            ForEach(WidgetLayoutFamily.allCases) { family in
-                                perSizeThemePicker(family)
-                            }
-                        }
+                        .labelsHidden().pickerStyle(.menu).frame(width: 180)
                     }
                 }
-            }
-            .padding(.horizontal, 28)
-            .padding(.vertical, 22)
-            .foregroundStyle(studioPaper)
-            .background(studioInk)
 
-            if isAnyBlockwork {
-                HStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("BLOCK LIBRARY")
-                                .font(.system(size: 10, weight: .black, design: .monospaced))
-                                .tracking(1)
-                            Text("Drag a block into any family slot")
-                                .font(.system(size: 9, weight: .medium))
-                                .foregroundStyle(studioMuted)
-                        }
-                        Spacer()
-                        Text("\(WidgetPane.allCases.count)")
-                            .font(.system(size: 10, weight: .black, design: .monospaced))
-                    }
-
-                    VStack(spacing: 0) {
-                        ForEach(WidgetPane.allCases) { pane in
-                            blockLibraryRow(pane)
-                        }
-                    }
-                    .overlay {
-                        Rectangle()
-                            .stroke(studioInk, lineWidth: 2)
-                    }
-
-                    blockColorEditor
-
-                    Spacer()
+                ForEach(WidgetLayoutFamily.allCases) { family in
+                    widgetSizeCard(family)
                 }
-                .padding(24)
-                .frame(width: 330)
-                .background(studioPaper)
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
-                    HStack {
-                        Text("FAMILY COMPOSER")
-                            .font(.system(size: 10, weight: .black, design: .monospaced))
-                            .tracking(1)
-                        Spacer()
-                        Text("1 / 2 / 3 / 4 FIXED SLOTS")
-                            .font(.system(size: 8, weight: .black, design: .monospaced))
-                            .foregroundStyle(studioMuted)
-                    }
-
-                    HStack(alignment: .top, spacing: 18) {
-                        familyComposer(.small, width: 170, height: 170)
-                        familyComposer(.medium, width: 360, height: 170)
-                    }
-
-                    HStack(alignment: .top, spacing: 18) {
-                        familyComposer(.large, width: 360, height: 330)
-                        Spacer(minLength: 0)
-                    }
-
-                    familyComposer(.extraLarge, width: 650, height: 310)
-
-                    HStack(spacing: 7) {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                        Text("Changes reload WidgetKit timelines automatically")
-                    }
-                    .font(.system(size: 9, weight: .bold, design: .monospaced))
-                    .foregroundStyle(studioMuted)
-
-                    Spacer()
-                    }
-                    .padding(24)
-                }
-                .frame(maxWidth: .infinity)
-                .background(Color(red: 0.62, green: 0.18, blue: 0.32))
-                }
-            } else {
-                defaultWidgetStudioOverview
-            }
-        }
-    }
-
-    private var defaultWidgetStudioOverview: some View {
-        HStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("\(visualTheme.displayName.uppercased()) IS FIXED")
-                        .font(.system(size: 10, weight: .black, design: .monospaced))
-                        .tracking(1)
-                        .foregroundStyle(DashboardPalette.green)
-                    Text("A fixed size-specific layout")
-                        .font(.system(size: 22, weight: .black, design: .rounded))
-                        .tracking(-0.6)
-                    Text("\(visualTheme.displayName) keeps its own size-specific hierarchy. Blockwork slots, block order, and poster colors never alter it.")
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundStyle(DashboardPalette.muted)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                VStack(alignment: .leading, spacing: 12) {
-                    defaultRule("Small, Medium, Large, and Extra Large keep their original compositions")
-                    defaultRule("Daily / Weekly and per-widget App Intent controls still apply")
-                    defaultRule("Activity values normalize inside bounded chart frames")
-                    defaultRule("Repository detail and update visibility remain supported")
-                }
-                .padding(14)
-                .background(DashboardPalette.lifted, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(DashboardPalette.line, lineWidth: 1)
-                }
-
-                Button {
-                    withAnimation(.snappy(duration: 0.24)) {
-                        visualTheme = .blockwork
-                    }
-                } label: {
-                    Label("Customize Blockwork", systemImage: "square.grid.3x3.fill")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(DashboardPalette.green)
-                .foregroundStyle(DashboardPalette.ink)
-
-                Spacer()
             }
             .padding(24)
-            .frame(width: 330)
-            .foregroundStyle(DashboardPalette.text)
-            .background(DashboardPalette.panel)
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("FIXED FAMILY LAYOUTS")
-                                .font(.system(size: 10, weight: .black, design: .monospaced))
-                                .tracking(1)
-                            Text("Read-only previews · no slots or block colors")
-                                .font(.system(size: 9, weight: .medium, design: .rounded))
-                                .foregroundStyle(DashboardPalette.muted)
-                        }
-                        Spacer()
-                        Text(visualTheme.displayName.uppercased())
-                            .font(.system(size: 8, weight: .black, design: .monospaced))
-                            .foregroundStyle(DashboardPalette.green)
-                    }
-
-                    HStack(alignment: .top, spacing: 18) {
-                        fixedThemePreview(.small, width: 170, height: 170)
-                        fixedThemePreview(.medium, width: 360, height: 170)
-                    }
-
-                    fixedThemePreview(.large, width: 360, height: 330)
-                    fixedThemePreview(.extraLarge, width: 650, height: 310)
-                }
-                .padding(24)
-            }
+            .frame(maxWidth: 880, alignment: .leading)
             .frame(maxWidth: .infinity)
-            .foregroundStyle(DashboardPalette.text)
-            .background(DashboardPalette.ink)
+        }
+        .foregroundStyle(DashboardPalette.text)
+        .background(DashboardPalette.ink)
+    }
+
+    private func widgetSizeCard(_ family: WidgetLayoutFamily) -> some View {
+        let theme = resolvedStudioTheme(family)
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("\(family.displayName.uppercased()) WIDGET")
+                    .font(.system(size: 11, weight: .black, design: .monospaced)).tracking(0.8)
+                Spacer()
+                Picker("", selection: themeOverrideBinding(family)) {
+                    Text("Default \u{00B7} \(visualTheme.displayName)").tag(WidgetVisualTheme?.none)
+                    ForEach(WidgetVisualTheme.allCases) { option in
+                        Text(option.displayName).tag(WidgetVisualTheme?.some(option))
+                    }
+                }
+                .labelsHidden().pickerStyle(.menu).frame(width: 220)
+            }
+
+            if theme == .blockwork {
+                DisclosureGroup {
+                    blockworkSettings(family).padding(.top, 12)
+                } label: {
+                    Label("Settings", systemImage: "square.grid.2x2")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                }
+                .tint(DashboardPalette.green)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    fixedThemePreview(
+                        family,
+                        width: previewSize(family).width,
+                        height: previewSize(family).height,
+                        theme: theme
+                    )
+                }
+            }
+        }
+        .padding(16)
+        .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(DashboardPalette.line, lineWidth: 1)
         }
     }
 
-    private func defaultRule(_ text: String) -> some View {
-        HStack(alignment: .top, spacing: 9) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(DashboardPalette.green)
-                .padding(.top, 1)
-            Text(text)
-                .font(.system(size: 10, weight: .medium, design: .rounded))
-                .foregroundStyle(DashboardPalette.text)
-                .fixedSize(horizontal: false, vertical: true)
+    private func previewSize(_ family: WidgetLayoutFamily) -> (width: CGFloat, height: CGFloat) {
+        switch family {
+        case .small: (190, 190)
+        case .medium: (380, 190)
+        case .large: (320, 320)
+        case .extraLarge: (620, 300)
+        }
+    }
+
+    private func blockworkSettings(_ family: WidgetLayoutFamily) -> some View {
+        HStack(alignment: .top, spacing: 18) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("BLOCKS")
+                    .font(.system(size: 9, weight: .black, design: .monospaced)).tracking(1)
+                VStack(spacing: 0) {
+                    ForEach(WidgetPane.allCases) { pane in
+                        blockLibraryRow(pane)
+                    }
+                }
+                .overlay { Rectangle().stroke(studioInk, lineWidth: 2) }
+                blockColorEditor
+            }
+            .frame(width: 300)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                familyComposer(
+                    family,
+                    width: composerSize(family).width,
+                    height: composerSize(family).height
+                )
+            }
+        }
+        .padding(16)
+        .background(studioPaper)
+        .foregroundStyle(studioInk)
+    }
+
+    private func composerSize(_ family: WidgetLayoutFamily) -> (width: CGFloat, height: CGFloat) {
+        switch family {
+        case .small: (180, 180)
+        case .medium: (380, 180)
+        case .large: (360, 320)
+        case .extraLarge: (620, 300)
         }
     }
 
@@ -680,8 +581,8 @@ struct WidgetSettingsView: View {
         let corner: CGFloat
     }
 
-    private var themePreviewStyle: ThemePreviewStyle {
-        switch visualTheme {
+    private func themePreviewStyle(_ theme: WidgetVisualTheme) -> ThemePreviewStyle {
+        switch theme {
         case .glasshouse:
             ThemePreviewStyle(
                 theme: .glasshouse,
@@ -729,11 +630,11 @@ struct WidgetSettingsView: View {
     }
 
     @ViewBuilder
-    private func fixedThemePreview(_ family: WidgetLayoutFamily, width: CGFloat, height: CGFloat) -> some View {
-        if visualTheme == .defaultTheme {
+    private func fixedThemePreview(_ family: WidgetLayoutFamily, width: CGFloat, height: CGFloat, theme: WidgetVisualTheme) -> some View {
+        if theme == .defaultTheme {
             fixedDefaultPreview(family, width: width, height: height)
         } else {
-            themedPreviewCard(themePreviewStyle, family: family, width: width, height: height)
+            themedPreviewCard(themePreviewStyle(theme), family: family, width: width, height: height)
         }
     }
 
@@ -748,7 +649,7 @@ struct WidgetSettingsView: View {
                 Text(family.displayName.uppercased())
                     .font(.system(size: 9, weight: .black, design: .monospaced)).tracking(0.9)
                 Spacer()
-                Text(visualTheme.displayName.uppercased())
+                Text(style.theme.displayName.uppercased())
                     .font(.system(size: 7, weight: .black, design: .monospaced))
                     .foregroundStyle(DashboardPalette.green)
             }
@@ -1883,32 +1784,6 @@ struct WidgetSettingsView: View {
 
     private var isAnyBlockwork: Bool {
         visualTheme == .blockwork || themeOverrides.values.contains(.blockwork)
-    }
-
-    private func perSizeThemePicker(_ family: WidgetLayoutFamily) -> some View {
-        VStack(spacing: 3) {
-            Text(sizeAbbrev(family))
-                .font(.system(size: 8, weight: .black, design: .monospaced))
-                .foregroundStyle(studioMuted)
-            Picker("", selection: themeOverrideBinding(family)) {
-                Text("Auto").tag(WidgetVisualTheme?.none)
-                ForEach(WidgetVisualTheme.allCases) { theme in
-                    Text(theme.displayName).tag(WidgetVisualTheme?.some(theme))
-                }
-            }
-            .labelsHidden()
-            .pickerStyle(.menu)
-            .frame(width: 96)
-        }
-    }
-
-    private func sizeAbbrev(_ family: WidgetLayoutFamily) -> String {
-        switch family {
-        case .small: "S"
-        case .medium: "M"
-        case .large: "L"
-        case .extraLarge: "XL"
-        }
     }
 
     private func themeOverrideBinding(_ family: WidgetLayoutFamily) -> Binding<WidgetVisualTheme?> {
