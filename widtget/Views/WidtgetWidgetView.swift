@@ -66,12 +66,13 @@ struct WidtgetWidgetView: View {
 }
 
 private struct ComposedWidgetView: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
     let entry: ActivityEntry
     let preferences: WidgetViewPreferences
     let family: WidgetLayoutFamily
 
     private var palette: ComposedWidgetPalette {
-        ComposedWidgetPalette(theme: preferences.visualTheme)
+        ComposedWidgetPalette(theme: preferences.visualTheme, vibrant: renderingMode != .fullColor)
     }
 
     private var blocks: [WidgetPane] {
@@ -163,12 +164,13 @@ private struct ComposedWidgetView: View {
 
 private struct ComposedPeriodHeader: View {
     @Environment(\.widgetFamily) private var widgetFamily
+    @Environment(\.widgetRenderingMode) private var renderingMode
 
     let entry: ActivityEntry
     let theme: WidgetVisualTheme
 
     private var palette: ComposedWidgetPalette {
-        ComposedWidgetPalette(theme: theme)
+        ComposedWidgetPalette(theme: theme, vibrant: renderingMode != .fullColor)
     }
 
     var body: some View {
@@ -784,6 +786,10 @@ private struct WidgetBlockView: View {
 
 private struct ComposedWidgetPalette {
     let theme: WidgetVisualTheme
+    // In macOS vibrant (de-emphasized) mode, opaque fills are painted as a light
+    // material and wash out; clear them and render content in semantic colours so
+    // Blockwork stays legible instead of a patchy white block.
+    var vibrant = false
 
     let ink = Color(red: 0.063, green: 0.067, blue: 0.059)
     let paper = Color(red: 0.937, green: 0.898, blue: 0.804)
@@ -792,46 +798,50 @@ private struct ComposedWidgetPalette {
     let sky = Color(red: 0.412, green: 0.729, blue: 0.859)
 
     var background: Color {
-        theme == .blockwork ? paper : Color(red: 0.035, green: 0.047, blue: 0.063)
+        if vibrant { return .clear }
+        return theme == .blockwork ? paper : Color(red: 0.035, green: 0.047, blue: 0.063)
     }
 
     var header: Color {
-        theme == .blockwork ? ink : background
+        if vibrant { return .clear }
+        return theme == .blockwork ? ink : background
     }
 
     var headerText: Color {
-        theme == .blockwork ? paper : text
+        vibrant ? .primary : (theme == .blockwork ? paper : text)
     }
 
     var text: Color {
-        theme == .blockwork ? ink : Color(red: 0.93, green: 0.95, blue: 0.97)
+        vibrant ? .primary : (theme == .blockwork ? ink : Color(red: 0.93, green: 0.95, blue: 0.97))
     }
 
     var muted: Color {
-        theme == .blockwork ? ink.opacity(0.62) : Color(red: 0.52, green: 0.57, blue: 0.63)
+        vibrant ? .secondary : (theme == .blockwork ? ink.opacity(0.62) : Color(red: 0.52, green: 0.57, blue: 0.63))
     }
 
     var divider: Color {
-        theme == .blockwork ? ink : Color.white.opacity(0.075)
+        vibrant ? Color.primary.opacity(0.25) : (theme == .blockwork ? ink : Color.white.opacity(0.075))
     }
 
     var addition: Color {
-        theme == .blockwork ? ink : Color(red: 0.22, green: 0.80, blue: 0.46)
+        vibrant ? .primary : (theme == .blockwork ? ink : Color(red: 0.22, green: 0.80, blue: 0.46))
     }
 
     var activityAddition: Color {
-        theme == .blockwork ? ink : Color(red: 0.22, green: 0.80, blue: 0.46)
+        vibrant ? .primary : (theme == .blockwork ? ink : Color(red: 0.22, green: 0.80, blue: 0.46))
     }
 
     var deletion: Color {
-        theme == .blockwork ? orange : Color(red: 0.95, green: 0.38, blue: 0.40)
+        vibrant ? .secondary : (theme == .blockwork ? orange : Color(red: 0.95, green: 0.38, blue: 0.40))
     }
 
     var neutral: Color {
-        theme == .blockwork ? ink.opacity(0.18) : Color(red: 0.13, green: 0.16, blue: 0.20)
+        vibrant ? Color.secondary.opacity(0.25) : (theme == .blockwork ? ink.opacity(0.18) : Color(red: 0.13, green: 0.16, blue: 0.20))
     }
 
     func fill(for block: WidgetPane, choice: WidgetBlockColor) -> Color {
+        if vibrant { return .clear }
+
         if choice != .automatic {
             return customFill(choice)
         }
@@ -850,6 +860,8 @@ private struct ComposedWidgetPalette {
     }
 
     func foreground(for block: WidgetPane, choice: WidgetBlockColor) -> Color {
+        if vibrant { return .primary }
+
         if theme == .defaultTheme {
             if choice == .automatic {
                 return text

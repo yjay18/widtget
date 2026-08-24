@@ -14,6 +14,9 @@ enum DefaultWidgetPalette {
 }
 
 struct DefaultWidgetView: View {
+    // An opaque background is painted as a light material in macOS vibrant mode and
+    // washes the widget out; clear it when de-emphasized so content stays legible.
+    @Environment(\.widgetRenderingMode) private var renderingMode
     let entry: ActivityEntry
     let preferences: WidgetViewPreferences
     let family: WidgetLayoutFamily
@@ -31,7 +34,7 @@ struct DefaultWidgetView: View {
                 DefaultExtraLargeWidgetView(entry: entry, preferences: preferences)
             }
         }
-        .background(DefaultWidgetPalette.background)
+        .background(renderingMode == .fullColor ? DefaultWidgetPalette.background : Color.clear)
     }
 }
 
