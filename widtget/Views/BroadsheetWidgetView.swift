@@ -20,6 +20,7 @@ struct BroadsheetWidgetView: View {
     // In vibrant mode clear the ground and render content as bright semantic
     // colours so it reads as light-on-material like the dark themes do.
     @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.widgetFamily) private var widgetFamily
     let entry: ActivityEntry
     let preferences: WidgetViewPreferences
     let family: WidgetLayoutFamily
@@ -144,13 +145,13 @@ struct BroadsheetWidgetView: View {
                 Rectangle().fill(hairC).frame(width: 1)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    kicker(entry.ledgerCaption).padding(.bottom, 8)
-                    dayBook(limit: 8)
-                    Rectangle().fill(inkC).frame(height: 1).padding(.vertical, 8)
+                    kicker(entry.ledgerCaption).padding(.bottom, 10)
+                    dayBook(limit: 8, spacing: 7)
+                    Spacer(minLength: 12)
+                    Rectangle().fill(inkC).frame(height: 1).padding(.bottom, 8)
                     leader("Commits", "\(entry.snapshot.commits)")
                     leader("Repositories", "\(entry.snapshot.repositories.count)")
                     leader("Per commit", "\(entry.snapshot.averagePerCommit)")
-                    Spacer(minLength: 0)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -167,13 +168,28 @@ struct BroadsheetWidgetView: View {
     }
 
     private var masthead: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text("The commit record")
                 .font(.system(size: family == .small ? 12 : 14, weight: .semibold, design: .serif))
-            Spacer()
-            Text(mastheadMeta)
-                .font(.system(size: 8, weight: .semibold, design: .monospaced))
-                .tracking(1).foregroundStyle(mutedC).lineLimit(1)
+            Spacer(minLength: 4)
+            Link(destination: URL(string: "widtget://refresh")!) {
+                Text("↻").font(.system(size: 9, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(entry.snapshot.state == .error ? redC : mutedC)
+            }
+            .accessibilityLabel("Refresh GitHub activity")
+            Button(intent: SetActivityPeriodIntent(
+                period: entry.period.toggled,
+                family: ActivityWidgetFamily(widgetFamily: widgetFamily),
+                configuredPeriod: entry.configuredPeriod
+            )) {
+                Text(mastheadMeta)
+                    .font(.system(size: 8, weight: .semibold, design: .monospaced))
+                    .tracking(1).foregroundStyle(inkC).lineLimit(1)
+                    .padding(.horizontal, 6).padding(.vertical, 3)
+                    .overlay { Rectangle().stroke(hairC, lineWidth: 1) }
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Show \(entry.period.toggled.rawValue) activity")
         }
     }
 
@@ -211,10 +227,10 @@ struct BroadsheetWidgetView: View {
         .padding(.vertical, 2)
     }
 
-    private func dayBook(limit: Int) -> some View {
+    private func dayBook(limit: Int, spacing: CGFloat = 0) -> some View {
         let labels = entry.intervalLabels(style: .expanded)
         let cells = Array(entry.snapshot.activity.enumerated().prefix(limit))
-        return VStack(spacing: 0) {
+        return VStack(spacing: spacing) {
             ForEach(cells, id: \.offset) { index, cell in
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
                     Text(labels.indices.contains(index) ? labels[index] : "—")
