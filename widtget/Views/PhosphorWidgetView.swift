@@ -119,7 +119,7 @@ struct PhosphorWidgetView: View {
                     dim("activity")
                     Spacer(minLength: 0)
                     phosphorBars(cells: entry.snapshot.activity, height: 46)
-                    dim(axisString)
+                    phosphorAxis()
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -146,6 +146,20 @@ struct PhosphorWidgetView: View {
             rows: 2
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    // Interval labels aligned under each bar (one label per bar, evenly spaced).
+    private func phosphorAxis() -> some View {
+        let labels = entry.intervalLabels().map { $0.lowercased() }
+        return HStack(spacing: 3) {
+            ForEach(labels.indices, id: \.self) { index in
+                Text(labels[index])
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    .foregroundStyle(PhosphorPalette.dim)
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .frame(maxWidth: .infinity)
+            }
+        }
     }
 
     // Blocky full-width bars for large/XL, so a 4-5 week month fills the box instead
@@ -179,26 +193,28 @@ struct PhosphorWidgetView: View {
                 let gap: CGFloat = 18
                 let usable = max(proxy.size.width - gap * 2, 1)
                 HStack(alignment: .top, spacing: gap) {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 7) {
                         dim("$ git log --numstat")
                         Text(value(entry.snapshot.additions, sign: "+"))
-                            .font(.system(size: 52, weight: .bold, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.5)
+                            .font(.system(size: 60, weight: .bold, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.5)
                         Text(value(entry.snapshot.deletions, sign: "−"))
-                            .font(.system(size: 26, weight: .semibold, design: .monospaced)).foregroundStyle(PhosphorPalette.amber)
+                            .font(.system(size: 30, weight: .semibold, design: .monospaced)).foregroundStyle(PhosphorPalette.amber)
                         Rectangle().fill(PhosphorPalette.dim.opacity(0.4)).frame(height: 1).padding(.vertical, 8)
                         phosphorStat("net", value(entry.snapshot.net, sign: netSign))
                         phosphorStat("avg/commit", "\(entry.snapshot.averagePerCommit)")
+                        phosphorStat("commits", "\(entry.snapshot.commits)")
+                        phosphorStat("repos", "\(entry.snapshot.repositories.count)")
                         phosphorStat("peak", entry.peakLabel.lowercased())
                         phosphorStat("active", "\(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1))")
                         Spacer(minLength: 0)
                     }
-                    .frame(width: usable * 0.40, alignment: .topLeading)
+                    .frame(width: usable * 0.46, alignment: .topLeading)
 
                     VStack(spacing: 0) {
                         VStack(alignment: .leading, spacing: 8) {
                             dim("activity")
                             phosphorBars(cells: entry.snapshot.activity, height: 64)
-                            dim(axisString)
+                            phosphorAxis()
                             dim("peak \(entry.peakLabel.lowercased()) · \(entry.snapshot.activeIntervals)/\(max(entry.snapshot.activity.count, 1)) active")
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -206,13 +222,13 @@ struct PhosphorWidgetView: View {
                         pet
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    .frame(width: usable * 0.33)
+                    .frame(width: usable * 0.30)
                     .overlay(alignment: .leading) {
                         Rectangle().fill(PhosphorPalette.dim.opacity(0.5)).frame(width: 1).offset(x: -9)
                     }
 
                     repoColumn(limit: preferences.repositoryDetail.extraLargeLimit)
-                        .frame(width: usable * 0.27, alignment: .leading)
+                        .frame(width: usable * 0.24, alignment: .leading)
                         .overlay(alignment: .leading) {
                             Rectangle().fill(PhosphorPalette.dim.opacity(0.5)).frame(width: 1).offset(x: -9)
                         }

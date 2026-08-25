@@ -45,7 +45,7 @@ struct ArcadeWidgetView: View {
         switch family {
         case .small, .extraLarge: 20
         case .medium: 40
-        case .large: 60
+        case .large: 100
         }
     }
 

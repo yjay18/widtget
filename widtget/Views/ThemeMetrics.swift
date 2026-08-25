@@ -140,12 +140,25 @@ struct CommitPetView: View {
     @ViewBuilder
     private func cellView(index: Int) -> some View {
         let fill = index < CommitSnakeLimits.visualBlockCount ? cell(index) : Color.clear
+        let isHead = segments > 0 && index == segments - 1
+        let base = RoundedRectangle(cornerRadius: 2, style: .continuous)
+            .fill(fill)
+            .overlay { if isHead { headEye } }
         if rows == 1 {
-            RoundedRectangle(cornerRadius: 2, style: .continuous)
-                .fill(fill).frame(height: 12).frame(maxWidth: .infinity)
+            base.frame(height: 12).frame(maxWidth: .infinity)
         } else {
-            RoundedRectangle(cornerRadius: 2, style: .continuous)
-                .fill(fill).aspectRatio(1, contentMode: .fit).frame(maxWidth: .infinity)
+            base.aspectRatio(1, contentMode: .fit).frame(maxWidth: .infinity)
+        }
+    }
+
+    // A small dark pip so the head reads as a face, not just a brighter block.
+    private var headEye: some View {
+        GeometryReader { proxy in
+            let d = max(2, min(proxy.size.width, proxy.size.height) * 0.22)
+            Circle()
+                .fill(bodyColor)
+                .frame(width: d, height: d)
+                .position(x: proxy.size.width * 0.66, y: proxy.size.height * 0.4)
         }
     }
 
