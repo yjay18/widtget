@@ -151,14 +151,16 @@ struct CommitPetView: View {
         }
     }
 
-    // A small dark pip so the head reads as a face, not just a brighter block.
+    // Two dark eyes so the head clearly reads as a face, not just a brighter block.
     private var headEye: some View {
         GeometryReader { proxy in
-            let d = max(2, min(proxy.size.width, proxy.size.height) * 0.22)
-            Circle()
-                .fill(bodyColor)
-                .frame(width: d, height: d)
-                .position(x: proxy.size.width * 0.66, y: proxy.size.height * 0.4)
+            let s = min(proxy.size.width, proxy.size.height)
+            let d = max(2, s * 0.3)
+            HStack(spacing: d * 0.7) {
+                Circle().fill(Color.black.opacity(0.72)).frame(width: d, height: d)
+                Circle().fill(Color.black.opacity(0.72)).frame(width: d, height: d)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .center)
         }
     }
 

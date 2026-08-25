@@ -49,15 +49,15 @@ struct ArcadeWidgetView: View {
         }
     }
 
-    // One block per N units (commits or lines, per the chosen basis), capped at the
-    // family's playfield size.
-    private var blocks: Int {
-        CommitSnakeLimits.blocks(
-            units: entry.snapshot.snakeUnits(preferences.snakeBlockBasis),
-            per: preferences.snakeCommitsPerBlock,
-            cap: maxBlocks
-        )
+    // Level is the true, uncapped block count (one per N units) — it can exceed the
+    // playfield size. The snake visual (`blocks`) fills the grid, capped at maxBlocks.
+    private var level: Int {
+        let per = max(preferences.snakeCommitsPerBlock, 1)
+        let units = entry.snapshot.snakeUnits(preferences.snakeBlockBasis)
+        return max(Int(ceil(Double(units) / Double(per))), 0)
     }
+
+    private var blocks: Int { min(level, maxBlocks) }
 
     private var snekLabel: String {
         "SNEK · 1 = \(preferences.snakeCommitsPerBlock) \(preferences.snakeBlockBasis.unitNoun.uppercased())"
@@ -76,7 +76,7 @@ struct ArcadeWidgetView: View {
             playfield(cols: 10)
             Spacer(minLength: 0)
             HStack {
-                tag("LV.\(blocks)")
+                tag("LV.\(level)")
                 Spacer()
                 tag("\(entry.snapshot.repositories.count) REPOS")
             }
@@ -90,7 +90,7 @@ struct ArcadeWidgetView: View {
                 VStack(alignment: .leading, spacing: 7) {
                     panel { tag("LINES MADE"); PixelScore(text: score(entry.snapshot.additions, sign: "+"), size: 22, color: ArcadePalette.lightest) }
                     panel { tag("REMOVED"); PixelScore(text: score(entry.snapshot.deletions, sign: "-"), size: 14, color: ArcadePalette.food) }
-                    HStack { tag("LV.\(blocks)"); Spacer(); tag("HI \(entry.peakLabel.uppercased())") }
+                    HStack { tag("LV.\(level)"); Spacer(); tag("HI \(entry.peakLabel.uppercased())") }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -116,7 +116,7 @@ struct ArcadeWidgetView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     tag(snekLabel)
                     playfield(cols: 10)
-                    HStack { tag("\(blocks)/\(maxBlocks)"); Spacer(); tag("LV.\(blocks)") }
+                    HStack { tag("\(blocks)/\(maxBlocks)"); Spacer(); tag("LV.\(level)") }
                 }
                 .frame(width: 150)
 
@@ -143,7 +143,7 @@ struct ArcadeWidgetView: View {
                     panel { tag("LINES MADE"); PixelScore(text: score(entry.snapshot.additions, sign: "+"), size: 28, color: ArcadePalette.lightest) }
                     panel { tag("REMOVED"); PixelScore(text: score(entry.snapshot.deletions, sign: "-"), size: 20, color: ArcadePalette.food) }
                     panel {
-                        HStack { tag("LV.\(blocks)"); Spacer(); tag("HI \(entry.peakLabel.uppercased())") }
+                        HStack { tag("LV.\(level)"); Spacer(); tag("HI \(entry.peakLabel.uppercased())") }
                         HStack { tag("\(entry.snapshot.commits) COMMITS"); Spacer(); tag("\(entry.snapshot.averagePerCommit) AVG") }
                     }
                     tag(snekLabel)
