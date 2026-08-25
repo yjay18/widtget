@@ -292,6 +292,8 @@ enum SharedPreferences {
         static let windowMode = "appearance.widget.windowMode"
         static let snakeBlockBasis = "appearance.widget.snakeBlockBasis"
         static let snakeUnitsPerBlock = "appearance.widget.snakeUnitsPerBlock"
+        static let snekBasisPrefix = "appearance.snek.basis"
+        static let snekPerBlockPrefix = "appearance.snek.per"
         static let githubUsername = "github.username"
         static let lastSuccessfulRefresh = "github.lastSuccessfulRefresh"
         static let githubRefreshRequested = "github.refreshRequested"
@@ -353,6 +355,40 @@ enum SharedPreferences {
             return stored > 0 ? stored : snakeBlockBasis.defaultPerBlock
         }
         set { defaults.set(max(1, newValue), forKey: Key.snakeUnitsPerBlock) }
+    }
+
+    // Per-(theme, size) snek configuration, falling back to the global default so a
+    // single widget's snek can count a different metric or scale than the rest.
+    private static func snekKey(_ prefix: String, _ theme: WidgetVisualTheme, _ family: WidgetLayoutFamily) -> String {
+        "\(prefix).\(theme.rawValue).\(family.rawValue)"
+    }
+
+    static func snekBasisOverride(theme: WidgetVisualTheme, family: WidgetLayoutFamily) -> SnakeBlockBasis? {
+        defaults.string(forKey: snekKey(Key.snekBasisPrefix, theme, family))
+            .flatMap(SnakeBlockBasis.init(rawValue:))
+    }
+
+    static func snekBasis(theme: WidgetVisualTheme, family: WidgetLayoutFamily) -> SnakeBlockBasis {
+        snekBasisOverride(theme: theme, family: family) ?? snakeBlockBasis
+    }
+
+    static func setSnekBasis(_ basis: SnakeBlockBasis?, theme: WidgetVisualTheme, family: WidgetLayoutFamily) {
+        let key = snekKey(Key.snekBasisPrefix, theme, family)
+        if let basis { defaults.set(basis.rawValue, forKey: key) } else { defaults.removeObject(forKey: key) }
+    }
+
+    static func snekPerBlockOverride(theme: WidgetVisualTheme, family: WidgetLayoutFamily) -> Int? {
+        let stored = defaults.integer(forKey: snekKey(Key.snekPerBlockPrefix, theme, family))
+        return stored > 0 ? stored : nil
+    }
+
+    static func snekPerBlock(theme: WidgetVisualTheme, family: WidgetLayoutFamily) -> Int {
+        snekPerBlockOverride(theme: theme, family: family) ?? snakeUnitsPerBlock
+    }
+
+    static func setSnekPerBlock(_ value: Int?, theme: WidgetVisualTheme, family: WidgetLayoutFamily) {
+        let key = snekKey(Key.snekPerBlockPrefix, theme, family)
+        if let value { defaults.set(max(1, value), forKey: key) } else { defaults.removeObject(forKey: key) }
     }
 
     static var modularPreferences: WidgetModularPreferences {

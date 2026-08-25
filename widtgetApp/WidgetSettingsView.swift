@@ -50,6 +50,28 @@ struct WidgetSettingsView: View {
             SharedPreferences.themeOverride(for: family).map { (family, $0) }
         }
     )
+    @State private var snekBasisOverrides: [SnekKey: SnakeBlockBasis] = {
+        var result: [SnekKey: SnakeBlockBasis] = [:]
+        for theme in WidgetVisualTheme.allCases {
+            for family in WidgetLayoutFamily.allCases {
+                if let basis = SharedPreferences.snekBasisOverride(theme: theme, family: family) {
+                    result[SnekKey(theme: theme, family: family)] = basis
+                }
+            }
+        }
+        return result
+    }()
+    @State private var snekPerBlockOverrides: [SnekKey: Int] = {
+        var result: [SnekKey: Int] = [:]
+        for theme in WidgetVisualTheme.allCases {
+            for family in WidgetLayoutFamily.allCases {
+                if let value = SharedPreferences.snekPerBlockOverride(theme: theme, family: family) {
+                    result[SnekKey(theme: theme, family: family)] = value
+                }
+            }
+        }
+        return result
+    }()
     @State private var selectedBlock: WidgetPane = .additions
     @State private var draggedPane: WidgetPane?
     @State private var draggedOrigin: WidgetSlotOrigin?
@@ -300,12 +322,82 @@ struct WidgetSettingsView: View {
                     realThemePreview(family, theme: theme)
                 }
             }
+
+            if themeHasSnek(theme, family) {
+                Rectangle().fill(DashboardPalette.line).frame(height: 1)
+                snekConfigRow(theme: theme, family: family)
+            }
         }
         .padding(16)
         .background(DashboardPalette.panel, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(DashboardPalette.line, lineWidth: 1)
         }
+    }
+
+    private func themeHasSnek(_ theme: WidgetVisualTheme, _ family: WidgetLayoutFamily) -> Bool {
+        switch theme {
+        case .arcade: true
+        case .glasshouse, .phosphor: family == .large || family == .extraLarge
+        case .blockwork: (familyLayouts[family] ?? []).contains(.snake)
+        case .broadsheet, .defaultTheme: false
+        }
+    }
+
+    private func snekConfigRow(theme: WidgetVisualTheme, family: WidgetLayoutFamily) -> some View {
+        let basis = SharedPreferences.snekBasis(theme: theme, family: family)
+        return HStack(spacing: 10) {
+            Text("SNEK")
+                .font(.system(size: 9, weight: .black, design: .monospaced)).tracking(1)
+                .foregroundStyle(DashboardPalette.muted)
+            Picker("", selection: snekBasisBinding(theme, family)) {
+                Text("Default").tag(SnakeBlockBasis?.none)
+                ForEach(SnakeBlockBasis.allCases) { option in
+                    Text(option.displayName).tag(SnakeBlockBasis?.some(option))
+                }
+            }
+            .labelsHidden().pickerStyle(.menu).frame(width: 150)
+            Spacer(minLength: 8)
+            TextField("", value: snekPerBlockBinding(theme, family), format: .number)
+                .textFieldStyle(.roundedBorder).multilineTextAlignment(.trailing).frame(width: 84)
+            Text("\(basis.unitNoun)/block")
+                .font(.system(size: 10, design: .monospaced)).foregroundStyle(DashboardPalette.muted)
+        }
+        .font(.system(size: 11))
+    }
+
+    private func snekBasisBinding(_ theme: WidgetVisualTheme, _ family: WidgetLayoutFamily) -> Binding<SnakeBlockBasis?> {
+        let key = SnekKey(theme: theme, family: family)
+        return Binding(
+            get: { snekBasisOverrides[key] },
+            set: { newValue in
+                if let newValue {
+                    snekBasisOverrides[key] = newValue
+                    snekPerBlockOverrides[key] = newValue.defaultPerBlock
+                    SharedPreferences.setSnekBasis(newValue, theme: theme, family: family)
+                    SharedPreferences.setSnekPerBlock(newValue.defaultPerBlock, theme: theme, family: family)
+                } else {
+                    snekBasisOverrides.removeValue(forKey: key)
+                    snekPerBlockOverrides.removeValue(forKey: key)
+                    SharedPreferences.setSnekBasis(nil, theme: theme, family: family)
+                    SharedPreferences.setSnekPerBlock(nil, theme: theme, family: family)
+                }
+                reloadWidgets()
+            }
+        )
+    }
+
+    private func snekPerBlockBinding(_ theme: WidgetVisualTheme, _ family: WidgetLayoutFamily) -> Binding<Int> {
+        let key = SnekKey(theme: theme, family: family)
+        return Binding(
+            get: { snekPerBlockOverrides[key] ?? SharedPreferences.snekPerBlock(theme: theme, family: family) },
+            set: { newValue in
+                let clamped = max(1, newValue)
+                snekPerBlockOverrides[key] = clamped
+                SharedPreferences.setSnekPerBlock(clamped, theme: theme, family: family)
+                reloadWidgets()
+            }
+        )
     }
 
     private func previewSize(_ family: WidgetLayoutFamily) -> (width: CGFloat, height: CGFloat) {
@@ -320,7 +412,7 @@ struct WidgetSettingsView: View {
     // Renders the real widget view so the studio preview always matches the build.
     @ViewBuilder
     private func realThemePreview(_ family: WidgetLayoutFamily, theme: WidgetVisualTheme) -> some View {
-        let entry = previewEntry(theme: theme)
+        let entry = previewEntry(theme: theme, family: family)
         let size = previewSize(family)
         let corner: CGFloat = family == .small ? 22 : 18
         Group {
@@ -364,12 +456,12 @@ struct WidgetSettingsView: View {
         )
     }
 
-    private func previewEntry(theme: WidgetVisualTheme) -> ActivityEntry {
+    private func previewEntry(theme: WidgetVisualTheme, family: WidgetLayoutFamily) -> ActivityEntry {
         var prefs = WidgetViewPreferences.defaults
         prefs.visualTheme = theme
         prefs.periodWindowMode = SharedPreferences.windowMode
-        prefs.snakeBlockBasis = SharedPreferences.snakeBlockBasis
-        prefs.snakeCommitsPerBlock = SharedPreferences.snakeUnitsPerBlock
+        prefs.snakeBlockBasis = SharedPreferences.snekBasis(theme: theme, family: family)
+        prefs.snakeCommitsPerBlock = SharedPreferences.snekPerBlock(theme: theme, family: family)
         return ActivityEntry(
             date: .now,
             configuredPeriod: .weekly,
@@ -1405,6 +1497,11 @@ struct WidgetSettingsView: View {
 private struct WidgetSlotOrigin: Equatable {
     let family: WidgetLayoutFamily
     let index: Int
+}
+
+private struct SnekKey: Hashable {
+    let theme: WidgetVisualTheme
+    let family: WidgetLayoutFamily
 }
 
 private struct WidgetSlotDropDelegate: DropDelegate {
