@@ -1,6 +1,6 @@
-# gitlines
+# Gitlines
 
-`gitlines` is a widget-first native macOS product for focused code-activity snapshots. Its host app installs the WidgetKit extension, manages the GitHub connection and data refresh, presents snapshot analytics, and controls shared appearance preferences.
+`Gitlines` is a widget-first native macOS product for focused code-activity snapshots. Its host app installs the WidgetKit extension, manages the GitHub connection and data refresh, presents snapshot analytics, and controls shared appearance preferences.
 
 ## Features
 
@@ -35,7 +35,7 @@ The Widget Studio provides live previews for every size, a global theme, optiona
 4. Run the `widtget app` target once so macOS registers the embedded widget.
 5. Connect GitHub in the host app using the setup below.
 6. Open `WidtgetPreviews.swift` to inspect all widget families and states in the canvas.
-7. Add `gitlines` from the macOS widget gallery. Edit an individual widget to select Daily, Weekly, or Monthly.
+7. Add `Gitlines` from the macOS widget gallery. Edit an individual widget to select Daily, Weekly, or Monthly.
 
 The app controls global appearance preferences. The period remains a native per-widget setting, so multiple widgets can show different time ranges at once.
 
@@ -45,10 +45,10 @@ The project targets macOS 14 because it uses native App Intent widget configurat
 
 1. Use **Create a fine-grained token** in the host app. Choose your GitHub account as the resource owner, select the repositories to include, and keep the prefilled **Contents: read-only** permission.
 2. Paste the token into the host app and select **Connect GitHub**.
-3. To include repositories owned by an organization, enter its GitHub name under **Add organization**. The generated GitHub link preselects that organization and the minimum read-only permission; choose the repositories, generate the token, paste it back into `gitlines`, and select **Add organization**.
+3. To include repositories owned by an organization, enter its GitHub name under **Add organization**. The generated GitHub link preselects that organization and the minimum read-only permission; choose the repositories, generate the token, paste it back into `Gitlines`, and select **Add organization**.
 4. If the organization requires approval, ask an organization owner to approve the fine-grained token before adding it. A pending token cannot expose private repositories.
 
-GitHub limits each fine-grained personal access token to one resource owner, so every additional organization needs its own token. `gitlines` validates that the organization is actually visible to the token and that all connected tokens authenticate the same GitHub user. The connection manager shows each owner and accessible repository count, supports independent organization removal, stores all tokens only in Keychain, merges repositories across owners, and deduplicates repositories and commits.
+GitHub limits each fine-grained personal access token to one resource owner, so every additional organization needs its own token. `Gitlines` validates that the organization is actually visible to the token and that all connected tokens authenticate the same GitHub user. The connection manager shows each owner and accessible repository count, supports independent organization removal, stores all tokens only in Keychain, merges repositories across owners, and deduplicates repositories and commits.
 
 Activity is calculated from commits authored by the authenticated user across every accessible branch. The **Fixed** window uses the current local calendar day, week, or month; **Rolling** uses the last 24 hours, seven days, or 30 days. Both are cached on every refresh so the setting can switch immediately. Commits reachable from multiple branches are deduplicated by repository and SHA, and addition/deletion totals come from GitHub's individual commit statistics.
 
@@ -74,7 +74,7 @@ XcodeBuildMCP settings live in `.xcodebuildmcp/config.yaml`; they enable macOS b
 
 `GitHubActivityService` in `widtgetApp/GitHubActivityService.swift` is the only GitHub API client. The host app keeps personal access tokens in the app-scoped macOS data-protection Keychain, turns API responses into display-ready daily, weekly, and monthly snapshots, and writes those snapshots atomically to the shared App Group container. `ActivityDataSource` in `widtget/Provider/ActivityProvider.swift` only reads that cache, so the widget extension never receives tokens or makes authenticated requests.
 
-Deterministic snapshots remain limited to Xcode previews. A widget without cached data displays a setup prompt, and tapping a connected widget opens the authenticated user's GitHub profile. `gitlines` does not claim to be an official GitHub product.
+Deterministic snapshots remain limited to Xcode previews. A widget without cached data displays a setup prompt, and tapping a connected widget opens the authenticated user's GitHub profile. `Gitlines` does not claim to be an official GitHub product.
 
 ## Packaging
 

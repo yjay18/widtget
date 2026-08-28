@@ -177,7 +177,7 @@ struct WidgetSettingsView: View {
                     .frame(width: 34, height: 34)
 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text("gitlines")
+                    Text("Gitlines")
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                     Text("GITHUB SIGNAL")
                         .font(.system(size: 7, weight: .bold, design: .monospaced))
@@ -1083,7 +1083,7 @@ struct WidgetSettingsView: View {
                 }
                 .pickerStyle(.menu)
 
-                Text("Applies to every gitlines widget. Automatic uses a system-tuned default; macOS still meters refreshes against the daily budget, so very short intervals are not guaranteed.")
+                Text("Applies to every Gitlines widget. Automatic uses a system-tuned default; macOS still meters refreshes against the daily budget, so very short intervals are not guaranteed.")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -1267,7 +1267,7 @@ struct WidgetSettingsView: View {
                     }
 
                     HStack(alignment: .top) {
-                        Text("gitlines checks the token belongs to @\(github.username), refreshes every branch, then replaces the saved Keychain token. Your current token stays active if validation fails.")
+                        Text("Gitlines checks the token belongs to @\(github.username), refreshes every branch, then replaces the saved Keychain token. Your current token stays active if validation fails.")
                             .font(.system(size: 10))
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -1316,7 +1316,7 @@ struct WidgetSettingsView: View {
                     }
 
                     HStack(alignment: .top) {
-                        Text("gitlines verifies the organization and repository access before saving. If approval is required, ask an organization owner to approve the token first.")
+                        Text("Gitlines verifies the organization and repository access before saving. If approval is required, ask an organization owner to approve the token first.")
                             .font(.system(size: 10))
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -1401,7 +1401,7 @@ struct WidgetSettingsView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Per-widget controls stay with the widget")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
-                    Text("Right-click a gitlines widget on the desktop and choose Edit Widget.")
+                    Text("Right-click a Gitlines widget on the desktop and choose Edit Widget.")
                         .font(.system(size: 10, weight: .medium, design: .rounded))
                         .foregroundStyle(.secondary)
                 }

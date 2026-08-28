@@ -130,7 +130,7 @@ enum GitHubTokenStore {
 
         var add = protectedLookup
         add[kSecValueData as String] = data
-        add[kSecAttrLabel as String] = "gitlines GitHub activity token"
+        add[kSecAttrLabel as String] = "Gitlines GitHub activity token"
         add[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         let addStatus = SecItemAdd(add as CFDictionary, nil)
         guard addStatus == errSecSuccess else {
@@ -256,10 +256,10 @@ enum GitHubTokenTemplate {
     static func url(resourceOwner: String? = nil) -> URL {
         var components = URLComponents(string: "https://github.com/settings/personal-access-tokens/new")!
         var query = [
-            URLQueryItem(name: "name", value: "gitlines activity"),
+            URLQueryItem(name: "name", value: "Gitlines activity"),
             URLQueryItem(
                 name: "description",
-                value: "Read-only repository activity for the gitlines macOS widget"
+                value: "Read-only repository activity for the Gitlines macOS widget"
             ),
             URLQueryItem(name: "expires_in", value: "90"),
             URLQueryItem(name: "contents", value: "read")

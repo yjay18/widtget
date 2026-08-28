@@ -110,7 +110,7 @@ struct WeeklyDashboardAnalytics {
             return Review(
                 eyebrow: "WEEKLY REVIEW · WAITING",
                 title: "Connect GitHub to begin the story.",
-                summary: "Once connected, gitlines will turn the saved weekly snapshot into a concise, deterministic review.",
+                summary: "Once connected, Gitlines will turn the saved weekly snapshot into a concise, deterministic review.",
                 notes: []
             )
         case .loading:

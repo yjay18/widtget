@@ -123,7 +123,7 @@ enum ActivityDataSource {
                     activity: (0..<7).map { ActivityCell(id: $0, additions: 0, deletions: 0) },
                     updatedAt: .now,
                     state: .error,
-                    errorMessage: "Open gitlines · \(nsError.code)"
+                    errorMessage: "Open Gitlines · \(nsError.code)"
                 )
             )
         }

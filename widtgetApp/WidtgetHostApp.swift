@@ -17,7 +17,7 @@ struct WidtgetHostApp: App {
     @NSApplicationDelegateAdaptor(WidtgetAppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        Window("gitlines", id: "settings") {
+        Window("Gitlines", id: "settings") {
             WidgetSettingsView()
         }
         .defaultSize(width: 980, height: 760)
